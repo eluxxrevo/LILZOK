@@ -1,192 +1,247 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lilzok - Admin Panel</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lilzok App</title>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { background: #000; color: #FFD700; font-family: sans-serif; margin: 0; padding: 2rem; }
-    .user-card { border: 1px solid #FFD700; background: #111; padding: 1rem; margin-bottom: 1rem; }
-    .btn { padding: 0.4rem 0.8rem; border: none; background: #FFD700; color: #000; cursor: pointer; margin: 0.5rem 0.5rem 0 0; }
-    h1 { text-align: center; margin-bottom: 1rem; }
-    .filters, .summary, .search-bar { text-align: center; margin-bottom: 1rem; }
-    input[type="text"], input[type="email"], input[type="password"] { padding: 0.5rem; width: 60%; max-width: 400px; }
-    .edit-prices { background: #111; border: 1px solid #FFD700; padding: 1rem; margin: 2rem 0; }
-    .edit-prices input { width: 60px; padding: 0.3rem; margin-right: 1rem; }
-    @media (max-width: 600px) {
-      body { padding: 1rem; }
-      .user-card { font-size: 0.9rem; }
-      img { max-width: 100%; height: auto; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #000000, #1a1a1a);
+      color: #ffd700;
+      text-align: center;
+    }
+    header {
+      padding: 1rem;
+      font-size: 1.5rem;
+      background-color: #111;
+      border-bottom: 2px solid #ffd700;
+    }
+    .tabs {
+      display: flex;
+      justify-content: space-around;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #000;
+      border-top: 1px solid #ffd700;
+    }
+    .tab {
+      flex: 1;
+      padding: 1rem;
+      cursor: pointer;
+      background: #000;
+      color: #ffd700;
+    }
+    .tab:hover {
+      background: #222;
+    }
+    .section {
+      display: none;
+      padding: 2rem;
+    }
+    .active {
+      display: block;
+    }
+    button {
+      background: #ffd700;
+      border: none;
+      padding: 0.7rem 1.2rem;
+      margin: 1rem 0.5rem;
+      color: #000;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 5px;
+    }
+    input, select {
+      padding: 0.5rem;
+      margin: 0.5rem;
+    }
+    #chartContainer {
+      background: #111;
+      padding: 1rem;
+      margin: 1rem auto;
+      border: 1px solid #ffd700;
+      width: 90%;
     }
   </style>
 </head>
 <body>
-  <h1>👑 Admin Panel - Lilzok</h1>
-  <div id="adminLogin">
-    <input type="email" id="adminEmail" placeholder="Admin Email"><br><br>
-    <input type="password" id="adminPassword" placeholder="Password"><br><br>
-    <button class="btn" onclick="adminLogin()">Login as Admin</button>
-    <p id="loginStatus"></p>
-  </div>  <div id="adminPanel" style="display: none;">
-    <div class="summary">
-      <strong>Total Users:</strong> <span id="totalUsers">0</span> |
-      <strong>Total Earnings:</strong> $<span id="totalEarnings">0.00</span>
-      <button class="btn" onclick="logoutAdmin()">Logout</button>
-    </div>
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Search by email" oninput="searchUser(this.value)" />
-    </div>
-    <div class="filters">
-      <button class="btn" onclick="filterUsers('all')">All Users</button>
-      <button class="btn" onclick="filterUsers('verified')">Verified Only</button>
-      <button class="btn" onclick="filterUsers('pending')">Pending Only</button>
-      <button class="btn" onclick="exportCSV()">Export CSV</button>
-    </div><div class="edit-prices">
-  <h3>💹 Commodity Price Editor</h3>
-  <div>
-    <label>Gold: $</label><input id="goldPrice" type="number" step="0.01" />
-    <label>Diamond: $</label><input id="diamondPrice" type="number" step="0.01" />
-    <label>SOL: $</label><input id="solPrice" type="number" step="0.01" />
-    <button class="btn" onclick="updatePrices()">Update Prices</button>
-  </div>
+  <header>Lilzok Marketplace</header>  <div id="authSection">
+    <h3>Login / Register</h3>
+    <input type="email" id="email" placeholder="Email"><br>
+    <input type="password" id="password" placeholder="Password"><br>
+    <button onclick="login()">Login</button>
+    <button onclick="register()">Register</button>
+    <p id="authMessage"></p>
+  </div>  <div id="app" style="display:none;">
+    <h2>Welcome <span id="userEmail"></span> <span id="verifiedBadge"></span></h2>
+    <p>Balance: $<span id="userBalance">0</span></p>
+    <div id="chartContainer">
+      <canvas id="priceChart"></canvas>
+    </div><div id="market" class="section active">
+  <h3>Buy Commodities @ $2</h3>
+  <button onclick="buyCommodity('Gold')">Buy Gold</button>
+  <button onclick="buyCommodity('Diamond')">Buy Diamond</button>
+  <button onclick="buyCommodity('SOL')">Buy SOL</button>
+  <h3>Resell for $2.60</h3>
+  <button onclick="resellCommodity('Gold')">Sell Gold</button>
+  <button onclick="resellCommodity('Diamond')">Sell Diamond</button>
+  <button onclick="resellCommodity('SOL')">Sell SOL</button>
 </div>
 
-<div id="userList"></div>
+<div id="referral" class="section">
+  <h3>Your Referral Link:</h3>
+  <p id="refLink"></p>
+</div>
+
+<div id="earn" class="section">
+  <h3>Verify Your Account</h3>
+  <p>Upload valid ID + Deposit $1.50 to unlock resale access</p>
+  <input type="text" id="idLink" placeholder="Paste ID image URL">
+  <button onclick="verifyUser()">Verify Me</button>
+</div>
+
+<div id="wallet" class="section">
+  <h3>Wallet</h3>
+  <p><strong>Balance:</strong> $<span id="userBalance2">0</span></p>
+  <button onclick="deposit()">Deposit via Paystack</button>
+  <button onclick="withdraw()">Withdraw ($4 min)</button>
+</div>
+
+<div class="tabs">
+  <div class="tab" onclick="switchTab('market')">Market</div>
+  <div class="tab" onclick="switchTab('referral')">Referral</div>
+  <div class="tab" onclick="switchTab('earn')">Earn</div>
+  <div class="tab" onclick="switchTab('wallet')">Wallet</div>
+</div>
 
   </div>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBoWx2QyoiJwxD1PvHw7Xib7rAlRYTfhCc",
       authDomain: "lilzok.firebaseapp.com",
       projectId: "lilzok",
-      storageBucket: "lilzok.firebasestorage.app",
-      messagingSenderId: "185365580013",
-      appId: "1:185365580013:android:f33fd17ea7264edd6ba4e4"
     };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
     const auth = firebase.auth();
-    const adminEmails = ["admin@lilzok.com", "eluxxes@gmail.com"];
-    let usersData = [];
+    const db = firebase.firestore();
 
-    function adminLogin() {
-      const email = document.getElementById('adminEmail').value;
-      const password = document.getElementById('adminPassword').value;
+    let user = null;
 
-      auth.signInWithEmailAndPassword(email, password)
-        .then(user => {
-          if (!adminEmails.includes(email)) {
-            document.getElementById("loginStatus").innerText = "Access denied. Not an admin.";
-            auth.signOut();
-            return;
-          }
-          document.getElementById("adminLogin").style.display = "none";
-          document.getElementById("adminPanel").style.display = "block";
-          listenToUsers();
+    function login() {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(() => location.reload())
+        .catch(e => document.getElementById('authMessage').innerText = e.message);
+    }
+
+    function register() {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      auth.createUserWithEmailAndPassword(email, pass)
+        .then(cred => {
+          return db.collection("users").doc(cred.user.uid).set({
+            email,
+            balance: 10,
+            verified: false,
+            referrals: 0,
+            id_uploaded: false,
+            earnings: 0
+          });
         })
-        .catch(err => {
-          document.getElementById("loginStatus").innerText = err.message;
+        .then(() => location.reload())
+        .catch(e => document.getElementById('authMessage').innerText = e.message);
+    }
+
+    auth.onAuthStateChanged(u => {
+      if (u) {
+        user = u;
+        document.getElementById("authSection").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        loadUser();
+        loadChart();
+      }
+    });
+
+    function loadUser() {
+      db.collection("users").doc(user.uid).onSnapshot(doc => {
+        const data = doc.data();
+        document.getElementById("userEmail").innerText = data.email;
+        document.getElementById("userBalance").innerText = data.balance.toFixed(2);
+        document.getElementById("userBalance2").innerText = data.balance.toFixed(2);
+        document.getElementById("verifiedBadge").innerText = data.verified ? '✅ Verified' : '';
+        document.getElementById("refLink").innerText = `https://lilzok.com/register?ref=${user.uid}`;
+      });
+    }
+
+    function switchTab(id) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function deposit() {
+      window.open("https://paystack.com/buy/lilzok-vjmgrv", "_blank");
+    }
+
+    function withdraw() {
+      alert("Withdraw request sent. (Minimum: $4)");
+    }
+
+    function verifyUser() {
+      const link = document.getElementById('idLink').value;
+      db.collection("users").doc(user.uid).update({
+        id_uploaded: true,
+        verified: true,
+        id_url: link
+      }).then(() => alert("Verification Complete!"));
+    }
+
+    function buyCommodity(item) {
+      db.runTransaction(async (t) => {
+        const ref = db.collection("users").doc(user.uid);
+        const doc = await t.get(ref);
+        let bal = doc.data().balance;
+        if (bal < 2) return alert("Insufficient balance");
+        t.update(ref, { balance: bal - 2 });
+        alert(`${item} purchased.`);
+      });
+    }
+
+    function resellCommodity(item) {
+      db.runTransaction(async (t) => {
+        const ref = db.collection("users").doc(user.uid);
+        const doc = await t.get(ref);
+        let { balance, verified, id_uploaded } = doc.data();
+        if (!verified || !id_uploaded) return alert("You must be verified to resell");
+        t.update(ref, {
+          balance: balance + 2.45,
+          earnings: firebase.firestore.FieldValue.increment(2.45)
         });
-    }
-
-    function autoLoginIfAdmin() {
-      document.getElementById('adminEmail').value = "eluxxes@gmail.com";
-      document.getElementById('adminPassword').value = "Ebube@123";
-      adminLogin();
-    }
-
-    function shortcutListener() {
-      window.addEventListener("keydown", function (e) {
-        if (e.shiftKey && e.key.toLowerCase() === 'a') {
-          autoLoginIfAdmin();
-        }
+        alert(`${item} sold. $0.15 used for app maintenance.`);
       });
     }
 
-    window.onload = () => {
-      shortcutListener();
-      if (window.location.pathname.includes("admin")) autoLoginIfAdmin();
-    };
-
-    function logoutAdmin() {
-      auth.signOut().then(() => location.reload());
-    }
-
-    function listenToUsers() {
-      db.collection("users").onSnapshot(snapshot => {
-        usersData = [];
-        snapshot.forEach(doc => {
-          usersData.push({ id: doc.id, ...doc.data() });
+    function loadChart() {
+      db.collection("settings").doc("prices").onSnapshot(doc => {
+        const data = doc.data();
+        const ctx = document.getElementById("priceChart").getContext("2d");
+        new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: ["Gold", "Diamond", "SOL"],
+            datasets: [{
+              label: "Price ($)",
+              data: [data.gold, data.diamond, data.sol],
+              backgroundColor: ["gold", "lightblue", "lightgreen"]
+            }]
+          }
         });
-        filterUsers("all");
       });
-    }
-
-    function renderUsers(data) {
-      let html = "";
-      let total = 0;
-      let earnings = 0;
-      data.forEach(u => {
-        total++;
-        earnings += Number(u.earnings || 0);
-        html += `
-          <div class="user-card">
-            <strong>Email:</strong> ${u.name || 'Unknown'}<br>
-            <strong>Balance:</strong> $${(u.balance || 0).toFixed(2)}<br>
-            <strong>Earnings:</strong> $${(u.earnings || 0).toFixed(2)}<br>
-            <strong>Referrals:</strong> ${u.referrals || 0}<br>
-            <strong>Verified ID:</strong> ${u.id_uploaded ? '✅' : '❌'}<br>
-            ${u.id_url ? `<img src="${u.id_url}" alt="ID Image" width="200">` : ''}<br>
-            <button class="btn" onclick="toggleVerify('${u.id}', ${u.id_uploaded ? 'false' : 'true'})">${u.id_uploaded ? '❌ Unverify' : '✅ Verify'}</button>
-            <button class="btn" onclick="deleteUser('${u.id}')">Delete</button>
-          </div>
-        `;
-      });
-      document.getElementById("totalUsers").textContent = total;
-      document.getElementById("totalEarnings").textContent = earnings.toFixed(2);
-      document.getElementById("userList").innerHTML = html;
-    }
-
-    function filterUsers(type) {
-      let filtered = usersData;
-      if (type === "verified") filtered = usersData.filter(u => u.id_uploaded);
-      if (type === "pending") filtered = usersData.filter(u => !u.id_uploaded);
-      renderUsers(filtered);
-    }
-
-    function searchUser(query) {
-      const result = usersData.filter(u => (u.name || '').toLowerCase().includes(query.toLowerCase()));
-      renderUsers(result);
-    }
-
-    function toggleVerify(uid, status) {
-      db.collection("users").doc(uid).update({ id_uploaded: status });
-    }
-
-    function deleteUser(uid) {
-      if (!confirm("Are you sure you want to delete this user?")) return;
-      db.collection("users").doc(uid).delete();
-    }
-
-    function exportCSV() {
-      let csv = "Email,Balance,Earnings,Referrals,Verified\n";
-      usersData.forEach(u => {
-        csv += `${u.name || 'Unknown'},${(u.balance || 0)},${(u.earnings || 0)},${(u.referrals || 0)},${u.id_uploaded ? 'Yes' : 'No'}\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'lilzok_users.csv';
-      link.click();
-    }
-
-    function updatePrices() {
-      const gold = parseFloat(document.getElementById('goldPrice').value || 2).toFixed(2);
-      const diamond = parseFloat(document.getElementById('diamondPrice').value || 2).toFixed(2);
-      const sol = parseFloat(document.getElementById('solPrice').value || 2).toFixed(2);
-      db.collection("settings").doc("prices").set({ gold, diamond, sol }, { merge: true })
-        .then(() => alert("Prices updated!"));
     }
   </script></body>
 </html>
