@@ -1,0 +1,283 @@
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lilzok - Royal Commodity Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Playfair Display', serif;
+      background: linear-gradient(to bottom, #1A1A1A, #000);
+      color: #FFD700;
+    }
+    header {
+      text-align: center;
+      padding: 1rem;
+      font-size: 1.5rem;
+      border-bottom: 1px solid #FFD700;
+    }
+    nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #000;
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid #FFD700;
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: #FFD700;
+      font-weight: bold;
+      padding: 1rem;
+      flex: 1;
+    }
+    section {
+      display: none;
+      padding: 1rem;
+    }
+    section.active {
+      display: block;
+    }
+    .product {
+      border: 1px solid #FFD700;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: #111;
+    }
+    .btn {
+      background: #FFD700;
+      color: #000;
+      padding: 0.5rem 1rem;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      background: #222;
+      border: 1px solid #FFD700;
+      color: #FFD700;
+    }
+    footer {
+      text-align: center;
+      margin-bottom: 60px;
+      padding-top: 2rem;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <header>Lilzok Marketplace</header>
+
+  <section id="auth" class="active">
+    <h2>Register / Login</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <input type="text" id="referralCode" placeholder="Referral Code (optional)" />
+    <button class="btn" onclick="register()">Register</button>
+    <button class="btn" onclick="login()">Login</button>
+  </section>
+
+  <section id="market"><h2>Market</h2><div id="products"></div></section>
+
+  <section id="referral">
+    <h2>Referral</h2>
+    <p>Your Referral Code: <span id="userReferral">loading...</span></p>
+    <p>Referred Users: <span id="refCount">0</span> / 8</p>
+    <p>ID Upload:</p>
+    <input type="file" id="idUpload" />
+    <button class="btn" onclick="uploadID()">Upload ID</button>
+    <p id="idStatus"></p>
+  </section>
+
+  <section id="earn"><h2>Earnings</h2><div id="earnings">Loading...</div></section>
+
+  <section id="wallet">
+    <h2>Wallet</h2>
+    <p>Balance: $<span id="balance">0.00</span></p>
+    <button class="btn" onclick="window.open('https://paystack.com/buy/lilzok-vjmgrv', '_blank')">Deposit ₦1000</button>
+    <input type="number" id="withdrawAmount" placeholder="Amount to withdraw (min $4)" />
+    <button class="btn" onclick="withdraw()">Withdraw</button>
+    <h3>Transactions</h3>
+    <div id="transactions"></div>
+  </section>
+
+  <section id="support">
+    <h2>Customer Support</h2>
+    <iframe src="https://tawk.to/chat/YOUR_TAWKTO_ID/default" width="100%" height="400" frameborder="0"></iframe>
+  </section>
+
+  <nav>
+    <button onclick="showSection('market')">Market</button>
+    <button onclick="showSection('referral')">Referral</button>
+    <button onclick="showSection('earn')">Earn</button>
+    <button onclick="showSection('wallet')">Wallet</button>
+    <button onclick="showSection('support')">Support</button>
+  </nav>
+
+  <footer>Endorsed by Reverend</footer
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoWx2QyoiJwxD1PvHw7Xib7RAlRYTfhCc",
+      authDomain: "lilzok.firebaseapp.com",
+      projectId: "lilzok",
+      storageBucket: "lilzok.firebasestorage.app",
+      messagingSenderId: "185365580013",
+      appId: "1:185365580013:android:f33fd17ea7264edd6ba4e4"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    let currentUser = null;
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        showSection('market');
+        loadReferral();
+        loadWallet();
+        loadProducts();
+        loadEarnings();
+      } else {
+        showSection('auth');
+      }
+    });
+
+    function showSection(id) {
+      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function register() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const refCode = document.getElementById('referralCode').value;
+      auth.createUserWithEmailAndPassword(email, password).then(res => {
+        const uid = res.user.uid;
+        const myRefCode = uid.substring(0, 6);
+        db.collection('users').doc(uid).set({
+          email,
+          referralCode: myRefCode,
+          referredBy: refCode || null,
+          referrals: [],
+          verified: false,
+          idURL: '',
+          balance: 0,
+          transactions: []
+        }).then(() => {
+          if (refCode) {
+            db.collection('users').where('referralCode', '==', refCode).get().then(snap => {
+              if (!snap.empty) {
+                const refUser = snap.docs[0];
+                const refData = refUser.data();
+                db.collection('users').doc(refUser.id).update({
+                  referrals: [...refData.referrals, uid]
+                });
+              }
+            });
+          }
+        });
+      });
+    }
+
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      auth.signInWithEmailAndPassword(email, password);
+    }
+
+    async function uploadID() {
+      const file = document.getElementById('idUpload').files[0];
+      const formData = new FormData();
+      formData.append("image", file);
+      const res = await fetch("https://api.imgbb.com/1/upload?key=YOUR_IMGBB_API_KEY", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        const url = data.data.url;
+        await db.collection('users').doc(currentUser.uid).update({ idURL: url });
+        document.getElementById('idStatus').innerText = "ID Uploaded Successfully";
+      }
+    }
+
+    function loadReferral() {
+      db.collection('users').doc(currentUser.uid).get().then(doc => {
+        const data = doc.data();
+        document.getElementById('userReferral').innerText = data.referralCode;
+        document.getElementById('refCount').innerText = data.referrals.length;
+        if (data.idURL) {
+          document.getElementById('idStatus').innerText = "ID Uploaded";
+        }
+      });
+    }
+
+    function loadWallet() {
+      db.collection('users').doc(currentUser.uid).get().then(doc => {
+        const data = doc.data();
+        document.getElementById('balance').innerText = data.balance.toFixed(2);
+        const tx = data.transactions.map(t => `<p>${t}</p>`).join('');
+        document.getElementById('transactions').innerHTML = tx;
+      });
+    }
+
+    function withdraw() {
+      const amount = parseFloat(document.getElementById('withdrawAmount').value);
+      if (isNaN(amount) || amount < 4) return alert("Minimum withdrawal is $4");
+      db.collection('users').doc(currentUser.uid).get().then(doc => {
+        const data = doc.data();
+        if (data.balance < amount) return alert("Insufficient balance");
+        db.collection('users').doc(currentUser.uid).update({
+          balance: data.balance - amount,
+          transactions: [...data.transactions, `Withdrawal: $${amount}`]
+        });
+        alert("Withdrawal request sent.");
+        loadWallet();
+      });
+    }
+
+    function loadProducts() {
+      const products = ["Gold", "Diamond", "SOL", "Platinum", "Ruby"];
+      const container = document.getElementById('products');
+      container.innerHTML = products.map(p => `
+        <div class='product'>
+          <h3>${p}</h3>
+          <p>Price: $2</p>
+          <button class='btn' onclick="buyProduct('${p}')">Buy</button>
+        </div>
+      `).join('');
+    }
+
+    function buyProduct(productName) {
+      db.collection('users').doc(currentUser.uid).get().then(doc => {
+        const data = doc.data();
+        if (data.balance < 2) return alert("Insufficient balance");
+        db.collection('users').doc(currentUser.uid).update({
+          balance: data.balance - 2,
+          transactions: [...data.transactions, `Bought ${productName} for $2`]
+        });
+        loadWallet();
+      });
+    }
+
+    function loadEarnings() {
+      db.collection('users').doc(currentUser.uid).get().then(doc => {
+        const data = doc.data();
+        const earningsHTML = data.transactions.filter(t => t.includes('Resold')).map(e => `<p>${e}</p>`).join('');
+        document.getElementById('earnings').innerHTML = earningsHTML;
+      });
+    }
+  </script>
+</body>
+</html>
