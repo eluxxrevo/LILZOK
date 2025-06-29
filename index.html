@@ -1,134 +1,63 @@
-
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lilzok - Royal Commodity Platform</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <title>Lilzok - Admin Panel</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Playfair Display', serif;
-      background: linear-gradient(to bottom, #1A1A1A, #000);
-      color: #FFD700;
-    }
-    header {
-      text-align: center;
-      padding: 1rem;
-      font-size: 1.5rem;
-      border-bottom: 1px solid #FFD700;
-    }
-    nav {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #000;
-      display: flex;
-      justify-content: space-around;
-      border-top: 1px solid #FFD700;
-    }
-    nav button {
-      background: none;
-      border: none;
-      color: #FFD700;
-      font-weight: bold;
-      padding: 1rem;
-      flex: 1;
-    }
-    section {
-      display: none;
-      padding: 1rem;
-    }
-    section.active {
-      display: block;
-    }
-    .product {
-      border: 1px solid #FFD700;
-      margin: 1rem 0;
-      padding: 1rem;
-      background: #111;
-    }
-    .btn {
-      background: #FFD700;
-      color: #000;
-      padding: 0.5rem 1rem;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    input, select {
-      width: 100%;
-      padding: 0.5rem;
-      margin: 0.5rem 0;
-      background: #222;
-      border: 1px solid #FFD700;
-      color: #FFD700;
-    }
-    footer {
-      text-align: center;
-      margin-bottom: 60px;
-      padding-top: 2rem;
-      font-size: 0.9rem;
-      color: #aaa;
+    body { background: #000; color: #FFD700; font-family: sans-serif; margin: 0; padding: 2rem; }
+    .user-card { border: 1px solid #FFD700; background: #111; padding: 1rem; margin-bottom: 1rem; }
+    .btn { padding: 0.4rem 0.8rem; border: none; background: #FFD700; color: #000; cursor: pointer; margin: 0.5rem 0.5rem 0 0; }
+    h1 { text-align: center; margin-bottom: 1rem; }
+    .filters, .summary, .search-bar { text-align: center; margin-bottom: 1rem; }
+    input[type="text"], input[type="email"], input[type="password"] { padding: 0.5rem; width: 60%; max-width: 400px; }
+    .edit-prices { background: #111; border: 1px solid #FFD700; padding: 1rem; margin: 2rem 0; }
+    .edit-prices input { width: 60px; padding: 0.3rem; margin-right: 1rem; }
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      .user-card { font-size: 0.9rem; }
+      img { max-width: 100%; height: auto; }
     }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <header>Lilzok Marketplace</header>
+  <h1>👑 Admin Panel - Lilzok</h1>
+  <div id="adminLogin">
+    <input type="email" id="adminEmail" placeholder="Admin Email"><br><br>
+    <input type="password" id="adminPassword" placeholder="Password"><br><br>
+    <button class="btn" onclick="adminLogin()">Login as Admin</button>
+    <p id="loginStatus"></p>
+  </div>  <div id="adminPanel" style="display: none;">
+    <div class="summary">
+      <strong>Total Users:</strong> <span id="totalUsers">0</span> |
+      <strong>Total Earnings:</strong> $<span id="totalEarnings">0.00</span>
+      <button class="btn" onclick="logoutAdmin()">Logout</button>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search by email" oninput="searchUser(this.value)" />
+    </div>
+    <div class="filters">
+      <button class="btn" onclick="filterUsers('all')">All Users</button>
+      <button class="btn" onclick="filterUsers('verified')">Verified Only</button>
+      <button class="btn" onclick="filterUsers('pending')">Pending Only</button>
+      <button class="btn" onclick="exportCSV()">Export CSV</button>
+    </div><div class="edit-prices">
+  <h3>💹 Commodity Price Editor</h3>
+  <div>
+    <label>Gold: $</label><input id="goldPrice" type="number" step="0.01" />
+    <label>Diamond: $</label><input id="diamondPrice" type="number" step="0.01" />
+    <label>SOL: $</label><input id="solPrice" type="number" step="0.01" />
+    <button class="btn" onclick="updatePrices()">Update Prices</button>
+  </div>
+</div>
 
-  <section id="auth" class="active">
-    <h2>Register / Login</h2>
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
-    <input type="text" id="referralCode" placeholder="Referral Code (optional)" />
-    <button class="btn" onclick="register()">Register</button>
-    <button class="btn" onclick="login()">Login</button>
-  </section>
+<div id="userList"></div>
 
-  <section id="market"><h2>Market</h2><div id="products"></div></section>
-
-  <section id="referral">
-    <h2>Referral</h2>
-    <p>Your Referral Code: <span id="userReferral">loading...</span></p>
-    <p>Referred Users: <span id="refCount">0</span> / 8</p>
-    <p>ID Upload:</p>
-    <input type="file" id="idUpload" />
-    <button class="btn" onclick="uploadID()">Upload ID</button>
-    <p id="idStatus"></p>
-  </section>
-
-  <section id="earn"><h2>Earnings</h2><div id="earnings">Loading...</div></section>
-
-  <section id="wallet">
-    <h2>Wallet</h2>
-    <p>Balance: $<span id="balance">0.00</span></p>
-    <button class="btn" onclick="window.open('https://paystack.com/buy/lilzok-vjmgrv', '_blank')">Deposit ₦1000</button>
-    <input type="number" id="withdrawAmount" placeholder="Amount to withdraw (min $4)" />
-    <button class="btn" onclick="withdraw()">Withdraw</button>
-    <h3>Transactions</h3>
-    <div id="transactions"></div>
-  </section>
-
-  <section id="support">
-    <h2>Customer Support</h2>
-    <iframe src="https://tawk.to/chat/YOUR_TAWKTO_ID/default" width="100%" height="400" frameborder="0"></iframe>
-  </section>
-
-  <nav>
-    <button onclick="showSection('market')">Market</button>
-    <button onclick="showSection('referral')">Referral</button>
-    <button onclick="showSection('earn')">Earn</button>
-    <button onclick="showSection('wallet')">Wallet</button>
-    <button onclick="showSection('support')">Support</button>
-  </nav>
-
-  <footer>Endorsed by Reverend</footer
-<script>
+  </div>  <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyBoWx2QyoiJwxD1PvHw7Xib7RAlRYTfhCc",
+      apiKey: "AIzaSyBoWx2QyoiJwxD1PvHw7Xib7rAlRYTfhCc",
       authDomain: "lilzok.firebaseapp.com",
       projectId: "lilzok",
       storageBucket: "lilzok.firebasestorage.app",
@@ -136,148 +65,128 @@
       appId: "1:185365580013:android:f33fd17ea7264edd6ba4e4"
     };
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
     const db = firebase.firestore();
-    let currentUser = null;
+    const auth = firebase.auth();
+    const adminEmails = ["admin@lilzok.com", "eluxxes@gmail.com"];
+    let usersData = [];
 
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        currentUser = user;
-        showSection('market');
-        loadReferral();
-        loadWallet();
-        loadProducts();
-        loadEarnings();
-      } else {
-        showSection('auth');
-      }
-    });
+    function adminLogin() {
+      const email = document.getElementById('adminEmail').value;
+      const password = document.getElementById('adminPassword').value;
 
-    function showSection(id) {
-      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
-
-    function register() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const refCode = document.getElementById('referralCode').value;
-      auth.createUserWithEmailAndPassword(email, password).then(res => {
-        const uid = res.user.uid;
-        const myRefCode = uid.substring(0, 6);
-        db.collection('users').doc(uid).set({
-          email,
-          referralCode: myRefCode,
-          referredBy: refCode || null,
-          referrals: [],
-          verified: false,
-          idURL: '',
-          balance: 0,
-          transactions: []
-        }).then(() => {
-          if (refCode) {
-            db.collection('users').where('referralCode', '==', refCode).get().then(snap => {
-              if (!snap.empty) {
-                const refUser = snap.docs[0];
-                const refData = refUser.data();
-                db.collection('users').doc(refUser.id).update({
-                  referrals: [...refData.referrals, uid]
-                });
-              }
-            });
+      auth.signInWithEmailAndPassword(email, password)
+        .then(user => {
+          if (!adminEmails.includes(email)) {
+            document.getElementById("loginStatus").innerText = "Access denied. Not an admin.";
+            auth.signOut();
+            return;
           }
+          document.getElementById("adminLogin").style.display = "none";
+          document.getElementById("adminPanel").style.display = "block";
+          listenToUsers();
+        })
+        .catch(err => {
+          document.getElementById("loginStatus").innerText = err.message;
         });
-      });
     }
 
-    function login() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      auth.signInWithEmailAndPassword(email, password);
+    function autoLoginIfAdmin() {
+      document.getElementById('adminEmail').value = "eluxxes@gmail.com";
+      document.getElementById('adminPassword').value = "Ebube@123";
+      adminLogin();
     }
 
-    async function uploadID() {
-      const file = document.getElementById('idUpload').files[0];
-      const formData = new FormData();
-      formData.append("image", file);
-      const res = await fetch("https://api.imgbb.com/1/upload?key=YOUR_IMGBB_API_KEY", {
-        method: "POST",
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success) {
-        const url = data.data.url;
-        await db.collection('users').doc(currentUser.uid).update({ idURL: url });
-        document.getElementById('idStatus').innerText = "ID Uploaded Successfully";
-      }
-    }
-
-    function loadReferral() {
-      db.collection('users').doc(currentUser.uid).get().then(doc => {
-        const data = doc.data();
-        document.getElementById('userReferral').innerText = data.referralCode;
-        document.getElementById('refCount').innerText = data.referrals.length;
-        if (data.idURL) {
-          document.getElementById('idStatus').innerText = "ID Uploaded";
+    function shortcutListener() {
+      window.addEventListener("keydown", function (e) {
+        if (e.shiftKey && e.key.toLowerCase() === 'a') {
+          autoLoginIfAdmin();
         }
       });
     }
 
-    function loadWallet() {
-      db.collection('users').doc(currentUser.uid).get().then(doc => {
-        const data = doc.data();
-        document.getElementById('balance').innerText = data.balance.toFixed(2);
-        const tx = data.transactions.map(t => `<p>${t}</p>`).join('');
-        document.getElementById('transactions').innerHTML = tx;
-      });
+    window.onload = () => {
+      shortcutListener();
+      if (window.location.pathname.includes("admin")) autoLoginIfAdmin();
+    };
+
+    function logoutAdmin() {
+      auth.signOut().then(() => location.reload());
     }
 
-    function withdraw() {
-      const amount = parseFloat(document.getElementById('withdrawAmount').value);
-      if (isNaN(amount) || amount < 4) return alert("Minimum withdrawal is $4");
-      db.collection('users').doc(currentUser.uid).get().then(doc => {
-        const data = doc.data();
-        if (data.balance < amount) return alert("Insufficient balance");
-        db.collection('users').doc(currentUser.uid).update({
-          balance: data.balance - amount,
-          transactions: [...data.transactions, `Withdrawal: $${amount}`]
+    function listenToUsers() {
+      db.collection("users").onSnapshot(snapshot => {
+        usersData = [];
+        snapshot.forEach(doc => {
+          usersData.push({ id: doc.id, ...doc.data() });
         });
-        alert("Withdrawal request sent.");
-        loadWallet();
+        filterUsers("all");
       });
     }
 
-    function loadProducts() {
-      const products = ["Gold", "Diamond", "SOL", "Platinum", "Ruby"];
-      const container = document.getElementById('products');
-      container.innerHTML = products.map(p => `
-        <div class='product'>
-          <h3>${p}</h3>
-          <p>Price: $2</p>
-          <button class='btn' onclick="buyProduct('${p}')">Buy</button>
-        </div>
-      `).join('');
+    function renderUsers(data) {
+      let html = "";
+      let total = 0;
+      let earnings = 0;
+      data.forEach(u => {
+        total++;
+        earnings += Number(u.earnings || 0);
+        html += `
+          <div class="user-card">
+            <strong>Email:</strong> ${u.name || 'Unknown'}<br>
+            <strong>Balance:</strong> $${(u.balance || 0).toFixed(2)}<br>
+            <strong>Earnings:</strong> $${(u.earnings || 0).toFixed(2)}<br>
+            <strong>Referrals:</strong> ${u.referrals || 0}<br>
+            <strong>Verified ID:</strong> ${u.id_uploaded ? '✅' : '❌'}<br>
+            ${u.id_url ? `<img src="${u.id_url}" alt="ID Image" width="200">` : ''}<br>
+            <button class="btn" onclick="toggleVerify('${u.id}', ${u.id_uploaded ? 'false' : 'true'})">${u.id_uploaded ? '❌ Unverify' : '✅ Verify'}</button>
+            <button class="btn" onclick="deleteUser('${u.id}')">Delete</button>
+          </div>
+        `;
+      });
+      document.getElementById("totalUsers").textContent = total;
+      document.getElementById("totalEarnings").textContent = earnings.toFixed(2);
+      document.getElementById("userList").innerHTML = html;
     }
 
-    function buyProduct(productName) {
-      db.collection('users').doc(currentUser.uid).get().then(doc => {
-        const data = doc.data();
-        if (data.balance < 2) return alert("Insufficient balance");
-        db.collection('users').doc(currentUser.uid).update({
-          balance: data.balance - 2,
-          transactions: [...data.transactions, `Bought ${productName} for $2`]
-        });
-        loadWallet();
-      });
+    function filterUsers(type) {
+      let filtered = usersData;
+      if (type === "verified") filtered = usersData.filter(u => u.id_uploaded);
+      if (type === "pending") filtered = usersData.filter(u => !u.id_uploaded);
+      renderUsers(filtered);
     }
 
-    function loadEarnings() {
-      db.collection('users').doc(currentUser.uid).get().then(doc => {
-        const data = doc.data();
-        const earningsHTML = data.transactions.filter(t => t.includes('Resold')).map(e => `<p>${e}</p>`).join('');
-        document.getElementById('earnings').innerHTML = earningsHTML;
-      });
+    function searchUser(query) {
+      const result = usersData.filter(u => (u.name || '').toLowerCase().includes(query.toLowerCase()));
+      renderUsers(result);
     }
-  </script>
-</body>
+
+    function toggleVerify(uid, status) {
+      db.collection("users").doc(uid).update({ id_uploaded: status });
+    }
+
+    function deleteUser(uid) {
+      if (!confirm("Are you sure you want to delete this user?")) return;
+      db.collection("users").doc(uid).delete();
+    }
+
+    function exportCSV() {
+      let csv = "Email,Balance,Earnings,Referrals,Verified\n";
+      usersData.forEach(u => {
+        csv += `${u.name || 'Unknown'},${(u.balance || 0)},${(u.earnings || 0)},${(u.referrals || 0)},${u.id_uploaded ? 'Yes' : 'No'}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'lilzok_users.csv';
+      link.click();
+    }
+
+    function updatePrices() {
+      const gold = parseFloat(document.getElementById('goldPrice').value || 2).toFixed(2);
+      const diamond = parseFloat(document.getElementById('diamondPrice').value || 2).toFixed(2);
+      const sol = parseFloat(document.getElementById('solPrice').value || 2).toFixed(2);
+      db.collection("settings").doc("prices").set({ gold, diamond, sol }, { merge: true })
+        .then(() => alert("Prices updated!"));
+    }
+  </script></body>
 </html>
