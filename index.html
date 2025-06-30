@@ -1,208 +1,201 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ELSA - The Supreme</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elsa Coin App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #000000, #1a1a1a);
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom right, #000000, #FFD700);
       color: white;
       overflow-x: hidden;
     }
-    #splash {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: black;
-      z-index: 1000;
-    }
-    #splash h1 {
-      color: gold;
-      font-size: 3em;
-      animation: fadeInOut 4s ease-in-out forwards;
-    }
-    @keyframes fadeInOut {
-      0% { opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { opacity: 0; display: none; }
-    }
-    .hidden { display: none !important; }
-    .page {
-      display: none;
-      padding: 20px;
-    }
-    .page.active { display: block; }
-    .navbar {
+    .nav {
       position: fixed;
       bottom: 0;
       width: 100%;
       display: flex;
+      justify-content: space-around;
       background: #111;
       border-top: 1px solid #444;
+      z-index: 999;
     }
-    .nav-item {
-      flex: 1;
-      text-align: center;
-      padding: 10px 0;
-      color: #aaa;
-      cursor: pointer;
+    .nav i {
+      font-size: 1.5rem;
+      padding: 1rem;
     }
-    .nav-item.active { color: gold; }
-    .button {
-      background: gold;
-      color: black;
-      padding: 10px 20px;
-      border: none;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-    .tooltip {
-      position: absolute;
-      background: #222;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-size: 0.8em;
+    .page {
       display: none;
+      padding: 20px;
+    }
+    .active {
+      display: block;
+    }
+    .chart-container {
+      height: 300px;
+      width: 100%;
+    }
+    .referral-info, .wallet-info, .transaction-log {
+      margin-top: 20px;
     }
   </style>
 </head>
-<body>
-  <div id="splash"><h1>THE SUPREME ELSA</h1></div>  <!-- Language Selection -->  <div id="language-selection" class="page active">
-    <h2>Select Language</h2>
-    <button class="button" onclick="goToLogin('en')">English</button>
-    <button class="button" onclick="goToLogin('fr')">Français</button>
-  </div>  <!-- Login Page -->  <div id="login-page" class="page">
-    <h2>Login</h2>
-    <input type="email" id="login-email" placeholder="Email"><br>
-    <input type="password" id="login-password" placeholder="Password"><br>
-    <button class="button" onclick="login()">Login</button>
-    <p>Don't have an account? <a href="#" onclick="showPage('register-page')">Register</a></p>
-    <p id="login-error" style="color:red"></p>
-  </div>  <!-- Register Page -->  <div id="register-page" class="page">
-    <h2>Register</h2>
-    <input type="email" id="reg-email" placeholder="Email"><br>
-    <input type="password" id="reg-password" placeholder="Password"><br>
-    <button class="button" onclick="register()">Register</button>
-    <p id="register-error" style="color:red"></p>
-  </div>  <!-- Home -->  <div id="home-page" class="page">
-    <h2>Welcome</h2>
-    <p>Balance: <span id="balance-display">$0</span></p>
-    <p>Elsa Coins: <span id="elsa-amount">0</span></p>
-    <button class="button" onclick="buyElsa()">Buy Elsa</button>
-    <button class="button" onclick="resellElsa()">Resell Elsa</button>
-  </div>  <!-- Chart Page -->  <div id="chart-page" class="page">
-    <h2>Live Elsa Chart</h2>
-    <canvas id="liveChart" width="300" height="150" style="background:white"></canvas>
-    <button class="button" onclick="simulateChartChange()">Simulate Change</button>
-  </div>  <!-- Wallet Page -->  <div id="wallet-page" class="page">
-    <h2>Wallet</h2>
-    <p>Deposit via Paystack</p>
-    <a href="https://paystack.com/buy/lilzok-vjmgrv" target="_blank" class="button">Deposit</a>
-    <button class="button" onclick="markPaid()">I Have Paid</button>
-    <h3>Withdraw</h3>
-    <input placeholder="Amount" id="withdraw-amount"><br>
-    <input placeholder="Wallet Number" id="withdraw-wallet"><br>
-    <select id="withdraw-type">
-      <option value="Opay">Opay</option>
-      <option value="Kuda">Kuda</option>
-      <option value="PalmPay">PalmPay</option>
-    </select><br>
-    <button class="button" onclick="withdrawRequest()">Submit Withdraw</button>
-  </div>  <!-- Profile Page -->  <div id="profile-page" class="page">
-    <h2>Your Profile</h2>
-    <p>Email: <span id="profile-email"></span></p>
-    <p>Referrals: <span id="referral-count">0</span></p>
-    <p>Referral Link: <span id="ref-link"></span></p>
-    <p>Verification: <span id="verify-status">Not Verified</span></p>
-    <button class="button" onclick="verifyNow()">Verify Now</button>
-    <button class="button" onclick="logout()">Logout</button>
-  </div>  <!-- Nav Bar -->  <div class="navbar" id="navbar">
-    <div class="nav-item active" onclick="navTo('home-page')">🏠</div>
-    <div class="nav-item" onclick="navTo('chart-page')">📈</div>
-    <div class="nav-item" onclick="navTo('wallet-page')">💰</div>
-    <div class="nav-item" onclick="navTo('profile-page')">👤</div>
-  </div>  <script>
-    setTimeout(() => {
-      document.getElementById('splash').classList.add('hidden');
-      document.getElementById('language-selection').classList.add('active');
-    }, 4000);
+<body><!-- Splash Screen --><div id="splash" class="page active">
+  <h1 style="text-align:center; font-size: 2.5em; margin-top: 40vh;">The Supreme Elsa</h1>
+</div><!-- Login Page --><div id="loginPage" class="page">
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email" /><br />
+  <input type="password" id="loginPassword" placeholder="Password" /><br />
+  <button onclick="login()">Login</button>
+  <p>Don't have an account? <a href="#" onclick="showPage('registerPage')">Register</a></p>
+</div><!-- Register Page --><div id="registerPage" class="page">
+  <h2>Register</h2>
+  <input type="email" id="regEmail" placeholder="Email" /><br />
+  <input type="password" id="regPassword" placeholder="Password" /><br />
+  <input type="text" id="referralCode" placeholder="Referral Code (Optional)" /><br />
+  <button onclick="register()">Register</button>
+</div><!-- Dashboard Page --><div id="dashboard" class="page">
+  <h2>Welcome, <span id="userEmail"></span></h2>
+  <p>Balance: <span id="userBalance">$0</span></p>
+  <p>Elsa Coins: <span id="elsaBalance">0</span></p>
+  <p>Referral Link: <input type="text" value="" id="referralLink" readonly /></p>
+  <p>Verification: <span id="verificationStatus">Pending</span></p>
+  <button onclick="logout()">Logout</button>
+</div><!-- Chart Page --><div id="chartPage" class="page">
+  <h2>Elsa Coin Live Chart</h2>
+  <canvas id="chartCanvas"></canvas>
+  <button onclick="buyElsa()">Buy Elsa</button>
+  <button onclick="resellElsa()">Resell Elsa</button>
+</div><!-- Wallet Page --><div id="walletPage" class="page">
+  <h2>Wallet</h2>
+  <div class="wallet-info">
+    <p>Balance: <span id="walletBalance">$0</span></p>
+    <button onclick="deposit()">Deposit</button>
+    <button onclick="withdraw()">Withdraw</button>
+  </div>
+  <div class="transaction-log">
+    <h4>Transaction History</h4>
+    <ul id="transactionList"></ul>
+  </div>
+</div><!-- Leaderboard Page --><div id="leaderboardPage" class="page">
+  <h2>Leaderboard</h2>
+  <ul id="leaderboardList">
+    <li>Most Referrals</li>
+    <li>Most Earnings</li>
+  </ul>
+</div><!-- Navigation --><div class="nav">
+  <i class="fas fa-home" onclick="showPage('dashboard')"></i>
+  <i class="fas fa-chart-line" onclick="showPage('chartPage')"></i>
+  <i class="fas fa-wallet" onclick="showPage('walletPage')"></i>
+  <i class="fas fa-trophy" onclick="showPage('leaderboardPage')"></i>
+</div><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script>
+  // Simple page navigation
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
 
-    function showPage(id) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
+  // Splash timer
+  setTimeout(() => {
+    showPage('loginPage');
+  }, 4000);
 
-    function goToLogin(lang) {
-      showPage('login-page');
-    }
+  // Firebase Placeholder (mocked for demonstration)
+  let currentUser = null;
+  let balance = 0;
 
-    function navTo(id) {
-      showPage(id);
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => {
-        if (n.textContent.includes(id.split('-')[0])) n.classList.add('active');
-      });
+  function login() {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    if (email === 'eluxxes@gmail.com' && password === 'Ebube@123') {
+      balance = 2000;
+    } else {
+      balance = 0;
     }
+    currentUser = { email };
+    document.getElementById('userEmail').innerText = email;
+    document.getElementById('userBalance').innerText = `$${balance}`;
+    document.getElementById('walletBalance').innerText = `$${balance}`;
+    document.getElementById('referralLink').value = `${window.location.href}?ref=${btoa(email)}`;
+    showPage('dashboard');
+  }
 
-    function login() {
-      const email = document.getElementById('login-email').value;
-      const pass = document.getElementById('login-password').value;
-      if (email === 'eluxxes@gmail.com' && pass === 'Ebube@123') {
-        alert('Login success');
-        showPage('home-page');
-        document.getElementById('profile-email').textContent = email;
-        document.getElementById('balance-display').textContent = '$2000';
-        document.getElementById('elsa-amount').textContent = '2000';
-        document.getElementById('ref-link').textContent = `https://elsa.app?ref=${email}`;
-        document.getElementById('navbar').style.display = 'flex';
-      } else {
-        document.getElementById('login-error').textContent = 'Invalid credentials';
-        setTimeout(() => document.getElementById('login-error').textContent = '', 3000);
-      }
-    }
+  function register() {
+    const email = document.getElementById('regEmail').value;
+    const password = document.getElementById('regPassword').value;
+    const refCode = document.getElementById('referralCode').value;
+    alert('Registered Successfully!');
+    document.getElementById('loginEmail').value = email;
+    document.getElementById('loginPassword').value = password;
+    showPage('loginPage');
+  }
 
-    function register() {
-      const email = document.getElementById('reg-email').value;
-      const pass = document.getElementById('reg-password').value;
-      if (email && pass) {
-        alert('Registered! Now login.');
-        showPage('login-page');
-      } else {
-        document.getElementById('register-error').textContent = 'Fill all fields';
-        setTimeout(() => document.getElementById('register-error').textContent = '', 3000);
-      }
-    }
+  function logout() {
+    currentUser = null;
+    showPage('loginPage');
+  }
 
-    function logout() {
-      alert('Logged out');
-      location.reload();
-    }
+  function deposit() {
+    alert('Redirecting to Paystack...');
+    window.location.href = 'https://paystack.com/buy/lilzok-vjmgrv';
+  }
 
-    function simulateChartChange() {
-      const canvas = document.getElementById('liveChart');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#00cc00';
-      for (let i = 0; i < 10; i++) {
-        ctx.fillRect(i * 30, 150 - Math.random() * 150, 20, Math.random() * 100);
-      }
+  function withdraw() {
+    const amount = prompt('Enter withdrawal amount');
+    if (amount && parseFloat(amount) <= balance) {
+      alert('Withdrawal request sent!');
+    } else {
+      alert('Insufficient balance or invalid amount');
     }
+  }
 
-    function buyElsa() { alert('Buy logic coming soon'); }
-    function resellElsa() { alert('Resell logic coming soon'); }
-    function markPaid() { alert('Marked as paid. We will update balance soon.'); }
-    function withdrawRequest() {
-      const amt = document.getElementById('withdraw-amount').value;
-      const wallet = document.getElementById('withdraw-wallet').value;
-      const type = document.getElementById('withdraw-type').value;
-      alert(`Withdraw request of $${amt} to ${type}: ${wallet} submitted`);
+  function buyElsa() {
+    const amount = prompt('How much worth of Elsa do you want to buy? Minimum $2');
+    if (parseFloat(amount) >= 2) {
+      balance -= parseFloat(amount);
+      document.getElementById('userBalance').innerText = `$${balance}`;
+      document.getElementById('walletBalance').innerText = `$${balance}`;
+      alert('Purchase successful');
+    } else {
+      alert('Minimum $2 required');
     }
-    function verifyNow() { alert('Verify logic coming soon'); }
-  </script></body>
+  }
+
+  function resellElsa() {
+    alert('You must be verified to resell.');
+  }
+
+  const ctx = document.getElementById('chartCanvas').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'candlestick', // Note: requires custom plugin or replace with line
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Elsa Coin',
+        data: [],
+        borderColor: 'gold',
+        backgroundColor: 'black'
+      }]
+    },
+    options: {
+      animation: false,
+      responsive: true
+    }
+  });
+
+  // Simulate chart updates
+  setInterval(() => {
+    const now = new Date().toLocaleTimeString();
+    const val = Math.floor(Math.random() * 1000) + 2000;
+    if (chart.data.labels.length > 10) {
+      chart.data.labels.shift();
+      chart.data.datasets[0].data.shift();
+    }
+    chart.data.labels.push(now);
+    chart.data.datasets[0].data.push(val);
+    chart.update();
+  }, 3000);
+</script></body>
 </html>
