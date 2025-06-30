@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,22 +6,38 @@
   <style>
     body {
       margin: 0;
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #000000, #4b3621);
       color: gold;
+      transition: all 0.3s ease;
     }
     .section, .auth-page {
       display: none;
       padding: 20px;
+      animation: fadeIn 0.3s ease-in;
     }
     .active {
       display: block;
     }
-    .tab-bar, .commodity-bar {
-      display: flex;
+    .tab-bar {
+      display: none;
       justify-content: space-around;
       padding: 10px;
-      background: #222;
+      background: #111;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+    .tab-bar button {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: gold;
+      font-size: 14px;
+    }
+    .tab-bar button:hover {
+      background: #333;
     }
     button {
       background: gold;
@@ -31,6 +46,7 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      margin-top: 10px;
     }
     input, label {
       display: block;
@@ -41,17 +57,22 @@
       border: none;
     }
     .notif {
-      background: #333;
+      background: #222;
       padding: 10px;
       border-radius: 5px;
-      margin: 10px 0;
+      margin: 10px;
       text-align: center;
     }
     #chart {
       height: 300px;
+      margin-top: 10px;
     }
     h2, h3 {
       color: gold;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
@@ -59,69 +80,46 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
   <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
-<body>
-
-<div class="notif" id="notif"></div>
-
-<!-- Auth Pages -->
-<div id="loginPage" class="auth-page active">
+<body><div class="notif" id="notif"></div><!-- Login Page --><div id="loginPage" class="auth-page active">
   <h2>Login</h2>
   <input type="email" id="loginEmail" placeholder="Email">
   <input type="password" id="loginPassword" placeholder="Password">
   <button onclick="login()">Login</button>
   <p>Don't have an account? <a href="#" onclick="showRegister()">Register</a></p>
-</div>
-
-<div id="registerPage" class="auth-page">
+</div><!-- Register Page --><div id="registerPage" class="auth-page">
   <h2>Register</h2>
   <input type="email" id="regEmail" placeholder="Email">
   <input type="password" id="regPassword" placeholder="Password">
   <button onclick="register()">Register</button>
   <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
-</div>
-
-<!-- Main App Sections -->
-<div id="market" class="section">
+</div><!-- App Sections --><div id="market" class="section">
   <h2>Market</h2>
-  <div class="commodity-bar" id="commodityTabs"></div>
-  <h3 id="currentCommodity">Gold</h3>
+  <div id="currentCommodity">Gold</div>
   <div id="chart"></div>
-  <p>Current Price: $<span id="priceDisplay">2.00</span></p>
+  <p>Price: $<span id="priceDisplay">2.00</span></p>
   <button onclick="buyCommodity()">Buy</button>
   <button onclick="sellCommodity()">Sell</button>
-</div>
-
-<div id="wallet" class="section">
+</div><div id="wallet" class="section">
   <h2>Wallet</h2>
   <p>Balance: $<span id="userBalance"></span></p>
-  <button onclick="depositFunds()">Deposit ₦1000</button>
+  <button onclick="depositFunds()">Deposit</button>
   <button onclick="withdrawFunds()">Withdraw</button>
-</div>
-
-<div id="profile" class="section">
+</div><div id="profile" class="section">
   <h2>Profile</h2>
   <p>Email: <span id="userEmail"></span></p>
+  <p>Ref Code: <span id="userReferralCode"></span></p>
+  <p>Ref Link: <span id="refLink"></span></p>
   <p>Status: <span id="verifyStatus"></span></p>
-  <p>Referrals: <span id="referralCount">0</span> / 8</p>
-  <p>Referral Code: <span id="userReferralCode"></span></p>
-  <p>Referral Link: <code id="refLink"></code></p>
-  <button onclick="verifyUser()">Verify ($1)</button>
-</div>
-
-<div id="leaderboard" class="section">
-  <h2>Top Referrers</h2>
+  <button onclick="verifyUser()">Verify</button>
+</div><div id="leaderboard" class="section">
+  <h2>Top Referrals</h2>
   <ul id="leaderList"></ul>
-</div>
-
-<!-- Tab Bar -->
-<div class="tab-bar">
-  <button onclick="showSection('market')">Market</button>
-  <button onclick="showSection('wallet')">Wallet</button>
-  <button onclick="showSection('profile')">Profile</button>
-  <button onclick="showSection('leaderboard')">Leaderboard</button>
-</div>
-
-<script>
+</div><div class="tab-bar" id="tabBar">
+  <button onclick="showSection('market')">📊 Market</button>
+  <button onclick="showSection('wallet')">💰 Wallet</button>
+  <button onclick="showSection('profile')">👤 Profile</button>
+  <button onclick="showSection('leaderboard')">🏆 Leaderboard</button>
+</div><script>
 const firebaseConfig = {
   apiKey: "AIzaSyC8kLmGOyODdlrvHId2Nz3opdpT0tvD5mk",
   authDomain: "elsa-ab176.firebaseapp.com",
@@ -134,12 +132,10 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const commodities = ["Gold", "Diamond", "SOL"];
-let currentCommodity = "Gold";
-let chart;
-let chartSeries;
 let userId = null;
-let refBy = new URLSearchParams(window.location.search).get('ref');
+let currentCommodity = "Gold";
+let chart, chartSeries;
+let refBy = new URLSearchParams(location.search).get("ref");
 
 function showNotification(msg) {
   const n = document.getElementById("notif");
@@ -162,70 +158,76 @@ function showRegister() {
   document.querySelectorAll('.auth-page').forEach(p => p.classList.remove('active'));
   document.getElementById('registerPage').classList.add('active');
 }
-  function login() {
-  const email = document.getElementById("loginEmail").value;
-  const pass = document.getElementById("loginPassword").value;
-  auth.signInWithEmailAndPassword(email, pass)
-    .then(user => {
-      showSection('market');
-      initApp(user.user);
-    })
-    .catch(err => showNotification(err.message));
+
+function login() {
+  const email = loginEmail.value;
+  const password = loginPassword.value;
+  auth.signInWithEmailAndPassword(email, password)
+    .then(res => initApp(res.user))
+    .catch(err => showNotification("Login failed: " + err.message));
 }
 
 function register() {
-  const email = document.getElementById("regEmail").value;
-  const pass = document.getElementById("regPassword").value;
-  auth.createUserWithEmailAndPassword(email, pass)
-    .then(res => {
-      const user = res.user;
-      db.collection("users").doc(user.uid).set({
-        email,
-        balance: email === "eluxxes@gmail.com" ? 10 : 0,
-        verified: false,
-        referrals: 0,
-        refcode: user.uid.slice(0, 6),
-        referredBy: refBy || null
-      });
-      showSection('market');
-      initApp(user);
-    })
-    .catch(err => showNotification(err.message));
+  const email = regEmail.value;
+  const password = regPassword.value;
+  auth.createUserWithEmailAndPassword(email, password).then(res => {
+    const user = res.user;
+    const refCode = user.uid.slice(0, 6);
+    db.collection("users").doc(user.uid).set({
+      email,
+      balance: email === "eluxxes@gmail.com" ? 10 : 0,
+      verified: false,
+      referrals: 0,
+      refcode: refCode,
+      referredBy: refBy || null
+    });
+    initApp(user);
+  }).catch(err => showNotification("Registration failed: " + err.message));
 }
 
 function initApp(user) {
   userId = user.uid;
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("registerPage").style.display = "none";
-  db.collection("users").doc(userId).onSnapshot(doc => {
-    const data = doc.data();
-    document.getElementById("userBalance").innerText = data.balance.toFixed(2);
-    document.getElementById("userEmail").innerText = data.email;
-    document.getElementById("verifyStatus").innerText = data.verified ? "Verified ✅" : "Not Verified ❌";
-    document.getElementById("referralCount").innerText = data.referrals;
-    document.getElementById("userReferralCode").innerText = data.refcode;
-    document.getElementById("refLink").innerText = location.origin + "?ref=" + data.refcode;
+  loginPage.style.display = 'none';
+  registerPage.style.display = 'none';
+  document.getElementById("tabBar").style.display = "flex";
+  showSection('market');
+
+  db.collection("users").doc(user.uid).onSnapshot(doc => {
+    const d = doc.data();
+    userBalance.innerText = d.balance.toFixed(2);
+    userEmail.innerText = d.email;
+    userReferralCode.innerText = d.refcode;
+    refLink.innerText = `${location.origin}?ref=${d.refcode}`;
+    verifyStatus.innerText = d.verified ? "Verified ✅" : "Not Verified ❌";
   });
-  renderChart(currentCommodity);
-  renderLeaderboard();
-}
 
-function depositFunds() {
-  window.open("https://paystack.com/buy/lilzok-vjmgrv", "_blank");
-}
+  chart = LightweightCharts.createChart(document.getElementById("chart"), {
+    layout: { background: { color: '#000' }, textColor: 'gold' },
+    width: 360,
+    height: 300
+  });
+  chartSeries = chart.addCandlestickSeries();
+  db.collection("chart").doc(currentCommodity).onSnapshot(doc => {
+    const c = doc.data().candles;
+    chartSeries.setData(c);
+    priceDisplay.innerText = c[c.length - 1].close.toFixed(2);
+  });
 
-function withdrawFunds() {
-  showNotification("Withdrawals processed manually. Minimum $4.");
+  db.collection("users").orderBy("referrals", "desc").limit(10).get().then(snap => {
+    leaderList.innerHTML = "";
+    snap.forEach(doc => {
+      const d = doc.data();
+      leaderList.innerHTML += `<li>${d.email} - ${d.referrals}</li>`;
+    });
+  });
 }
 
 function buyCommodity() {
   db.collection("users").doc(userId).get().then(doc => {
-    const data = doc.data();
-    if (data.balance >= 2) {
-      db.collection("users").doc(userId).update({
-        balance: data.balance - 2
-      });
-      showNotification("Purchase successful!");
+    const d = doc.data();
+    if (d.balance >= 2) {
+      db.collection("users").doc(userId).update({ balance: d.balance - 2 });
+      showNotification("Commodity bought successfully.");
     } else {
       showNotification("Insufficient balance.");
     }
@@ -234,13 +236,19 @@ function buyCommodity() {
 
 function sellCommodity() {
   db.collection("users").doc(userId).get().then(doc => {
-    const data = doc.data();
-    if (!data.verified) return showNotification("Only verified users can sell.");
-    db.collection("users").doc(userId).update({
-      balance: data.balance + 2.45 // $2.60 minus $0.15 maintenance
-    });
-    showNotification("Sold for $2.45 after fee.");
+    const d = doc.data();
+    if (!d.verified) return showNotification("Only verified users can sell.");
+    db.collection("users").doc(userId).update({ balance: d.balance + 2.45 });
+    showNotification("Resold for $2.45 after fee.");
   });
+}
+
+function depositFunds() {
+  window.open("https://paystack.com/buy/lilzok-vjmgrv", "_blank");
+}
+
+function withdrawFunds() {
+  showNotification("Withdrawals are manual. Minimum $4 required.");
 }
 
 function verifyUser() {
@@ -248,56 +256,6 @@ function verifyUser() {
   db.collection("users").doc(userId).update({ verified: true });
 }
 
-function renderChart(symbol) {
-  document.getElementById("currentCommodity").innerText = symbol;
-  if (chart) chart.remove();
-  chart = LightweightCharts.createChart(document.getElementById("chart"), {
-    width: 400,
-    height: 300,
-    layout: { background: { color: "#000" }, textColor: "gold" }
-  });
-  chartSeries = chart.addCandlestickSeries();
-  db.collection("chart").doc(symbol).onSnapshot(doc => {
-    const data = doc.data();
-    if (data && data.candles) {
-      chartSeries.setData(data.candles);
-      const last = data.candles[data.candles.length - 1];
-      document.getElementById("priceDisplay").innerText = last.close.toFixed(2);
-    }
-  });
-}
-
-function renderLeaderboard() {
-  db.collection("users").orderBy("referrals", "desc").limit(10).get().then(snapshot => {
-    const ul = document.getElementById("leaderList");
-    ul.innerHTML = "";
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const li = document.createElement("li");
-      li.innerText = `${data.email} - ${data.referrals} referrals`;
-      ul.appendChild(li);
-    });
-  });
-}
-
-window.onload = () => {
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      showSection('market');
-      initApp(user);
-    }
-  });
-  const tabBar = document.getElementById("commodityTabs");
-  commodities.forEach(c => {
-    const btn = document.createElement("button");
-    btn.innerText = c;
-    btn.onclick = () => {
-      currentCommodity = c;
-      renderChart(c);
-    };
-    tabBar.appendChild(btn);
-  });
-};
-</script>
-</body>
+auth.onAuthStateChanged(user => { if (user) initApp(user); });
+</script></body>
 </html>
