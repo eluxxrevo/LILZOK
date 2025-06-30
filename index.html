@@ -1,32 +1,25 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Elsa App - Commodities</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Elsa App</title>
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #000000, #4b3621);
       color: gold;
-      transition: all 0.3s ease;
     }
-    .section, .auth-page {
-      display: none;
-      padding: 20px;
-      animation: fadeIn 0.3s ease-in;
-    }
-    .active {
-      display: block;
-    }
+    .section, .auth-page { display: none; padding: 20px; }
+    .active { display: block; }
     .tab-bar {
       display: none;
       justify-content: space-around;
-      padding: 10px;
-      background: #111;
       position: fixed;
       bottom: 0;
       width: 100%;
+      background: #111;
+      padding: 10px;
     }
     .tab-bar button {
       flex: 1;
@@ -36,91 +29,50 @@
       color: gold;
       font-size: 14px;
     }
-    .tab-bar button:hover {
-      background: #333;
-    }
     button {
       background: gold;
       color: black;
-      padding: 10px 20px;
+      padding: 10px;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
       margin-top: 10px;
     }
-    input, label {
-      display: block;
-      margin-top: 10px;
+    input {
       width: 100%;
-      padding: 8px;
-      border-radius: 4px;
+      padding: 10px;
+      margin-top: 10px;
       border: none;
+      border-radius: 5px;
     }
-    .notif {
+    #notif {
       background: #222;
       padding: 10px;
       border-radius: 5px;
       margin: 10px;
       text-align: center;
-    }
-    #chart {
-      height: 300px;
-      margin-top: 10px;
-    }
-    h2, h3 {
-      color: gold;
-    }
-    @keyframes fadeIn {
-      from {opacity: 0;}
-      to {opacity: 1;}
+      display: none;
     }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
-  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-</head>
-<body><div class="notif" id="notif"></div><!-- Login Page --><div id="loginPage" class="auth-page active">
-  <h2>Login</h2>
-  <input type="email" id="loginEmail" placeholder="Email">
-  <input type="password" id="loginPassword" placeholder="Password">
-  <button onclick="login()">Login</button>
-  <p>Don't have an account? <a href="#" onclick="showRegister()">Register</a></p>
-</div><!-- Register Page --><div id="registerPage" class="auth-page">
-  <h2>Register</h2>
-  <input type="email" id="regEmail" placeholder="Email">
-  <input type="password" id="regPassword" placeholder="Password">
-  <button onclick="register()">Register</button>
-  <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
-</div><!-- App Sections --><div id="market" class="section">
-  <h2>Market</h2>
-  <div id="currentCommodity">Gold</div>
-  <div id="chart"></div>
-  <p>Price: $<span id="priceDisplay">2.00</span></p>
-  <button onclick="buyCommodity()">Buy</button>
-  <button onclick="sellCommodity()">Sell</button>
-</div><div id="wallet" class="section">
-  <h2>Wallet</h2>
-  <p>Balance: $<span id="userBalance"></span></p>
-  <button onclick="depositFunds()">Deposit</button>
-  <button onclick="withdrawFunds()">Withdraw</button>
-</div><div id="profile" class="section">
-  <h2>Profile</h2>
-  <p>Email: <span id="userEmail"></span></p>
-  <p>Ref Code: <span id="userReferralCode"></span></p>
-  <p>Ref Link: <span id="refLink"></span></p>
-  <p>Status: <span id="verifyStatus"></span></p>
-  <button onclick="verifyUser()">Verify</button>
-</div><div id="leaderboard" class="section">
-  <h2>Top Referrals</h2>
-  <ul id="leaderList"></ul>
-</div><div class="tab-bar" id="tabBar">
-  <button onclick="showSection('market')">📊 Market</button>
-  <button onclick="showSection('wallet')">💰 Wallet</button>
-  <button onclick="showSection('profile')">👤 Profile</button>
-  <button onclick="showSection('leaderboard')">🏆 Leaderboard</button>
-</div><script>
-const firebaseConfig = {
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      getDoc,
+      updateDoc,
+      onSnapshot,
+      collection,
+      query,
+      orderBy,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";const firebaseConfig = {
   apiKey: "AIzaSyC8kLmGOyODdlrvHId2Nz3opdpT0tvD5mk",
   authDomain: "elsa-ab176.firebaseapp.com",
   projectId: "elsa-ab176",
@@ -128,20 +80,18 @@ const firebaseConfig = {
   messagingSenderId: "850786583459",
   appId: "1:850786583459:android:5710287d8738f48e8e1016"
 };
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const db = getFirestore();
 
 let userId = null;
-let currentCommodity = "Gold";
-let chart, chartSeries;
 let refBy = new URLSearchParams(location.search).get("ref");
 
 function showNotification(msg) {
   const n = document.getElementById("notif");
   n.innerText = msg;
   n.style.display = "block";
-  setTimeout(() => n.style.display = "none", 3000);
+  setTimeout(() => (n.style.display = "none"), 3000);
 }
 
 function showSection(id) {
@@ -150,30 +100,29 @@ function showSection(id) {
 }
 
 function showLogin() {
-  document.querySelectorAll('.auth-page').forEach(p => p.classList.remove('active'));
   document.getElementById('loginPage').classList.add('active');
+  document.getElementById('registerPage').classList.remove('active');
 }
 
 function showRegister() {
-  document.querySelectorAll('.auth-page').forEach(p => p.classList.remove('active'));
   document.getElementById('registerPage').classList.add('active');
+  document.getElementById('loginPage').classList.remove('active');
 }
 
-function login() {
-  const email = loginEmail.value;
-  const password = loginPassword.value;
-  auth.signInWithEmailAndPassword(email, password)
-    .then(res => initApp(res.user))
+window.login = function () {
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+  signInWithEmailAndPassword(auth, email, password)
+    .then(userCred => initApp(userCred.user))
     .catch(err => showNotification("Login failed: " + err.message));
-}
+};
 
-function register() {
-  const email = regEmail.value;
-  const password = regPassword.value;
-  auth.createUserWithEmailAndPassword(email, password).then(res => {
-    const user = res.user;
-    const refCode = user.uid.slice(0, 6);
-    db.collection("users").doc(user.uid).set({
+window.register = function () {
+  const email = document.getElementById("regEmail").value;
+  const password = document.getElementById("regPassword").value;
+  createUserWithEmailAndPassword(auth, email, password).then(res => {
+    const refCode = res.user.uid.slice(0, 6);
+    setDoc(doc(db, "users", res.user.uid), {
       email,
       balance: email === "eluxxes@gmail.com" ? 10 : 0,
       verified: false,
@@ -181,81 +130,65 @@ function register() {
       refcode: refCode,
       referredBy: refBy || null
     });
-    initApp(user);
-  }).catch(err => showNotification("Registration failed: " + err.message));
-}
+    initApp(res.user);
+  }).catch(err => showNotification("Register failed: " + err.message));
+};
 
 function initApp(user) {
   userId = user.uid;
-  loginPage.style.display = 'none';
-  registerPage.style.display = 'none';
-  document.getElementById("tabBar").style.display = "flex";
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("registerPage").style.display = "none";
+  document.querySelector(".tab-bar").style.display = "flex";
   showSection('market');
 
-  db.collection("users").doc(user.uid).onSnapshot(doc => {
-    const d = doc.data();
-    userBalance.innerText = d.balance.toFixed(2);
-    userEmail.innerText = d.email;
-    userReferralCode.innerText = d.refcode;
-    refLink.innerText = `${location.origin}?ref=${d.refcode}`;
-    verifyStatus.innerText = d.verified ? "Verified ✅" : "Not Verified ❌";
-  });
-
-  chart = LightweightCharts.createChart(document.getElementById("chart"), {
-    layout: { background: { color: '#000' }, textColor: 'gold' },
-    width: 360,
-    height: 300
-  });
-  chartSeries = chart.addCandlestickSeries();
-  db.collection("chart").doc(currentCommodity).onSnapshot(doc => {
-    const c = doc.data().candles;
-    chartSeries.setData(c);
-    priceDisplay.innerText = c[c.length - 1].close.toFixed(2);
-  });
-
-  db.collection("users").orderBy("referrals", "desc").limit(10).get().then(snap => {
-    leaderList.innerHTML = "";
-    snap.forEach(doc => {
-      const d = doc.data();
-      leaderList.innerHTML += `<li>${d.email} - ${d.referrals}</li>`;
-    });
+  const uDoc = doc(db, "users", userId);
+  onSnapshot(uDoc, docSnap => {
+    const d = docSnap.data();
+    document.getElementById("userBalance").innerText = d.balance.toFixed(2);
+    document.getElementById("userEmail").innerText = d.email;
+    document.getElementById("verifyStatus").innerText = d.verified ? "Verified ✅" : "Not Verified ❌";
   });
 }
 
-function buyCommodity() {
-  db.collection("users").doc(userId).get().then(doc => {
-    const d = doc.data();
-    if (d.balance >= 2) {
-      db.collection("users").doc(userId).update({ balance: d.balance - 2 });
-      showNotification("Commodity bought successfully.");
-    } else {
-      showNotification("Insufficient balance.");
-    }
-  });
-}
+onAuthStateChanged(auth, user => { if (user) initApp(user); });
 
-function sellCommodity() {
-  db.collection("users").doc(userId).get().then(doc => {
-    const d = doc.data();
-    if (!d.verified) return showNotification("Only verified users can sell.");
-    db.collection("users").doc(userId).update({ balance: d.balance + 2.45 });
-    showNotification("Resold for $2.45 after fee.");
-  });
-}
-
-function depositFunds() {
-  window.open("https://paystack.com/buy/lilzok-vjmgrv", "_blank");
-}
-
-function withdrawFunds() {
-  showNotification("Withdrawals are manual. Minimum $4 required.");
-}
-
-function verifyUser() {
-  window.open("https://paystack.com/buy/lilzok-vjmgrv", "_blank");
-  db.collection("users").doc(userId).update({ verified: true });
-}
-
-auth.onAuthStateChanged(user => { if (user) initApp(user); });
-</script></body>
-</html>
+  </script>
+</head>
+<body>
+<div id="notif"></div>
+<div id="loginPage" class="auth-page active">
+  <h2>Login</h2>
+  <input id="loginEmail" placeholder="Email">
+  <input id="loginPassword" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <p>Don't have an account? <a href="#" onclick="showRegister()">Register</a></p>
+</div>
+<div id="registerPage" class="auth-page">
+  <h2>Register</h2>
+  <input id="regEmail" placeholder="Email">
+  <input id="regPassword" type="password" placeholder="Password">
+  <button onclick="register()">Register</button>
+  <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
+</div>
+<div id="market" class="section">
+  <h2>Market</h2>
+  <p>Price: $<span id="priceDisplay">2.00</span></p>
+  <button onclick="buyCommodity()">Buy</button>
+  <button onclick="sellCommodity()">Sell</button>
+</div>
+<div id="wallet" class="section">
+  <h2>Wallet</h2>
+  <p>Balance: $<span id="userBalance"></span></p>
+</div>
+<div id="profile" class="section">
+  <h2>Profile</h2>
+  <p>Email: <span id="userEmail"></span></p>
+  <p>Status: <span id="verifyStatus"></span></p>
+</div>
+<div class="tab-bar">
+  <button onclick="showSection('market')">Market</button>
+  <button onclick="showSection('wallet')">Wallet</button>
+  <button onclick="showSection('profile')">Profile</button>
+</div>
+</body>
+</html
