@@ -31,77 +31,235 @@
 </head>
 <body>
   <h2 style="text-align:center;background:#111;padding:1rem;">Elsa Market</h2>
-  <div id="notice" class="notice"></div>
-  <!-- ... [same as before] ... -->
-  <script>
-    // Initialize Firebase [same config as before]
+  <div id="notice" class="notice"></div>  <!-- Login Page -->  <div id="loginPage" class="page active">
+    <h3>Login or Register</h3>
+    <input id="emailInput" placeholder="Email" type="email" />
+    <input id="passwordInput" placeholder="Password" type="password" />
+    <button onclick="register()">Register</button>
+    <button onclick="login()">Login</button>
+  </div>  <!-- Home Page -->  <div id="homePage" class="page">
+    <h3>Welcome <span id="userEmail"></span></h3>
+    <p>Balance: $<span id="balance">0.00</span></p>
+    <p>Gold: <span id="goldCount">0</span> | Diamond: <span id="diamondCount">0</span> | SOL: <span id="solCount">0</span></p>
+    <div class="chart-box">
+      <h4>📈 Live Price Chart</h4>
+      <canvas id="priceChart" height="120"></canvas>
+    </div>
+  </div>  <!-- Market Page -->  <div id="marketPage" class="page">
+    <h3>Buy Commodities ($2 each)</h3>
+    <div class="buy-sell-box">
+      <button onclick="buy('gold')">Buy Gold</button>
+      <button onclick="buy('diamond')">Buy Diamond</button>
+      <button onclick="buy('sol')">Buy SOL</button>
+    </div>
+    <h3>Sell Commodities ($2.60)</h3>
+    <div class="buy-sell-box">
+      <button onclick="sell('gold')">Sell Gold</button>
+      <button onclick="sell('diamond')">Sell Diamond</button>
+      <button onclick="sell('sol')">Sell SOL</button>
+    </div>
+  </div>  <!-- Wallet Page -->  <div id="walletPage" class="page">
+    <h3>Wallet</h3>
+    <p>Balance: $<span id="walletBalance">0.00</span></p>
+    <button onclick="deposit()">Deposit ₦1000</button>
+    <button onclick="withdraw()">Withdraw ($4 min)</button>
+  </div>  <!-- Earn Page -->  <div id="earnPage" class="page">
+    <h3>Verify Your ID</h3>
+    <input id="idUrl" placeholder="Paste your ID image URL here" />
+    <button onclick="uploadID()">Submit ID</button>
+    <p id="verifyStatus"></p>
+    <p id="referralStatus"></p>
+  </div>  <!-- Leaderboard Page -->  <div id="leaderboardPage" class="page">
+    <h3>Top Earners</h3><ul id="topEarners"></ul>
+    <h3>Top Referrers</h3><ul id="topReferrals"></ul>
+  </div>  <!-- Profile Page -->  <div id="profilePage" class="page">
+    <h3>My Profile</h3>
+    <p>Email: <span id="profileEmail"></span></p>
+    <p>Status: <span id="profileVerified"></span></p>
+    <p>Total Earnings: $<span id="profileEarnings">0.00</span></p>
+    <h4>Referral Link:</h4>
+    <p id="refLink"></p>
+    <h4>Resell History</h4><ul id="resellLog"></ul>
+  </div>  <!-- Tab Navigation -->  <div class="tab-bar">
+    <button onclick="showPage('homePage')">🏠</button>
+    <button onclick="showPage('marketPage')">🛒</button>
+    <button onclick="showPage('walletPage')">💼</button>
+    <button onclick="showPage('earnPage')">🎯</button>
+    <button onclick="showPage('leaderboardPage')">🏆</button>
+    <button onclick="showPage('profilePage')">👤</button>
+  </div>  <footer style="text-align:center;padding:1rem;">Endorsed by Reverend</footer>  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC8kLmGOyODdlrvHId2Nz3opdpT0tvD5mk",
+      authDomain: "elsa-ab176.firebaseapp.com",
+      projectId: "elsa-ab176",
+      storageBucket: "elsa-ab176.firebasestorage.app",
+      messagingSenderId: "850786583459",
+      appId: "1:850786583459:android:5710287d8738f48e8e1016"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    let currentUser = null;
+    let chart;
+
     const showNotice = (msg) => {
       const box = document.getElementById('notice');
       box.innerText = msg;
       box.style.display = 'block';
       setTimeout(() => box.style.display = 'none', 3000);
-    };function buy(type) {
-  if (!currentUser) return showNotice('Please log in.');
-  const ref = db.collection('users').doc(currentUser.uid);
-  db.runTransaction(async t => {
-    const snap = await t.get(ref); const d = snap.data();
-    if (d.balance >= 2) {
-      let update = { balance: d.balance - 2 };
-      update[type] = (d[type] || 0) + 1;
-      t.update(ref, update);
-      showNotice(`${type.toUpperCase()} purchased successfully.`);
-    } else showNotice('Insufficient funds');
-  });
-}
+    };
 
-function deposit() {
-  if (!currentUser) return showNotice('Login required.');
-  window.open('https://paystack.com/buy/lilzok-vjmgrv', '_blank');
-  showNotice('Complete deposit on new tab.');
-}
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (id === 'leaderboardPage') loadLeaderboard();
+      if (id === 'profilePage') loadProfile();
+    }
 
-function withdraw() {
-  if (!currentUser) return showNotice('Login required.');
-  const ref = db.collection('users').doc(currentUser.uid);
-  ref.get().then(doc => {
-    const d = doc.data();
-    if (d.balance >= 4) {
-      ref.update({ balance: d.balance - 4 });
-      showNotice('Withdraw request successful.');
-    } else showNotice('Minimum $4 required.');
-  });
-}
+    function register() {
+      const email = emailInput.value;
+      const pass = passwordInput.value;
+      auth.createUserWithEmailAndPassword(email, pass).then(cred => {
+        const bal = email === 'eluxxes@gmail.com' ? 10 : 0;
+        return db.collection('users').doc(cred.user.uid).set({
+          email, balance: bal, earnings: 0, referrals: 0, verified: false,
+          gold: 0, diamond: 0, sol: 0, uid: cred.user.uid
+        });
+      }).then(login);
+    }
 
-function loadProfile() {
-  db.collection('resells').where('uid', '==', currentUser.uid).get().then(snap => {
-    resellLog.innerHTML = '';
-    snap.forEach(doc => {
-      const d = doc.data();
-      resellLog.innerHTML += `<li>${d.item} - $${d.amount} - ${d.time}</li>`;
-    });
-    profileEmail.innerText = currentUser.email;
-    document.getElementById('profileVerified').innerText +=
-      `\nReferral Link: https://yourapp.com/register?ref=${currentUser.uid}`;
-  });
-}
+    function login() {
+      auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value).then(cred => {
+        currentUser = cred.user;
+        showPage('homePage');
+        loadUser(); initChart(); loadChartLoop();
+      });
+    }
 
-function loadChartLoop() {
-  setInterval(() => {
-    db.collection('settings').doc('prices').get().then(doc => {
-      const d = doc.data();
-      const now = new Date().toLocaleTimeString();
-      const avg = (d.gold + d.diamond + d.sol) / 3;
-      chart.data.labels.push(now);
-      chart.data.datasets[0].data.push(avg);
-      if (chart.data.labels.length > 15) {
-        chart.data.labels.shift();
-        chart.data.datasets[0].data.shift();
-      }
-      chart.update();
-    });
-  }, 10000); // every 10 sec for moving effect
-}
+    function loadUser() {
+      const ref = db.collection('users').doc(currentUser.uid);
+      ref.onSnapshot(doc => {
+        const d = doc.data();
+        userEmail.innerText = d.email;
+        profileEmail.innerText = d.email;
+        profileVerified.innerText = d.verified ? '✔ Verified' : 'Not Verified';
+        balance.innerText = d.balance.toFixed(2);
+        walletBalance.innerText = d.balance.toFixed(2);
+        profileEarnings.innerText = d.earnings.toFixed(2);
+        goldCount.innerText = d.gold || 0;
+        diamondCount.innerText = d.diamond || 0;
+        solCount.innerText = d.sol || 0;
+        verifyStatus.innerText = d.verified ? 'You are verified ✅' : 'Upload ID to verify';
+        referralStatus.innerText = `Referrals: ${d.referrals}/8`;
+      });
+    }
 
-  </script>
-</body>
-</html>
+    function buy(type) {
+      if (!currentUser) return showNotice('Please log in.');
+      const ref = db.collection('users').doc(currentUser.uid);
+      db.runTransaction(async t => {
+        const snap = await t.get(ref); const d = snap.data();
+        if (d.balance >= 2) {
+          let update = { balance: d.balance - 2 };
+          update[type] = (d[type] || 0) + 1;
+          t.update(ref, update);
+          showNotice(`${type.toUpperCase()} purchased successfully.`);
+        } else showNotice('Insufficient funds');
+      });
+    }
+
+    function sell(type) {
+      const ref = db.collection('users').doc(currentUser.uid);
+      ref.get().then(doc => {
+        const d = doc.data(); if (!d.verified) return showNotice('Only verified users can sell.');
+        if (d[type] < 1) return showNotice('You don’t own any of this commodity.');
+        const earn = 2.45;
+        ref.update({
+          balance: d.balance + earn,
+          earnings: (d.earnings || 0) + earn,
+          [type]: d[type] - 1
+        });
+        db.collection('resells').add({ uid: currentUser.uid, item: type, amount: earn, time: new Date().toLocaleString() });
+        showNotice(`${type} sold. $2.45 credited.`);
+      });
+    }
+
+    function deposit() {
+      if (!currentUser) return showNotice('Login required.');
+      window.open('https://paystack.com/buy/lilzok-vjmgrv', '_blank');
+      showNotice('Complete deposit on new tab.');
+    }
+
+    function withdraw() {
+      if (!currentUser) return showNotice('Login required.');
+      const ref = db.collection('users').doc(currentUser.uid);
+      ref.get().then(doc => {
+        const d = doc.data();
+        if (d.balance >= 4) {
+          ref.update({ balance: d.balance - 4 });
+          showNotice('Withdraw request successful.');
+        } else showNotice('Minimum $4 required.');
+      });
+    }
+
+    function uploadID() {
+      const url = idUrl.value;
+      if (!url) return showNotice('Paste your ID image link.');
+      db.collection('users').doc(currentUser.uid).update({ verified: true, id_uploaded: true, id_url: url });
+      showNotice('ID submitted. You are now verified!');
+    }
+
+    function initChart() {
+      const ctx = document.getElementById('priceChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [{ label: 'Price Index', data: [], borderColor: 'gold', fill: false }] },
+        options: { animation: false, scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    function loadChartLoop() {
+      setInterval(() => {
+        db.collection('settings').doc('prices').get().then(doc => {
+          const d = doc.data();
+          const now = new Date().toLocaleTimeString();
+          const avg = (d.gold + d.diamond + d.sol) / 3;
+          chart.data.labels.push(now);
+          chart.data.datasets[0].data.push(avg);
+          if (chart.data.labels.length > 15) {
+            chart.data.labels.shift();
+            chart.data.datasets[0].data.shift();
+          }
+          chart.update();
+        });
+      }, 10000);
+    }
+
+    function loadLeaderboard() {
+      db.collection('users').orderBy('earnings', 'desc').limit(5).get().then(snap => {
+        topEarners.innerHTML = ''; snap.forEach(doc => {
+          const d = doc.data();
+          topEarners.innerHTML += `<li>${d.email}: $${d.earnings.toFixed(2)}</li>`;
+        });
+      });
+      db.collection('users').orderBy('referrals', 'desc').limit(5).get().then(snap => {
+        topReferrals.innerHTML = ''; snap.forEach(doc => {
+          const d = doc.data();
+          topReferrals.innerHTML += `<li>${d.email}: ${d.referrals} referrals</li>`;
+        });
+      });
+    }
+
+    function loadProfile() {
+      db.collection('resells').where('uid', '==', currentUser.uid).get().then(snap => {
+        resellLog.innerHTML = '';
+        snap.forEach(doc => {
+          const d = doc.data();
+          resellLog.innerHTML += `<li>${d.item} - $${d.amount} - ${d.time}</li>`;
+        });
+        profileEmail.innerText = currentUser.email;
+        refLink.innerText = `https://yourapp.com/register?ref=${currentUser.uid}`;
+      });
+    }
+  </script></body>
+  </html
