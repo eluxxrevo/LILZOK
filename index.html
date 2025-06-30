@@ -1,198 +1,299 @@
+<!-- PART 1 START -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Elsa App</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.1.0"></script>
   <style>
-    body { font-family: Arial, sans-serif; background-color: #000; color: gold; margin: 0; }
-    .container { padding: 1rem; }
-    input, button, select { display: block; width: 100%; margin: 0.5rem 0; padding: 0.5rem; border: 1px solid gold; background: #111; color: gold; border-radius: 5px; }
-    .notice { color: green; font-weight: bold; text-align: center; }
-    nav { position: fixed; bottom: 0; width: 100%; background: #111; display: flex; justify-content: space-around; border-top: 1px solid gold; }
-    nav button { background: transparent; border: none; color: gold; padding: 1rem; }
-    .tab { display: none; padding-bottom: 60px; }
-    .active { display: block; }
-    canvas { max-width: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #000, #111);
+      color: gold;
+    }
+    .hidden { display: none; }
+    .centered {
+      text-align: center;
+      padding: 30px;
+    }
+    .tab {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      background: #111;
+      border-top: 1px solid gold;
+    }
+    .tab button {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: gold;
+      padding: 10px;
+      font-size: 18px;
+    }
+    .container {
+      padding: 20px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      background: gold;
+      color: black;
+      font-weight: bold;
+    }
+    canvas {
+      margin-top: 20px;
+      background: #222;
+      border-radius: 10px;
+    }
+    header {
+      background: black;
+      color: gold;
+      text-align: center;
+      padding: 15px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .badge {
+      background: green;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 10px;
+      margin-left: 5px;
+    }
+    .notification {
+      background: #444;
+      padding: 10px;
+      color: #fff;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div id="authTab" class="tab active">
-      <h1>Register</h1>
-      <input type="email" id="regEmail" placeholder="Email">
-      <input type="password" id="regPassword" placeholder="Password">
-      <button onclick="registerUser()">Register</button>
+  <header>Elsa App</header>
 
-      <h1>Login</h1>
-      <input type="email" id="logEmail" placeholder="Email">
-      <input type="password" id="logPassword" placeholder="Password">
-      <button onclick="loginUser()">Login</button>
-      <p class="notice" id="notice"></p>
-    </div>
+  <!-- Language Selector -->
+  <div id="language-select" class="container">
+    <h2>Select Language</h2>
+    <button onclick="setLanguage('en')">English</button>
+    <button onclick="setLanguage('fr')">Français</button>
+  </div>
 
-    <div id="profileTab" class="tab">
-      <h2>Profile</h2>
-      <p id="profileEmail"></p>
-      <p id="profileUsername"></p>
-      <p id="profileWallet"></p>
-      <p id="profileRefCode"></p>
-      <p id="profileVerified"></p>
-      <input type="text" id="userCountry" placeholder="Country">
-      <input type="text" id="userPhoto" placeholder="Photo URL">
-      <button onclick="verifyUser()">Verify Account ($1)</button>
-    </div>
+  <!-- Login Form -->
+  <div id="auth" class="container hidden">
+    <h2 id="loginTitle">Login</h2>
+    <input id="loginEmail" type="email" placeholder="Email" />
+    <input id="loginPassword" type="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <p><span id="registerPrompt">Don't have an account?</span> <a href="#" onclick="toggleSection('register')">Register</a></p>
+  </div>
 
-    <div id="marketTab" class="tab">
-      <h2>Live Market Chart (Candlestick)</h2>
-      <canvas id="liveChart" height="150"></canvas>
-      <button style="background: green;" onclick="buyCommodity()">Buy ($2)</button>
-      <button style="background: red;" onclick="sellCommodity()">Sell ($2.60)</button>
-    </div>
+  <!-- Registration Form -->
+  <div id="register" class="container hidden">
+    <h2 id="registerTitle">Register</h2>
+    <input id="regEmail" type="email" placeholder="Email" />
+    <input id="regPassword" type="password" placeholder="Password" />
+    <input id="refCode" type="text" placeholder="Referral Code (optional)" />
+    <button onclick="register()">Register</button>
+    <p><span id="loginPrompt">Already have an account?</span> <a href="#" onclick="toggleSection('auth')">Login</a></p>
+  </div>
 
-    <div id="historyTab" class="tab">
-      <h2>Transaction History</h2>
-      <ul id="historyList"></ul>
+  <!-- Dashboard -->
+  <div id="dashboard" class="hidden">
+    <div class="container">
+      <h2 id="marketTitle">Market</h2>
+      <p><strong>Live Price: $<span id="livePrice">0.00</span></strong></p>
+      <canvas id="chart" height="160"></canvas>
+      <button onclick="buyCommodity()" id="buyBtn">Buy for $2</button>
+      <button onclick="sellCommodity()" id="sellBtn">Sell for $2.60</button>
+      <div class="notification" id="notifBox" style="display:none;"></div>
     </div>
   </div>
 
-  <nav>
-    <button onclick="switchTab('authTab')">Login</button>
-    <button onclick="switchTab('profileTab')">Profile</button>
-    <button onclick="switchTab('marketTab')">Market</button>
-    <button onclick="switchTab('historyTab')">History</button>
-  </nav>
+  <!-- Wallet -->
+  <div id="walletPage" class="container hidden">
+    <h2>Wallet</h2>
+    <p>Email: <span id="userEmail"></span></p>
+    <p>Balance: $<span id="balance"></span></p>
+    <p>Status: <span id="verifyStatus"></span></p>
+    <button onclick="verifyUser()">Verify Account ($1.50)</button>
+    <button onclick="depositFunds()">Deposit</button>
+    <button onclick="withdrawFunds()">Withdraw</button>
+  </div>
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyC8kLmGOyODdlrvHId2Nz3opdpT0tvD5mk",
-  authDomain: "elsa-ab176.firebaseapp.com",
-  projectId: "elsa-ab176",
-  storageBucket: "elsa-ab176.firebasestorage.app",
-  messagingSenderId: "850786583459",
-  appId: "1:850786583459:android:5710287d8738f48e8e1016"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+  <!-- Profile -->
+  <div id="profilePage" class="container hidden">
+    <h2>Profile</h2>
+    <p>Name: <span id="profileEmail"></span></p>
+    <p>Referral Link:</p>
+    <input id="referralLink" readonly />
+    <p>Referrals: <span id="referralCount">0</span>/8</p>
+    <p><strong>Verified:</strong> <span id="verifiedBadge">❌</span></p>
+  </div>
 
-const urlParams = new URLSearchParams(window.location.search);
-const ref = urlParams.get('ref');
-if (ref) localStorage.setItem("referredBy", ref);
+  <!-- Navigation Tabs -->
+  <div class="tab hidden" id="tabBar">
+    <button onclick="switchTab('dashboard')"><span class=\"material-icons\">show_chart</span></button>
+    <button onclick="switchTab('walletPage')"><span class=\"material-icons\">account_balance_wallet</span></button>
+    <button onclick="switchTab('profilePage')"><span class=\"material-icons\">person</span></button>
+  </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Elsa App</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #000, #111);
+      color: gold;
+    }
+    .hidden { display: none; }
+    .centered {
+      text-align: center;
+      padding: 30px;
+    }
+    .tab {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      background: #111;
+      border-top: 1px solid gold;
+    }
+    .tab button {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: gold;
+      padding: 10px;
+      font-size: 18px;
+    }
+    .container {
+      padding: 20px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      background: gold;
+      color: black;
+      font-weight: bold;
+    }
+    canvas {
+      margin-top: 20px;
+      background: #222;
+      border-radius: 10px;
+    }
+    header {
+      background: black;
+      color: gold;
+      text-align: center;
+      padding: 15px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .badge {
+      background: green;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 10px;
+      margin-left: 5px;
+    }
+    .notification {
+      background: #444;
+      padding: 10px;
+      color: #fff;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>Elsa App</header>
 
-function switchTab(id) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
+  <!-- Language Selector -->
+  <div id="language-select" class="container">
+    <h2>Select Language</h2>
+    <button onclick="setLanguage('en')">English</button>
+    <button onclick="setLanguage('fr')">Français</button>
+  </div>
 
-function registerUser() {
-  const email = document.getElementById("regEmail").value;
-  const password = document.getElementById("regPassword").value;
-  auth.createUserWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      const defaultWallet = email === 'eluxxes@gmail.com' ? 10 : 0;
-      const referralCode = 'ELX-' + Math.floor(Math.random() * 100000);
-      const referredBy = localStorage.getItem("referredBy") || "";
-      const userData = {
-        uid: user.uid,
-        email: user.email,
-        username: email.split('@')[0],
-        wallet: defaultWallet,
-        verified: false,
-        verificationPaid: false,
-        referrals: 0,
-        referralCode: referralCode,
-        referredBy: referredBy,
-        photoURL: '',
-        country: '',
-        registrationTime: firebase.firestore.FieldValue.serverTimestamp(),
-        transactions: []
-      };
-      db.collection('users').doc(user.uid).set(userData);
-      alert("Registered successfully!");
-    }).catch(e => alert(e.message));
-}
+  <!-- Login Form -->
+  <div id="auth" class="container hidden">
+    <h2 id="loginTitle">Login</h2>
+    <input id="loginEmail" type="email" placeholder="Email" />
+    <input id="loginPassword" type="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <p><span id="registerPrompt">Don't have an account?</span> <a href="#" onclick="toggleSection('register')">Register</a></p>
+  </div>
 
-function loginUser() {
-  const email = document.getElementById("logEmail").value;
-  const password = document.getElementById("logPassword").value;
-  auth.signInWithEmailAndPassword(email, password)
-    .then(() => {
-      alert("Logged in!");
-      loadProfile();
-      switchTab('profileTab');
-      fetchChartData();
-    }).catch(e => alert(e.message));
-}
+  <!-- Registration Form -->
+  <div id="register" class="container hidden">
+    <h2 id="registerTitle">Register</h2>
+    <input id="regEmail" type="email" placeholder="Email" />
+    <input id="regPassword" type="password" placeholder="Password" />
+    <input id="refCode" type="text" placeholder="Referral Code (optional)" />
+    <button onclick="register()">Register</button>
+    <p><span id="loginPrompt">Already have an account?</span> <a href="#" onclick="toggleSection('auth')">Login</a></p>
+  </div>
 
-function loadProfile() {
-  const user = auth.currentUser;
-  if (!user) return;
-  db.collection('users').doc(user.uid).get().then(doc => {
-    const data = doc.data();
-    document.getElementById('profileEmail').innerText = "Email: " + data.email;
-    document.getElementById('profileUsername').innerText = "Username: " + data.username;
-    document.getElementById('profileWallet').innerText = "Wallet: $" + data.wallet;
-    document.getElementById('profileRefCode').innerText = "Referral Code: " + data.referralCode;
-    document.getElementById('profileVerified').innerText = data.verified ? "✅ Verified" : "❌ Not Verified";
-  });
-}
+  <!-- Dashboard -->
+  <div id="dashboard" class="hidden">
+    <div class="container">
+      <h2 id="marketTitle">Market</h2>
+      <p><strong>Live Price: $<span id="livePrice">0.00</span></strong></p>
+      <canvas id="chart" height="160"></canvas>
+      <button onclick="buyCommodity()" id="buyBtn">Buy for $2</button>
+      <button onclick="sellCommodity()" id="sellBtn">Sell for $2.60</button>
+      <div class="notification" id="notifBox" style="display:none;"></div>
+    </div>
+  </div>
 
-function verifyUser() {
-  const user = auth.currentUser;
-  const country = document.getElementById('userCountry').value;
-  const photo = document.getElementById('userPhoto').value;
-  if (!country || !photo) return alert("Fill country and photo link.");
-  alert("Redirecting to Paystack...");
-  db.collection('users').doc(user.uid).update({ verified: true, verificationPaid: true, country, photoURL: photo });
-  alert("You are now verified!");
-  loadProfile();
-}
+  <!-- Wallet -->
+  <div id="walletPage" class="container hidden">
+    <h2>Wallet</h2>
+    <p>Email: <span id="userEmail"></span></p>
+    <p>Balance: $<span id="balance"></span></p>
+    <p>Status: <span id="verifyStatus"></span></p>
+    <button onclick="verifyUser()">Verify Account ($1.50)</button>
+    <button onclick="depositFunds()">Deposit</button>
+    <button onclick="withdrawFunds()">Withdraw</button>
+  </div>
 
-function buyCommodity() {
-  const user = auth.currentUser;
-  db.collection('users').doc(user.uid).update({
-    wallet: firebase.firestore.FieldValue.increment(-2),
-    transactions: firebase.firestore.FieldValue.arrayUnion({ type: 'buy', amount: 2, time: Date.now() })
-  });
-  alert("Bought commodity for $2");
-}
+  <!-- Profile -->
+  <div id="profilePage" class="container hidden">
+    <h2>Profile</h2>
+    <p>Name: <span id="profileEmail"></span></p>
+    <p>Referral Link:</p>
+    <input id="referralLink" readonly />
+    <p>Referrals: <span id="referralCount">0</span>/8</p>
+    <p><strong>Verified:</strong> <span id="verifiedBadge">❌</span></p>
+  </div>
 
-function sellCommodity() {
-  const user = auth.currentUser;
-  db.collection('users').doc(user.uid).get().then(doc => {
-    if (!doc.data().verified) return alert("Only verified users can sell.");
-    db.collection('users').doc(user.uid).update({
-      wallet: firebase.firestore.FieldValue.increment(2.45),
-      transactions: firebase.firestore.FieldValue.arrayUnion({ type: 'sell', amount: 2.6, fee: 0.15, time: Date.now() })
-    });
-    alert("Sold for $2.60 (0.15 fee deducted)");
-  });
-}
-
-// Live Chart Loader
-function fetchChartData() {
-  const ctx = document.getElementById('liveChart').getContext('2d');
-  db.collection("chartData").orderBy("timestamp", "desc").limit(20).onSnapshot(snapshot => {
-    const candles = snapshot.docs.map(doc => doc.data()).reverse();
-    new Chart(ctx, {
-      type: 'candlestick',
-      data: {
-        datasets: [{
-          label: 'Live Commodity Price',
-          data: candles.map(d => ({ x: new Date(d.timestamp), o: d.open, h: d.high, l: d.low, c: d.close }))
-        }]
-      },
-      options: { responsive: true }
-    });
-  });
-}
-</script>
-</body>
-</html>
+  <!-- Navigation Tabs -->
+  <div class="tab hidden" id="tabBar">
+    <button onclick="switchTab('dashboard')"><span class=\"material-icons\">show_chart</span></button>
+    <button onclick="switchTab('walletPage')"><span class=\"material-icons\">account_balance_wallet</span></button>
+    <button onclick="switchTab('profilePage')"><span class=\"material-icons\">person</span></button>
+  </div>
