@@ -3,92 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Elsa App - Commodities</title>
+  <title>Elsa App</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.1.0"></script>
   <style>
-    body { margin: 0; font-family: sans-serif; background: #111; color: white; }
-    .section, .auth-page { display: none; padding: 20px; }
+    body { font-family: Arial, sans-serif; background-color: #000; color: gold; margin: 0; }
+    .container { padding: 1rem; }
+    input, button, select { display: block; width: 100%; margin: 0.5rem 0; padding: 0.5rem; border: 1px solid gold; background: #111; color: gold; border-radius: 5px; }
+    .notice { color: green; font-weight: bold; text-align: center; }
+    nav { position: fixed; bottom: 0; width: 100%; background: #111; display: flex; justify-content: space-around; border-top: 1px solid gold; }
+    nav button { background: transparent; border: none; color: gold; padding: 1rem; }
+    .tab { display: none; padding-bottom: 60px; }
     .active { display: block; }
-    .tab-bar, .commodity-bar {
-      display: flex; justify-content: space-around; padding: 10px; background: #222;
-    }
-    button { background: #0f0; color: black; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-    input, label { display: block; margin-top: 10px; width: 100%; padding: 8px; border-radius: 4px; }
-    .notif { background: #333; padding: 10px; border-radius: 5px; margin: 10px 0; text-align: center; }
-    #chart { height: 300px; }
+    canvas { max-width: 100%; }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
-  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
+  <div class="container">
+    <div id="authTab" class="tab active">
+      <h1>Register</h1>
+      <input type="email" id="regEmail" placeholder="Email">
+      <input type="password" id="regPassword" placeholder="Password">
+      <button onclick="registerUser()">Register</button>
 
-<div class="notif" id="notif"></div>
+      <h1>Login</h1>
+      <input type="email" id="logEmail" placeholder="Email">
+      <input type="password" id="logPassword" placeholder="Password">
+      <button onclick="loginUser()">Login</button>
+      <p class="notice" id="notice"></p>
+    </div>
 
-<!-- Auth Pages -->
-<div id="loginPage" class="auth-page active">
-  <h2>Login</h2>
-  <input type="email" id="loginEmail" placeholder="Email">
-  <input type="password" id="loginPassword" placeholder="Password">
-  <button onclick="login()">Login</button>
-  <p>Don't have an account? <a href="#" onclick="showRegister()">Register</a></p>
-</div>
+    <div id="profileTab" class="tab">
+      <h2>Profile</h2>
+      <p id="profileEmail"></p>
+      <p id="profileUsername"></p>
+      <p id="profileWallet"></p>
+      <p id="profileRefCode"></p>
+      <p id="profileVerified"></p>
+      <input type="text" id="userCountry" placeholder="Country">
+      <input type="text" id="userPhoto" placeholder="Photo URL">
+      <button onclick="verifyUser()">Verify Account ($1)</button>
+    </div>
 
-<div id="registerPage" class="auth-page">
-  <h2>Register</h2>
-  <input type="email" id="regEmail" placeholder="Email">
-  <input type="password" id="regPassword" placeholder="Password">
-  <button onclick="register()">Register</button>
-  <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
-</div>
+    <div id="marketTab" class="tab">
+      <h2>Live Market Chart (Candlestick)</h2>
+      <canvas id="liveChart" height="150"></canvas>
+      <button style="background: green;" onclick="buyCommodity()">Buy ($2)</button>
+      <button style="background: red;" onclick="sellCommodity()">Sell ($2.60)</button>
+    </div>
 
-<!-- Main App Sections -->
-<div id="market" class="section">
-  <h2>Market</h2>
-  <div class="commodity-bar" id="commodityTabs"></div>
-  <h3 id="currentCommodity">Gold</h3>
-  <div id="chart"></div>
-  <p>Current Price: $<span id="priceDisplay">2.00</span></p>
-  <button onclick="buyCommodity()">Buy</button>
-  <button onclick="sellCommodity()">Sell</button>
-</div>
+    <div id="historyTab" class="tab">
+      <h2>Transaction History</h2>
+      <ul id="historyList"></ul>
+    </div>
+  </div>
 
-<div id="wallet" class="section">
-  <h2>Wallet</h2>
-  <p>Balance: $<span id="userBalance"></span></p>
-  <button onclick="depositFunds()">Deposit ₦1000</button>
-  <button onclick="withdrawFunds()">Withdraw</button>
-</div>
-
-<div id="profile" class="section">
-  <h2>Profile</h2>
-  <p>Email: <span id="userEmail"></span></p>
-  <p>Status: <span id="verifyStatus"></span></p>
-  <p>Referrals: <span id="referralCount">0</span> / 8</p>
-  <p>Referral Code: <span id="userReferralCode"></span></p>
-  <p>Referral Link: <code id="refLink"></code></p>
-  <button onclick="verifyUser()">Verify ($1)</button>
-</div>
-
-<div id="leaderboard" class="section">
-  <h2>Top Referrers</h2>
-  <ul id="leaderList"></ul>
-</div>
-
-<!-- Tab Bar -->
-<div class="tab-bar">
-  <button onclick="showSection('market')">Market</button>
-  <button onclick="showSection('wallet')">Wallet</button>
-  <button onclick="showSection('profile')">Profile</button>
-  <button onclick="showSection('leaderboard')">Leaderboard</button>
-</div>
+  <nav>
+    <button onclick="switchTab('authTab')">Login</button>
+    <button onclick="switchTab('profileTab')">Profile</button>
+    <button onclick="switchTab('marketTab')">Market</button>
+    <button onclick="switchTab('historyTab')">History</button>
+  </nav>
 
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyC8kLmGOyODdlrvHId2Nz3opdpT0tvD5mk",
   authDomain: "elsa-ab176.firebaseapp.com",
   projectId: "elsa-ab176",
-  storageBucket: "elsa-ab176.appspot.com",
+  storageBucket: "elsa-ab176.firebasestorage.app",
   messagingSenderId: "850786583459",
   appId: "1:850786583459:android:5710287d8738f48e8e1016"
 };
@@ -96,163 +81,118 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const commodities = ["Gold", "Diamond", "SOL"];
-let currentCommodity = "Gold";
-let chart;
-let chartSeries;
-let userId = null;
-let refBy = new URLSearchParams(window.location.search).get('ref');
+const urlParams = new URLSearchParams(window.location.search);
+const ref = urlParams.get('ref');
+if (ref) localStorage.setItem("referredBy", ref);
 
-function showNotification(msg) {
-  const n = document.getElementById("notif");
-  n.innerText = msg;
-  n.style.display = "block";
-  setTimeout(() => n.style.display = "none", 3000);
-}
-
-function showSection(id) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-function showLogin() {
-  document.querySelectorAll('.auth-page').forEach(p => p.classList.remove('active'));
-  document.getElementById('loginPage').classList.add('active');
-}
-
-function showRegister() {
-  document.querySelectorAll('.auth-page').forEach(p => p.classList.remove('active'));
-  document.getElementById('registerPage').classList.add('active');
-}
-
-function register() {
+function registerUser() {
   const email = document.getElementById("regEmail").value;
   const password = document.getElementById("regPassword").value;
-  auth.createUserWithEmailAndPassword(email, password).then(cred => {
-    const data = {
-      balance: email === 'eluxxes@gmail.com' ? 10 : 0,
-      verified: false,
-      referralCode: cred.user.uid,
-      referrals: 0,
-      holdings: {}
-    };
-    if (refBy) {
-      data.referredBy = refBy;
-      db.collection("users").doc(refBy).update({ referrals: firebase.firestore.FieldValue.increment(1) });
-    }
-    return db.collection("users").doc(cred.user.uid).set(data);
-  });
-}
-
-function login() {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
-  auth.signInWithEmailAndPassword(email, password);
-}
-
-function renderCommodities() {
-  document.getElementById("commodityTabs").innerHTML = commodities.map(c => `<button onclick="switchCommodity('${c}')">${c}</button>`).join('');
-}
-
-function switchCommodity(name) {
-  currentCommodity = name;
-  document.getElementById("currentCommodity").innerText = name;
-  drawChart(name);
-}
-
-function drawChart(name) {
-  db.collection("chart").doc(name).onSnapshot(doc => {
-    const data = doc.data();
-    const history = data?.candles || [];
-    if (!chart) {
-      chart = LightweightCharts.createChart(document.getElementById("chart"), { layout: { backgroundColor: '#111', textColor: 'white' } });
-      chartSeries = chart.addCandlestickSeries();
-    }
-    chartSeries.setData(history);
-    const latest = history[history.length - 1]?.close || 2.00;
-    document.getElementById("priceDisplay").innerText = latest.toFixed(2);
-  });
-}
-
-function buyCommodity() {
-  db.collection("users").doc(userId).get().then(doc => {
-    const user = doc.data();
-    const price = parseFloat(document.getElementById("priceDisplay").innerText);
-    if (user.balance >= price) {
-      const updated = { balance: user.balance - price };
-      updated[`holdings.${currentCommodity}`] = (user.holdings?.[currentCommodity] || 0) + 1;
-      db.collection("users").doc(userId).update(updated);
-      showNotification("Bought 1 unit");
-    } else showNotification("Insufficient funds");
-  });
-}
-
-function sellCommodity() {
-  db.collection("users").doc(userId).get().then(doc => {
-    const user = doc.data();
-    const qty = user.holdings?.[currentCommodity] || 0;
-    const price = parseFloat(document.getElementById("priceDisplay").innerText);
-    if (!user.verified) return showNotification("Not verified");
-    if (qty > 0) {
-      const profit = price + 0.15;
-      const updated = {
-        balance: user.balance + profit,
-        [`holdings.${currentCommodity}`]: qty - 1
+  auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      const defaultWallet = email === 'eluxxes@gmail.com' ? 10 : 0;
+      const referralCode = 'ELX-' + Math.floor(Math.random() * 100000);
+      const referredBy = localStorage.getItem("referredBy") || "";
+      const userData = {
+        uid: user.uid,
+        email: user.email,
+        username: email.split('@')[0],
+        wallet: defaultWallet,
+        verified: false,
+        verificationPaid: false,
+        referrals: 0,
+        referralCode: referralCode,
+        referredBy: referredBy,
+        photoURL: '',
+        country: '',
+        registrationTime: firebase.firestore.FieldValue.serverTimestamp(),
+        transactions: []
       };
-      db.collection("users").doc(userId).update(updated);
-      showNotification("Sold 1 unit");
-    } else showNotification("You don't own this item");
-  });
+      db.collection('users').doc(user.uid).set(userData);
+      alert("Registered successfully!");
+    }).catch(e => alert(e.message));
 }
 
-function depositFunds() {
-  window.open("https://paystack.com/buy/lilzok-vjmgrv", "_blank");
+function loginUser() {
+  const email = document.getElementById("logEmail").value;
+  const password = document.getElementById("logPassword").value;
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => {
+      alert("Logged in!");
+      loadProfile();
+      switchTab('profileTab');
+      fetchChartData();
+    }).catch(e => alert(e.message));
 }
 
-function withdrawFunds() {
-  db.collection("users").doc(userId).get().then(doc => {
-    const user = doc.data();
-    if (user.balance >= 4) {
-      db.collection("users").doc(userId).update({ balance: user.balance - 4 });
-      showNotification("Withdraw submitted");
-    } else showNotification("Min $4 to withdraw");
+function loadProfile() {
+  const user = auth.currentUser;
+  if (!user) return;
+  db.collection('users').doc(user.uid).get().then(doc => {
+    const data = doc.data();
+    document.getElementById('profileEmail').innerText = "Email: " + data.email;
+    document.getElementById('profileUsername').innerText = "Username: " + data.username;
+    document.getElementById('profileWallet').innerText = "Wallet: $" + data.wallet;
+    document.getElementById('profileRefCode').innerText = "Referral Code: " + data.referralCode;
+    document.getElementById('profileVerified').innerText = data.verified ? "✅ Verified" : "❌ Not Verified";
   });
 }
 
 function verifyUser() {
-  db.collection("users").doc(userId).update({ verified: true });
-  showNotification("Verification activated");
+  const user = auth.currentUser;
+  const country = document.getElementById('userCountry').value;
+  const photo = document.getElementById('userPhoto').value;
+  if (!country || !photo) return alert("Fill country and photo link.");
+  alert("Redirecting to Paystack...");
+  db.collection('users').doc(user.uid).update({ verified: true, verificationPaid: true, country, photoURL: photo });
+  alert("You are now verified!");
+  loadProfile();
 }
 
-function loadLeaderboard() {
-  db.collection("users").orderBy("referrals", "desc").limit(10).onSnapshot(snapshot => {
-    const list = document.getElementById("leaderList");
-    list.innerHTML = "";
-    snapshot.forEach(doc => {
-      const u = doc.data();
-      list.innerHTML += `<li>${u.referralCode}: ${u.referrals} referrals</li>`;
+function buyCommodity() {
+  const user = auth.currentUser;
+  db.collection('users').doc(user.uid).update({
+    wallet: firebase.firestore.FieldValue.increment(-2),
+    transactions: firebase.firestore.FieldValue.arrayUnion({ type: 'buy', amount: 2, time: Date.now() })
+  });
+  alert("Bought commodity for $2");
+}
+
+function sellCommodity() {
+  const user = auth.currentUser;
+  db.collection('users').doc(user.uid).get().then(doc => {
+    if (!doc.data().verified) return alert("Only verified users can sell.");
+    db.collection('users').doc(user.uid).update({
+      wallet: firebase.firestore.FieldValue.increment(2.45),
+      transactions: firebase.firestore.FieldValue.arrayUnion({ type: 'sell', amount: 2.6, fee: 0.15, time: Date.now() })
     });
+    alert("Sold for $2.60 (0.15 fee deducted)");
   });
 }
 
-auth.onAuthStateChanged(user => {
-  if (user) {
-    userId = user.uid;
-    db.collection("users").doc(userId).onSnapshot(doc => {
-      const u = doc.data();
-      document.getElementById("userEmail").innerText = user.email;
-      document.getElementById("userBalance").innerText = u.balance.toFixed(2);
-      document.getElementById("verifyStatus").innerText = u.verified ? "Verified" : "Unverified";
-      document.getElementById("referralCount").innerText = u.referrals || 0;
-      document.getElementById("userReferralCode").innerText = u.referralCode;
-      document.getElementById("refLink").innerText = `${location.origin}?ref=${u.referralCode}`;
+// Live Chart Loader
+function fetchChartData() {
+  const ctx = document.getElementById('liveChart').getContext('2d');
+  db.collection("chartData").orderBy("timestamp", "desc").limit(20).onSnapshot(snapshot => {
+    const candles = snapshot.docs.map(doc => doc.data()).reverse();
+    new Chart(ctx, {
+      type: 'candlestick',
+      data: {
+        datasets: [{
+          label: 'Live Commodity Price',
+          data: candles.map(d => ({ x: new Date(d.timestamp), o: d.open, h: d.high, l: d.low, c: d.close }))
+        }]
+      },
+      options: { responsive: true }
     });
-    showSection('market');
-    renderCommodities();
-    drawChart(currentCommodity);
-    loadLeaderboard();
-  }
-});
+  });
+}
 </script>
 </body>
 </html>
