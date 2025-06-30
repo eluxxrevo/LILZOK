@@ -1,78 +1,90 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Elsa App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elsa App - Commodities</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #000000, #4b3621);
-      color: gold;
-    }
+    body { margin: 0; font-family: sans-serif; background: #111; color: white; }
     .section, .auth-page { display: none; padding: 20px; }
     .active { display: block; }
-    .tab-bar {
-      display: none;
-      justify-content: space-around;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #111;
-      padding: 10px;
+    .tab-bar, .commodity-bar {
+      display: flex; justify-content: space-around; padding: 10px; background: #222;
     }
-    .tab-bar button {
-      flex: 1;
-      padding: 10px;
-      background: transparent;
-      border: none;
-      color: gold;
-      font-size: 14px;
-    }
-    button {
-      background: gold;
-      color: black;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      margin-top: 10px;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 5px;
-    }
-    #notif {
-      background: #222;
-      padding: 10px;
-      border-radius: 5px;
-      margin: 10px;
-      text-align: center;
-      display: none;
-    }
+    button { background: #0f0; color: black; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+    input, label { display: block; margin-top: 10px; width: 100%; padding: 8px; border-radius: 4px; }
+    .notif { background: #333; padding: 10px; border-radius: 5px; margin: 10px 0; text-align: center; }
+    #chart { height: 300px; }
   </style>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      setDoc,
-      getDoc,
-      updateDoc,
-      onSnapshot,
-      collection,
-      query,
-      orderBy,
-      getDocs
-    } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";const firebaseConfig = {
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+
+<div class="notif" id="notif"></div>
+
+<!-- Auth Pages -->
+<div id="loginPage" class="auth-page active">
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email">
+  <input type="password" id="loginPassword" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <p>Don't have an account? <a href="#" onclick="showRegister()">Register</a></p>
+</div>
+
+<div id="registerPage" class="auth-page">
+  <h2>Register</h2>
+  <input type="email" id="regEmail" placeholder="Email">
+  <input type="password" id="regPassword" placeholder="Password">
+  <button onclick="register()">Register</button>
+  <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
+</div>
+
+<!-- Main App Sections -->
+<div id="market" class="section">
+  <h2>Market</h2>
+  <div class="commodity-bar" id="commodityTabs"></div>
+  <h3 id="currentCommodity">Gold</h3>
+  <div id="chart"></div>
+  <p>Current Price: $<span id="priceDisplay">2.00</span></p>
+  <button onclick="buyCommodity()">Buy</button>
+  <button onclick="sellCommodity()">Sell</button>
+</div>
+
+<div id="wallet" class="section">
+  <h2>Wallet</h2>
+  <p>Balance: $<span id="userBalance"></span></p>
+  <button onclick="depositFunds()">Deposit ₦1000</button>
+  <button onclick="withdrawFunds()">Withdraw</button>
+</div>
+
+<div id="profile" class="section">
+  <h2>Profile</h2>
+  <p>Email: <span id="userEmail"></span></p>
+  <p>Status: <span id="verifyStatus"></span></p>
+  <p>Referrals: <span id="referralCount">0</span> / 8</p>
+  <p>Referral Code: <span id="userReferralCode"></span></p>
+  <p>Referral Link: <code id="refLink"></code></p>
+  <button onclick="verifyUser()">Verify ($1)</button>
+</div>
+
+<div id="leaderboard" class="section">
+  <h2>Top Referrers</h2>
+  <ul id="leaderList"></ul>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <button onclick="showSection('market')">Market</button>
+  <button onclick="showSection('wallet')">Wallet</button>
+  <button onclick="showSection('profile')">Profile</button>
+  <button onclick="showSection('leaderboard')">Leaderboard</button>
+</div>
+
+<script>
+const firebaseConfig = {
   apiKey: "AIzaSyC8kLmGOyODdlrvHId2Nz3opdpT0tvD5mk",
   authDomain: "elsa-ab176.firebaseapp.com",
   projectId: "elsa-ab176",
@@ -80,18 +92,22 @@
   messagingSenderId: "850786583459",
   appId: "1:850786583459:android:5710287d8738f48e8e1016"
 };
-const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getFirestore();
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
+const commodities = ["Gold", "Diamond", "SOL"];
+let currentCommodity = "Gold";
+let chart;
+let chartSeries;
 let userId = null;
-let refBy = new URLSearchParams(location.search).get("ref");
+let refBy = new URLSearchParams(window.location.search).get('ref');
 
 function showNotification(msg) {
   const n = document.getElementById("notif");
   n.innerText = msg;
   n.style.display = "block";
-  setTimeout(() => (n.style.display = "none"), 3000);
+  setTimeout(() => n.style.display = "none", 3000);
 }
 
 function showSection(id) {
@@ -100,95 +116,143 @@ function showSection(id) {
 }
 
 function showLogin() {
+  document.querySelectorAll('.auth-page').forEach(p => p.classList.remove('active'));
   document.getElementById('loginPage').classList.add('active');
-  document.getElementById('registerPage').classList.remove('active');
 }
 
 function showRegister() {
+  document.querySelectorAll('.auth-page').forEach(p => p.classList.remove('active'));
   document.getElementById('registerPage').classList.add('active');
-  document.getElementById('loginPage').classList.remove('active');
 }
 
-window.login = function () {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
-  signInWithEmailAndPassword(auth, email, password)
-    .then(userCred => initApp(userCred.user))
-    .catch(err => showNotification("Login failed: " + err.message));
-};
-
-window.register = function () {
+function register() {
   const email = document.getElementById("regEmail").value;
   const password = document.getElementById("regPassword").value;
-  createUserWithEmailAndPassword(auth, email, password).then(res => {
-    const refCode = res.user.uid.slice(0, 6);
-    setDoc(doc(db, "users", res.user.uid), {
-      email,
-      balance: email === "eluxxes@gmail.com" ? 10 : 0,
+  auth.createUserWithEmailAndPassword(email, password).then(cred => {
+    const data = {
+      balance: email === 'eluxxes@gmail.com' ? 10 : 0,
       verified: false,
+      referralCode: cred.user.uid,
       referrals: 0,
-      refcode: refCode,
-      referredBy: refBy || null
-    });
-    initApp(res.user);
-  }).catch(err => showNotification("Register failed: " + err.message));
-};
-
-function initApp(user) {
-  userId = user.uid;
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("registerPage").style.display = "none";
-  document.querySelector(".tab-bar").style.display = "flex";
-  showSection('market');
-
-  const uDoc = doc(db, "users", userId);
-  onSnapshot(uDoc, docSnap => {
-    const d = docSnap.data();
-    document.getElementById("userBalance").innerText = d.balance.toFixed(2);
-    document.getElementById("userEmail").innerText = d.email;
-    document.getElementById("verifyStatus").innerText = d.verified ? "Verified ✅" : "Not Verified ❌";
+      holdings: {}
+    };
+    if (refBy) {
+      data.referredBy = refBy;
+      db.collection("users").doc(refBy).update({ referrals: firebase.firestore.FieldValue.increment(1) });
+    }
+    return db.collection("users").doc(cred.user.uid).set(data);
   });
 }
 
-onAuthStateChanged(auth, user => { if (user) initApp(user); });
+function login() {
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+  auth.signInWithEmailAndPassword(email, password);
+}
 
-  </script>
-</head>
-<body>
-<div id="notif"></div>
-<div id="loginPage" class="auth-page active">
-  <h2>Login</h2>
-  <input id="loginEmail" placeholder="Email">
-  <input id="loginPassword" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-  <p>Don't have an account? <a href="#" onclick="showRegister()">Register</a></p>
-</div>
-<div id="registerPage" class="auth-page">
-  <h2>Register</h2>
-  <input id="regEmail" placeholder="Email">
-  <input id="regPassword" type="password" placeholder="Password">
-  <button onclick="register()">Register</button>
-  <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
-</div>
-<div id="market" class="section">
-  <h2>Market</h2>
-  <p>Price: $<span id="priceDisplay">2.00</span></p>
-  <button onclick="buyCommodity()">Buy</button>
-  <button onclick="sellCommodity()">Sell</button>
-</div>
-<div id="wallet" class="section">
-  <h2>Wallet</h2>
-  <p>Balance: $<span id="userBalance"></span></p>
-</div>
-<div id="profile" class="section">
-  <h2>Profile</h2>
-  <p>Email: <span id="userEmail"></span></p>
-  <p>Status: <span id="verifyStatus"></span></p>
-</div>
-<div class="tab-bar">
-  <button onclick="showSection('market')">Market</button>
-  <button onclick="showSection('wallet')">Wallet</button>
-  <button onclick="showSection('profile')">Profile</button>
-</div>
+function renderCommodities() {
+  document.getElementById("commodityTabs").innerHTML = commodities.map(c => `<button onclick="switchCommodity('${c}')">${c}</button>`).join('');
+}
+
+function switchCommodity(name) {
+  currentCommodity = name;
+  document.getElementById("currentCommodity").innerText = name;
+  drawChart(name);
+}
+
+function drawChart(name) {
+  db.collection("chart").doc(name).onSnapshot(doc => {
+    const data = doc.data();
+    const history = data?.candles || [];
+    if (!chart) {
+      chart = LightweightCharts.createChart(document.getElementById("chart"), { layout: { backgroundColor: '#111', textColor: 'white' } });
+      chartSeries = chart.addCandlestickSeries();
+    }
+    chartSeries.setData(history);
+    const latest = history[history.length - 1]?.close || 2.00;
+    document.getElementById("priceDisplay").innerText = latest.toFixed(2);
+  });
+}
+
+function buyCommodity() {
+  db.collection("users").doc(userId).get().then(doc => {
+    const user = doc.data();
+    const price = parseFloat(document.getElementById("priceDisplay").innerText);
+    if (user.balance >= price) {
+      const updated = { balance: user.balance - price };
+      updated[`holdings.${currentCommodity}`] = (user.holdings?.[currentCommodity] || 0) + 1;
+      db.collection("users").doc(userId).update(updated);
+      showNotification("Bought 1 unit");
+    } else showNotification("Insufficient funds");
+  });
+}
+
+function sellCommodity() {
+  db.collection("users").doc(userId).get().then(doc => {
+    const user = doc.data();
+    const qty = user.holdings?.[currentCommodity] || 0;
+    const price = parseFloat(document.getElementById("priceDisplay").innerText);
+    if (!user.verified) return showNotification("Not verified");
+    if (qty > 0) {
+      const profit = price + 0.15;
+      const updated = {
+        balance: user.balance + profit,
+        [`holdings.${currentCommodity}`]: qty - 1
+      };
+      db.collection("users").doc(userId).update(updated);
+      showNotification("Sold 1 unit");
+    } else showNotification("You don't own this item");
+  });
+}
+
+function depositFunds() {
+  window.open("https://paystack.com/buy/lilzok-vjmgrv", "_blank");
+}
+
+function withdrawFunds() {
+  db.collection("users").doc(userId).get().then(doc => {
+    const user = doc.data();
+    if (user.balance >= 4) {
+      db.collection("users").doc(userId).update({ balance: user.balance - 4 });
+      showNotification("Withdraw submitted");
+    } else showNotification("Min $4 to withdraw");
+  });
+}
+
+function verifyUser() {
+  db.collection("users").doc(userId).update({ verified: true });
+  showNotification("Verification activated");
+}
+
+function loadLeaderboard() {
+  db.collection("users").orderBy("referrals", "desc").limit(10).onSnapshot(snapshot => {
+    const list = document.getElementById("leaderList");
+    list.innerHTML = "";
+    snapshot.forEach(doc => {
+      const u = doc.data();
+      list.innerHTML += `<li>${u.referralCode}: ${u.referrals} referrals</li>`;
+    });
+  });
+}
+
+auth.onAuthStateChanged(user => {
+  if (user) {
+    userId = user.uid;
+    db.collection("users").doc(userId).onSnapshot(doc => {
+      const u = doc.data();
+      document.getElementById("userEmail").innerText = user.email;
+      document.getElementById("userBalance").innerText = u.balance.toFixed(2);
+      document.getElementById("verifyStatus").innerText = u.verified ? "Verified" : "Unverified";
+      document.getElementById("referralCount").innerText = u.referrals || 0;
+      document.getElementById("userReferralCode").innerText = u.referralCode;
+      document.getElementById("refLink").innerText = `${location.origin}?ref=${u.referralCode}`;
+    });
+    showSection('market');
+    renderCommodities();
+    drawChart(currentCommodity);
+    loadLeaderboard();
+  }
+});
+</script>
 </body>
-</html
+</html>
