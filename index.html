@@ -1,77 +1,108 @@
 <!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Elsa App</title>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
       font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #000, #111);
+    }
+    body {
+      background: #000;
       color: gold;
-      margin: 0; padding: 0;
     }
-    header { text-align: center; padding: 1rem; font-size: 1.5rem; border-bottom: 1px solid gold; }
-    .tabbar {
-      position: fixed; bottom: 0; width: 100%; display: flex; background: black;
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      background: #111;
+      border-top: 1px solid gold;
     }
-    .tabbar div {
-      flex: 1; text-align: center; padding: 1rem; border-top: 1px solid gold; cursor: pointer;
+    .tab-bar button {
+      flex: 1;
+      padding: 1rem;
+      background: none;
+      border: none;
+      color: gold;
+      font-weight: bold;
+      cursor: pointer;
     }
-    .section { display: none; padding-bottom: 6rem; }
-    .active { display: block; }
-    button, input {
-      padding: 10px; margin: 5px; font-size: 1rem;
+    .page {
+      display: none;
+      padding: 1rem;
+      min-height: 90vh;
     }
-    canvas { background: #222; border: 1px solid gold; margin-top: 1rem; }
+    .active {
+      display: block;
+    }
+    header {
+      padding: 1rem;
+      text-align: center;
+      background: #111;
+      border-bottom: 1px solid gold;
+      font-size: 1.5rem;
+    }
+    input, button {
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      width: 100%;
+    }
+    canvas {
+      margin-top: 1rem;
+      background: #222;
+    }
   </style>
 </head>
 <body>
-  <header>Elsa Market</header>
-  <div id="loginSection" class="section active">
+  <header>Elsa Market</header>  <!-- Login Page -->  <div id="loginPage" class="page active">
     <h2>Login or Register</h2>
-    <input id="email" placeholder="Email"><br>
-    <input id="password" type="password" placeholder="Password"><br>
+    <input id="email" type="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Password">
     <button onclick="register()">Register</button>
     <button onclick="login()">Login</button>
-  </div>
-  <div id="mainSection" class="section">
+  </div>  <!-- Home Page -->  <div id="homePage" class="page">
     <h2>Welcome <span id="userEmail"></span></h2>
-    <p>Balance: $<span id="balance">0.00</span></p>
-    <div id="market" class="subsection">
-      <h3>Market (Buy @ $2)</h3>
+    <p>Your balance: $<span id="balance">0.00</span></p>
+    <p>Referral Code: <span id="refCode"></span></p>
+    <canvas id="priceChart" height="150"></canvas>
+  </div>  <!-- Market Page -->  <div id="marketPage" class="page">
+    <h2>Market</h2>
+    <div>
+      <p>Buy for $2 each:</p>
       <button onclick="buy('Gold')">Buy Gold</button>
       <button onclick="buy('Diamond')">Buy Diamond</button>
       <button onclick="buy('SOL')">Buy SOL</button>
-      <h4>Sell for $2.60 (Verified only)</h4>
+    </div>
+    <div>
+      <p>Sell for $2.60 (Verified Only):</p>
       <button onclick="sell('Gold')">Sell Gold</button>
       <button onclick="sell('Diamond')">Sell Diamond</button>
       <button onclick="sell('SOL')">Sell SOL</button>
-      <canvas id="chart" width="300" height="150"></canvas>
     </div>
-    <div id="referral" class="subsection">
-      <h3>Your Referral Code:</h3>
-      <p id="refCode"></p>
-    </div>
-    <div id="earn" class="subsection">
-      <h3>Upload ID to Verify</h3>
-      <input id="idUrl" placeholder="Paste ID Image URL"><br>
-      <button onclick="uploadID()">Submit</button>
-      <p id="verifyStatus"></p>
-    </div>
-    <div id="wallet" class="subsection">
-      <h3>Wallet</h3>
-      <button onclick="deposit()">Deposit</button>
-      <button onclick="withdraw()">Withdraw</button>
-    </div>
-    <div class="tabbar">
-      <div onclick="showTab('market')">Market</div>
-      <div onclick="showTab('referral')">Referral</div>
-      <div onclick="showTab('earn')">Earn</div>
-      <div onclick="showTab('wallet')">Wallet</div>
-    </div>
+  </div>  <!-- Wallet Page -->  <div id="walletPage" class="page">
+    <h2>Wallet</h2>
+    <p>Current Balance: $<span id="walletBalance">0.00</span></p>
+    <button onclick="deposit()">Deposit ₦1000</button>
+    <button onclick="withdraw()">Withdraw ($4 minimum)</button>
+  </div>  <!-- Earn Page -->  <div id="earnPage" class="page">
+    <h2>Verify to Sell</h2>
+    <input id="idUrl" placeholder="Paste ID Image URL">
+    <button onclick="uploadID()">Submit</button>
+    <p id="verifyStatus"></p>
+  </div>  <!-- Bottom Navigation -->  <div class="tab-bar">
+    <button onclick="showPage('homePage')">🏠 Home</button>
+    <button onclick="showPage('marketPage')">🛒 Market</button>
+    <button onclick="showPage('walletPage')">💼 Wallet</button>
+    <button onclick="showPage('earnPage')">🎯 Earn</button>
   </div>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyC8kLmGOyODdlrvHId2Nz3opdpT0tvD5mk",
@@ -86,7 +117,13 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    let currentUser, chartInstance;
+    let currentUser = null;
+    let chart;
+
+    function showPage(id) {
+      document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
 
     function register() {
       const email = document.getElementById("email").value;
@@ -94,17 +131,14 @@
       auth.createUserWithEmailAndPassword(email, pass).then(cred => {
         const defaultBalance = email === "eluxxes@gmail.com" ? 10 : 0;
         return db.collection("users").doc(cred.user.uid).set({
-          email: email,
+          email,
           balance: defaultBalance,
-          verified: false,
-          referrals: 0,
           earnings: 0,
+          verified: false,
           id_uploaded: false,
           uid: cred.user.uid
         });
-      }).then(() => {
-        alert("Registered and logged in");
-      });
+      }).then(() => login());
     }
 
     function login() {
@@ -112,7 +146,10 @@
       const pass = document.getElementById("password").value;
       auth.signInWithEmailAndPassword(email, pass).then(cred => {
         currentUser = cred.user;
+        document.getElementById("loginPage").classList.remove("active");
+        showPage("homePage");
         loadUser();
+        loadChart();
       });
     }
 
@@ -121,90 +158,146 @@
         const data = doc.data();
         document.getElementById("userEmail").innerText = data.email;
         document.getElementById("balance").innerText = data.balance.toFixed(2);
+        document.getElementById("walletBalance").innerText = data.balance.toFixed(2);
         document.getElementById("refCode").innerText = currentUser.uid;
         document.getElementById("verifyStatus").innerText = data.verified ? "✔ Verified" : "Not Verified";
-        document.getElementById("loginSection").classList.remove("active");
-        document.getElementById("mainSection").classList.add("active");
       });
+    }
 
-      db.collection("settings").doc("prices").onSnapshot(doc => {
-        const data = doc.data();
-        if (chartInstance) chartInstance.destroy();
-        chartInstance = new Chart(document.getElementById("chart"), {
-          type: 'bar',
-          data: {
-            labels: Object.keys(data),
-            datasets: [{
-              label: 'Prices',
-              data: Object.values(data),
-              backgroundColor: ["gold", "deepskyblue", "limegreen"]
-            }]
-          },
-          options: {
-            responsive: true,
-            plugins: { legend: { display: false }, title: { display: true, text: 'Live Market Prices' } }
+    function loadChart() {
+      const ctx = document.getElementById("priceChart").getContext("2d");
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Commodity Prices',
+            data: [],
+            borderColor: 'gold',
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true }
           }
+        }
+      });
+
+      setInterval(() => {
+        db.collection("settings").doc("prices").get().then(doc => {
+          const prices = doc.data();
+          const now = new Date().toLocaleTimeString();
+          chart.data.labels.push(now);
+          chart.data.datasets[0].data.push(Object.values(prices).reduce((a,b)=>a+b,0));
+          if(chart.data.labels.length > 10){
+            chart.data.labels.shift();
+            chart.data.datasets[0].data.shift();
+          }
+          chart.update();
         });
-      });
-    }
-
-    function buy(item) {
-      const uid = currentUser.uid;
-      db.runTransaction(async t => {
-        const ref = db.collection("users").doc(uid);
-        const doc = await t.get(ref);
-        let data = doc.data();
-        if (data.balance >= 2) {
-          t.update(ref, { balance: data.balance - 2 });
-          alert(item + " purchased!");
-        } else {
-          alert("Insufficient balance");
-        }
-      });
-    }
-
-    function sell(item) {
-      const uid = currentUser.uid;
-      db.collection("users").doc(uid).get().then(doc => {
-        const data = doc.data();
-        if (!data.verified) return alert("You must be verified to resell.");
-        const newBal = data.balance + 2.45;
-        db.collection("users").doc(uid).update({ balance: newBal, earnings: data.earnings + 2.45 });
-        alert("You sold " + item);
-      });
-    }
-
-    function uploadID() {
-      const idUrl = document.getElementById("idUrl").value;
-      if (!idUrl) return alert("Please paste a valid ID image link");
-      db.collection("users").doc(currentUser.uid).update({
-        id_uploaded: true,
-        id_url: idUrl,
-        verified: true
-      });
-      alert("ID submitted. You're now verified!");
-    }
-
-    function deposit() {
-      window.open("https://paystack.com/buy/lilzok-vjmgrv", "_blank");
-    }
-
-    function withdraw() {
-      const uid = currentUser.uid;
-      db.collection("users").doc(uid).get().then(doc => {
-        const data = doc.data();
-        if (data.balance >= 4) {
-          db.collection("users").doc(uid).update({ balance: data.balance - 4 });
-          alert("Withdraw successful");
-        } else {
-          alert("Minimum withdraw is $4");
-        }
-      });
-    }
-
-    function showTab(id) {
-      document.querySelectorAll('.subsection').forEach(s => s.style.display = 'none');
-      document.getElementById(id).style.display = 'block';
+      }, 30000); // every 30 seconds
     }
   </script></body>
 </html>
+<!-- ... previous HTML ... --><!-- Leaderboard Page --><div id="leaderboardPage" class="page">
+  <h2>🏆 Leaderboard</h2>
+  <div>
+    <h3>Top Earners</h3>
+    <ul id="topEarners"></ul>
+  </div>
+  <div>
+    <h3>Top Referrals</h3>
+    <ul id="topReferrals"></ul>
+  </div>
+</div><!-- Add leaderboard to tab bar --><div class="tab-bar">
+  <button onclick="showPage('homePage')">🏠 Home</button>
+  <button onclick="showPage('marketPage')">🛒 Market</button>
+  <button onclick="showPage('walletPage')">💼 Wallet</button>
+  <button onclick="showPage('earnPage')">🎯 Earn</button>
+  <button onclick="showPage('leaderboardPage')">🏆 Leaderboard</button>
+</div><script>
+// ... existing JS functions ...
+
+function loadLeaderboard() {
+  db.collection("users").orderBy("earnings", "desc").limit(5).get().then(snapshot => {
+    const topE = document.getElementById("topEarners");
+    topE.innerHTML = "";
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      const li = document.createElement("li");
+      li.innerText = `${d.email}: $${(d.earnings || 0).toFixed(2)}`;
+      topE.appendChild(li);
+    });
+  });
+
+  db.collection("users").orderBy("referrals", "desc").limit(5).get().then(snapshot => {
+    const topR = document.getElementById("topReferrals");
+    topR.innerHTML = "";
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      const li = document.createElement("li");
+      li.innerText = `${d.email}: ${d.referrals || 0} referrals`;
+      topR.appendChild(li);
+    });
+  });
+}
+
+// Call when leaderboard tab is shown
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if (id === 'leaderboardPage') loadLeaderboard();
+}
+</script>
+<!-- ... previous HTML ... --><!-- Leaderboard Page --><div id="leaderboardPage" class="page">
+  <h2>🏆 Leaderboard</h2>
+  <div>
+    <h3>Top Earners</h3>
+    <ul id="topEarners"></ul>
+  </div>
+  <div>
+    <h3>Top Referrals</h3>
+    <ul id="topReferrals"></ul>
+  </div>
+</div><!-- Add leaderboard to tab bar --><div class="tab-bar">
+  <button onclick="showPage('homePage')">🏠 Home</button>
+  <button onclick="showPage('marketPage')">🛒 Market</button>
+  <button onclick="showPage('walletPage')">💼 Wallet</button>
+  <button onclick="showPage('earnPage')">🎯 Earn</button>
+  <button onclick="showPage('leaderboardPage')">🏆 Leaderboard</button>
+</div><script>
+// ... existing JS functions ...
+
+function loadLeaderboard() {
+  db.collection("users").orderBy("earnings", "desc").limit(5).get().then(snapshot => {
+    const topE = document.getElementById("topEarners");
+    topE.innerHTML = "";
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      const li = document.createElement("li");
+      li.innerText = `${d.email}: $${(d.earnings || 0).toFixed(2)}`;
+      topE.appendChild(li);
+    });
+  });
+
+  db.collection("users").orderBy("referrals", "desc").limit(5).get().then(snapshot => {
+    const topR = document.getElementById("topReferrals");
+    topR.innerHTML = "";
+    snapshot.forEach(doc => {
+      const d = doc.data();
+      const li = document.createElement("li");
+      li.innerText = `${d.email}: ${d.referrals || 0} referrals`;
+      topR.appendChild(li);
+    });
+  });
+}
+
+// Call when leaderboard tab is shown
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if (id === 'leaderboardPage') loadLeaderboard();
+}
+</script>
