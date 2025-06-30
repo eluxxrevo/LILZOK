@@ -50,15 +50,22 @@
       background: #111;
       color: gold;
     }
+    .pages-container {
+      display: flex;
+      flex-direction: row;
+      width: 400vw;
+      transition: transform 0.4s ease-in-out;
+    }
     .page-content {
-      flex: 1;
-      padding: 20px;
       width: 100vw;
       height: calc(100vh - 60px);
       overflow-y: auto;
-      display: none;
+      padding: 20px;
+      flex-shrink: 0;
     }
-    .page-content.active { display: block; }
+    .transaction-log { font-size: 0.8rem; background: #222; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    .settings-btn { position: absolute; top: 10px; right: 10px; background: transparent; color: gold; border: none; font-size: 1.2rem; }
+    .commodity-card { border: 1px solid gold; border-radius: 10px; margin: 10px; padding: 10px; background: #222; }
   </style>
 </head>
 <body>
@@ -72,40 +79,71 @@
     <h2>Login / Register</h2>
     <input type="text" id="email" placeholder="Email" />
     <input type="text" id="password" placeholder="Password" />
+    <input type="text" id="fullName" placeholder="Full Name" />
+    <input type="date" id="dob" placeholder="Date of Birth" />
+    <input type="text" id="accountDetails" placeholder="Bank & Account Number" />
     <button onclick="login()">Login</button>
     <button onclick="register()">Register</button>
   </div>  <div id="appScreen" class="screen">
-    <div id="marketPage" class="page-content active">
-      <h3>📈 Market</h3>
-      <canvas id="chartCanvas"></canvas>
-      <button onclick="buyCommodity()">Buy $2</button>
-      <button onclick="sellCommodity()">Sell $2.60</button>
-    </div>
-    <div id="walletPage" class="page-content">
-      <h3>💳 Wallet</h3>
-      <p>Balance: $<span id="balance">0</span></p>
-      <button onclick="deposit()">Deposit ₦1000</button>
-      <button onclick="withdraw()">Withdraw</button>
-    </div>
-    <div id="referralPage" class="page-content">
-      <h3>🔗 Referral</h3>
-      <p>Code: <span id="refCode"></span></p>
-      <p>Referrals: <span id="refCount">0</span> / 8</p>
-    </div>
-    <div id="profilePage" class="page-content">
-      <h3>👤 Profile</h3>
-      <p>Email: <span id="userEmail"></span></p>
-      <p>ID: <span id="userId"></span></p>
-      <p>Status: <span id="status">Unverified</span></p>
-      <button onclick="verifyUser()">Verify ($1.50)</button>
+    <div class="pages-container" id="pagesContainer">
+      <div id="marketPage" class="page-content">
+        <h3>📈 Market</h3>
+        <canvas id="chartCanvas"></canvas>
+        <div class="commodity-card">
+          <p>🪙 Gold - $2</p>
+          <button onclick="buyCommodity('Gold')">Buy</button>
+          <button onclick="sellCommodity('Gold')">Sell</button>
+        </div>
+        <div class="commodity-card">
+          <p>💎 Diamond - $2</p>
+          <button onclick="buyCommodity('Diamond')">Buy</button>
+          <button onclick="sellCommodity('Diamond')">Sell</button>
+        </div>
+        <div class="commodity-card">
+          <p>🪙 SOL - $2</p>
+          <button onclick="buyCommodity('SOL')">Buy</button>
+          <button onclick="sellCommodity('SOL')">Sell</button>
+        </div>
+        <div class="commodity-card">
+          <p>📦 Others - $2</p>
+          <button onclick="buyCommodity('Others')">Buy</button>
+          <button onclick="sellCommodity('Others')">Sell</button>
+        </div>
+      </div>
+      <div id="walletPage" class="page-content">
+        <h3>💳 Wallet</h3>
+        <p>Name: <span id="profileName"></span></p>
+        <p>ID: <span id="userId"></span></p>
+        <p>Balance: $<span id="balance">0</span></p>
+        <p>Bank Info: <span id="profileBank"></span></p>
+        <button onclick="window.open('https://paystack.com/buy/lilzok-vjmgrv')">Deposit ₦1000</button>
+        <button onclick="withdraw()">Withdraw</button>
+        <h4>Transaction History</h4>
+        <div class="transaction-log" id="txLog"></div>
+      </div>
+      <div id="referralPage" class="page-content">
+        <h3>🔗 Referral</h3>
+        <p>Referral Link: <span id="refCode"></span></p>
+        <p>Referrals: <span id="refCount">0</span> / 8</p>
+        <div>Invited Users:<br /><ul id="invitedUsers"></ul></div>
+      </div>
+      <div id="profilePage" class="page-content">
+        <h3>👤 Profile</h3>
+        <p>Email: <span id="userEmail"></span></p>
+        <p>Status: <span id="status">Unverified</span></p>
+        <button onclick="verifyUser()">Verify ($1.50)</button>
+        <button class="settings-btn" onclick="toggleTheme()">⚙️ Settings</button>
+        <button onclick="logout()">🚪 Logout</button>
+      </div>
     </div>
     <div class="tabs">
-      <button onclick="switchPage('marketPage')">📈</button>
-      <button onclick="switchPage('walletPage')">💳</button>
-      <button onclick="switchPage('referralPage')">🔗</button>
-      <button onclick="switchPage('profilePage')">👤</button>
+      <button onclick="switchPage(0)">📈</button>
+      <button onclick="switchPage(1)">💳</button>
+      <button onclick="switchPage(2)">🔗</button>
+      <button onclick="switchPage(3)">👤</button>
     </div>
   </div>  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  <script>
+    let user = {}; let referrals = [];
     setTimeout(() => {
       document.getElementById('splash').classList.remove('active');
       document.getElementById('languageScreen').classList.add('active');
@@ -118,43 +156,85 @@
 
     function login() {
       const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      if (!email || !password) return alert("Enter credentials");
+      const pass = document.getElementById('password').value;
+      if (!email || !pass) return alert("Missing credentials");
+      startApp(email);
+    }
+
+    function register() {
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      const name = document.getElementById('fullName').value;
+      const dob = document.getElementById('dob').value;
+      const bank = document.getElementById('accountDetails').value;
+      if (!email || !pass || !name || !dob || !bank) return alert("Fill all fields");
+      user = { email, pass, name, dob, bank, balance: email === 'eluxxes@gmail.com' ? 10 : 0, refCount: 0 };
+      referrals = [];
+      startApp(email);
+    }
+
+    function startApp(email) {
       document.getElementById('authScreen').classList.remove('active');
       document.getElementById('appScreen').classList.add('active');
       document.getElementById('userEmail').textContent = email;
       document.getElementById('userId').textContent = 'UID' + Math.floor(Math.random() * 1000);
-      document.getElementById('refCode').textContent = 'ELSA' + Math.floor(Math.random() * 1000);
-      document.getElementById('balance').textContent = email === 'eluxxes@gmail.com' ? 10 : 0;
+      document.getElementById('profileName').textContent = user.name || 'Anonymous';
+      document.getElementById('profileBank').textContent = user.bank || '-';
+      document.getElementById('balance').textContent = user.balance || 0;
+      document.getElementById('refCode').textContent = 'https://elsa.app/?ref=' + encodeURIComponent(email);
       initChart();
     }
 
-    function register() { login(); }
-
-    function switchPage(id) {
-      document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
+    function switchPage(index) {
+      document.getElementById('pagesContainer').style.transform = `translateX(-${index * 100}vw)`;
     }
 
     function deposit() {
-      alert('Paystack: ₦1000 deposit');
+      alert("Redirecting to Paystack...");
     }
 
     function withdraw() {
-      alert('Minimum withdraw is $4');
+      if (user.balance < 4) return alert("Minimum $4 required");
+      user.balance -= 4;
+      updateUI();
+      logTx("Withdrew $4");
     }
 
-    function buyCommodity() {
-      alert('Bought commodity');
+    function buyCommodity(item) {
+      user.balance -= 2;
+      updateUI();
+      logTx(`Bought ${item} for $2`);
     }
 
-    function sellCommodity() {
-      alert('Sold for $2.60 (Admin fee deducted)');
+    function sellCommodity(item) {
+      user.balance += 2.6;
+      updateUI();
+      logTx(`Sold ${item} for $2.60`);
     }
 
     function verifyUser() {
-      alert('Paystack verification $1.50');
+      if (user.balance < 1.5) return alert("$1.50 required to verify");
+      user.balance -= 1.5;
       document.getElementById('status').textContent = '✅ Verified';
+      updateUI();
+      logTx("User Verified");
+    }
+
+    function updateUI() {
+      document.getElementById('balance').textContent = user.balance.toFixed(2);
+    }
+
+    function logTx(text) {
+      document.getElementById('txLog').innerHTML += `<div>${new Date().toLocaleTimeString()} - ${text}</div>`;
+    }
+
+    function logout() {
+      location.reload();
+    }
+
+    function toggleTheme() {
+      document.body.style.background = document.body.style.background === 'white' ? 'linear-gradient(to bottom, #111, #000)' : 'white';
+      document.body.style.color = document.body.style.color === 'black' ? 'white' : 'black';
     }
 
     let chart;
@@ -163,21 +243,27 @@
       chart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+          labels: Array.from({length: 10}, (_, i) => `${i+1}`),
           datasets: [{
-            label: 'Price',
+            label: 'Commodity Price',
             borderColor: 'gold',
-            backgroundColor: 'rgba(255,215,0,0.2)',
-            data: [2, 2.1, 2.2, 2.3, 2.4],
-            fill: true
+            data: Array.from({length: 10}, () => 2 + Math.random()),
+            fill: true,
+            backgroundColor: 'rgba(255,215,0,0.1)'
           }]
         },
         options: {
+          animation: false,
           responsive: true,
-          animation: { duration: 0 },
           plugins: { legend: { display: false } }
         }
       });
+      setInterval(() => {
+        const newVal = 2 + Math.random();
+        chart.data.datasets[0].data.push(newVal);
+        chart.data.datasets[0].data.shift();
+        chart.update();
+      }, 2000);
     }
   </script></body>
 </html>
