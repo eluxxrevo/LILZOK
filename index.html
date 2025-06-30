@@ -123,7 +123,13 @@
       document.getElementById(id).classList.add('active');
     };
 
-    setTimeout(() => showPage('language'), 4000); // Splash screen
+    window.addEventListener('load', () => {
+  setTimeout(() => {
+    showPage('language');
+    document.getElementById('splash').classList.remove('active');
+    document.getElementById('language').classList.add('active');
+  }, 4000);
+}); // Splash screen
 
     let currentUser = null;
 
