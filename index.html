@@ -4,23 +4,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Elsa App</title>
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
     body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(to bottom, #111, #000);
       color: white;
+      overflow: hidden;
     }
-    .hidden { display: none; }
-    .centered {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-    }
+    .screen { display: none; height: 100vh; width: 100vw; justify-content: center; align-items: center; flex-direction: column; position: absolute; top: 0; left: 0; }
+    .active { display: flex !important; }
     .splash-logo {
-      font-size: 2.5rem;
+      font-size: 3rem;
       font-weight: bold;
       color: gold;
       animation: fadein 3s;
@@ -29,391 +22,159 @@
       0% { opacity: 0; transform: scale(0.5); }
       100% { opacity: 1; transform: scale(1); }
     }
-    button {
-      padding: 10px 20px;
+    input, button {
       margin: 10px;
-      background: gold;
+      padding: 10px;
       border: none;
-      border-radius: 8px;
-      color: #000;
-      font-weight: bold;
-    }
-    .tab-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      background: #111;
-      border-top: 2px solid gold;
-    }
-    .tab-nav button {
-      flex: 1;
-      padding: 15px 0;
-      font-size: 1rem;
-    }
-    .page { display: none; padding: 20px; }
-    .page.active { display: block; }
-  </style>
-</head>
-<body>
-  <!-- Splash Screen -->
-  <div id="splash" class="centered">
-    <div class="splash-logo">🌟 Elsa App</div>
-  </div>  <!-- Language Selection -->  <div id="language-selection" class="centered hidden">
-    <h2>Select Language</h2>
-    <button onclick="setLanguage('en')">English</button>
-    <button onclick="setLanguage('fr')">Français</button>
-  </div>  <!-- Login / Register -->  <div id="auth-screen" class="centered hidden">
-    <h2 id="auth-title">Login</h2>
-    <input type="email" id="email" placeholder="Email" /><br>
-    <input type="password" id="password" placeholder="Password" /><br>
-    <button onclick="login()">Login</button>
-    <button onclick="register()">Register</button>
-  </div>  <!-- App Pages -->  <div id="main-app" class="hidden">
-    <!-- Tabs -->
-    <div class="tab-nav hidden" id="tabs">
-      <button onclick="showPage('market')">📊 Market</button>
-      <button onclick="showPage('wallet')">💰 Wallet</button>
-      <button onclick="showPage('referral')">👥 Referral</button>
-      <button onclick="showPage('profile')">👤 Profile</button>
-    </div><!-- Market Page -->
-<div class="page" id="market">
-  <h2>Commodity Market</h2>
-  <canvas id="chartCanvas" height="200"></canvas>
-  <br>
-  <button onclick="buyCommodity()">Buy $2</button>
-  <button onclick="sellCommodity()">Sell $2.60</button>
-</div>
-
-<!-- Wallet Page -->
-<div class="page" id="wallet">
-  <h2>Wallet</h2>
-  <div>Balance: $<span id="wallet-balance">0</span></div>
-  <button onclick="deposit()">Deposit (₦1000)</button>
-  <button onclick="withdraw()">Withdraw</button>
-</div>
-
-<!-- Referral Page -->
-<div class="page" id="referral">
-  <h2>Referrals</h2>
-  <div>Your Referral Code: <span id="referral-code"></span></div>
-  <div>Referrals: <span id="referral-count">0</span> / 8</div>
-</div>
-
-<!-- Profile Page -->
-<div class="page" id="profile">
-  <h2>Profile</h2>
-  <div>Email: <span id="profile-email"></span></div>
-  <div>ID: <span id="profile-id"></span></div>
-  <div>Status: <span id="verification-badge">Unverified</span></div>
-  <button onclick="verifyUser()">Verify ($1.50)</button>
-</div>
-
-  </div>  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  <script>
-    // Splash then move to language selection
-    setTimeout(() => {
-      document.getElementById('splash').classList.add('hidden');
-      document.getElementById('language-selection').classList.remove('hidden');
-    }, 3000);
-
-    function setLanguage(lang) {
-      document.getElementById('language-selection').classList.add('hidden');
-      document.getElementById('auth-screen').classList.remove('hidden');
-    }
-
-    function login() {
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      // Simulate login success
-      if (email && password) {
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('main-app').classList.remove('hidden');
-        document.getElementById('tabs').classList.remove('hidden');
-        document.getElementById('profile-email').innerText = email;
-        document.getElementById('profile-id').innerText = 'user_' + Math.floor(Math.random() * 10000);
-        document.getElementById('referral-code').innerText = 'ELSA-' + Math.floor(Math.random() * 10000);
-        document.getElementById('wallet-balance').innerText = (email === 'eluxxes@gmail.com') ? 10 : 0;
-        showPage('market');
-        startChart();
-      } else {
-        alert('Invalid credentials');
-      }
-    }
-
-    function register() {
-      login(); // same simulation for demo
-    }
-
-    function showPage(id) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
-
-    function deposit() {
-      alert('Redirecting to Paystack deposit: ₦1000');
-    }
-
-    function withdraw() {
-      alert('Withdrawals must be at least $4');
-    }
-
-    function buyCommodity() {
-      alert('Commodity purchased for $2');
-    }
-
-    function sellCommodity() {
-      alert('Commodity sold for $2.60. Admin fee deducted.');
-    }
-
-    function verifyUser() {
-      alert('Redirecting to Paystack for verification ($1.50)...');
-      document.getElementById('verification-badge').innerText = '✅ Verified';
-    }
-
-    let chart;
-    function startChart() {
-      const ctx = document.getElementById('chartCanvas').getContext('2d');
-      chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ["9am", "10am", "11am", "12pm", "1pm"],
-          datasets: [{
-            label: 'Commodity Price',
-            borderColor: 'gold',
-            data: [2, 2.1, 2.3, 2.6, 2.4],
-          }]
-        },
-        options: {
-          animation: false,
-          scales: { y: { beginAtZero: false } }
-        }
-      });
-      setInterval(() => {
-        const last = chart.data.datasets[0].data.slice(-1)[0];
-        const next = +(last + (Math.random() - 0.5) * 0.1).toFixed(2);
-        chart.data.labels.push(new Date().toLocaleTimeString());
-        chart.data.datasets[0].data.push(next);
-        if (chart.data.labels.length > 6) {
-          chart.data.labels.shift();
-          chart.data.datasets[0].data.shift();
-        }
-        chart.update();
-      }, 4000);
-    }
-  </script></body>
-</html>
-<!DOCTYPE html><html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Elsa App</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #111, #000);
-      color: white;
-    }
-    .hidden { display: none; }
-    .centered {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      text-align: center;
-    }
-    .splash-logo {
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: gold;
-      animation: fadein 3s;
-    }
-    @keyframes fadein {
-      0% { opacity: 0; transform: scale(0.5); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    button {
-      padding: 10px 20px;
-      margin: 10px;
-      background: gold;
-      border: none;
-      border-radius: 8px;
-      color: #000;
-      font-weight: bold;
-    }
-    .tab-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      background: #111;
-      border-top: 2px solid gold;
-    }
-    .tab-nav button {
-      flex: 1;
-      padding: 15px 0;
-      font-size: 1rem;
-    }
-    .page { display: none; padding: 20px; }
-    .page.active { display: block; }
-    .tooltip {
-      position: relative;
-      display: inline-block;
-      cursor: help;
-    }
-    .tooltip .tooltiptext {
-      visibility: hidden;
-      width: 120px;
-      background-color: #333;
-      color: #fff;
-      text-align: center;
       border-radius: 6px;
-      padding: 5px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      margin-left: -60px;
-      opacity: 0;
-      transition: opacity 0.3s;
+      width: 80%;
     }
-    .tooltip:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
+    input { color: black; }
+    button {
+      background: gold;
+      color: black;
+      font-weight: bold;
     }
+    .tabs {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      display: flex;
+      background: #111;
+      border-top: 2px solid gold;
+    }
+    .tabs button {
+      flex: 1;
+      padding: 12px 0;
+      font-size: 0.8rem;
+      background: #111;
+      color: gold;
+    }
+    .page-content {
+      flex: 1;
+      padding: 20px;
+      width: 100vw;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+      display: none;
+    }
+    .page-content.active { display: block; }
   </style>
 </head>
 <body>
-  <!-- Splash Screen -->
-  <div id="splash" class="centered">
-    <div class="splash-logo">🌟 Elsa App</div>
-  </div>  <!-- Language Selection -->  <div id="language-selection" class="centered hidden">
+  <div id="splash" class="screen active">
+    <div class="splash-logo">✨ Elsa App</div>
+  </div>  <div id="languageScreen" class="screen">
     <h2>Select Language</h2>
-    <button onclick="setLanguage('en')">English</button>
-    <button onclick="setLanguage('fr')">Français</button>
-  </div>  <!-- Login / Register -->  <div id="auth-screen" class="centered hidden">
-    <h2 id="auth-title">Login</h2>
-    <input type="email" id="email" placeholder="Email" /><br>
-    <input type="password" id="password" placeholder="Password" /><br>
+    <button onclick="selectLanguage('en')">English</button>
+    <button onclick="selectLanguage('fr')">Français</button>
+  </div>  <div id="authScreen" class="screen">
+    <h2>Login / Register</h2>
+    <input type="text" id="email" placeholder="Email" />
+    <input type="text" id="password" placeholder="Password" />
     <button onclick="login()">Login</button>
     <button onclick="register()">Register</button>
-  </div>  <!-- App Pages -->  <div id="main-app" class="hidden">
-    <!-- Tabs -->
-    <div class="tab-nav hidden" id="tabs">
-      <button onclick="showPage('market')">📊 Market</button>
-      <button onclick="showPage('wallet')">💰 Wallet</button>
-      <button onclick="showPage('referral')">👥 Referral</button>
-      <button onclick="showPage('profile')">👤 Profile</button>
-    </div><!-- Market Page -->
-<div class="page" id="market">
-  <h2>Commodity Market <span class="tooltip">❔<span class="tooltiptext">Live chart showing price</span></span></h2>
-  <canvas id="chartCanvas" height="200"></canvas>
-  <br>
-  <button onclick="buyCommodity()">Buy $2</button>
-  <button onclick="sellCommodity()">Sell $2.60</button>
-</div>
-
-<!-- Wallet Page -->
-<div class="page" id="wallet">
-  <h2>Wallet</h2>
-  <div>Balance: $<span id="wallet-balance">0</span></div>
-  <button onclick="deposit()">Deposit (₦1000)</button>
-  <button onclick="withdraw()">Withdraw</button>
-</div>
-
-<!-- Referral Page -->
-<div class="page" id="referral">
-  <h2>Referrals</h2>
-  <div>Your Referral Code: <span id="referral-code"></span></div>
-  <div>Referrals: <span id="referral-count">0</span> / 8</div>
-</div>
-
-<!-- Profile Page -->
-<div class="page" id="profile">
-  <h2>Profile</h2>
-  <div>Email: <span id="profile-email"></span></div>
-  <div>ID: <span id="profile-id"></span></div>
-  <div>Status: <span id="verification-badge">Unverified</span></div>
-  <button onclick="verifyUser()">Verify ($1.50)</button>
-</div>
-
+  </div>  <div id="appScreen" class="screen">
+    <div id="marketPage" class="page-content active">
+      <h3>📈 Market</h3>
+      <canvas id="chartCanvas"></canvas>
+      <button onclick="buyCommodity()">Buy $2</button>
+      <button onclick="sellCommodity()">Sell $2.60</button>
+    </div>
+    <div id="walletPage" class="page-content">
+      <h3>💳 Wallet</h3>
+      <p>Balance: $<span id="balance">0</span></p>
+      <button onclick="deposit()">Deposit ₦1000</button>
+      <button onclick="withdraw()">Withdraw</button>
+    </div>
+    <div id="referralPage" class="page-content">
+      <h3>🔗 Referral</h3>
+      <p>Code: <span id="refCode"></span></p>
+      <p>Referrals: <span id="refCount">0</span> / 8</p>
+    </div>
+    <div id="profilePage" class="page-content">
+      <h3>👤 Profile</h3>
+      <p>Email: <span id="userEmail"></span></p>
+      <p>ID: <span id="userId"></span></p>
+      <p>Status: <span id="status">Unverified</span></p>
+      <button onclick="verifyUser()">Verify ($1.50)</button>
+    </div>
+    <div class="tabs">
+      <button onclick="switchPage('marketPage')">📈</button>
+      <button onclick="switchPage('walletPage')">💳</button>
+      <button onclick="switchPage('referralPage')">🔗</button>
+      <button onclick="switchPage('profilePage')">👤</button>
+    </div>
   </div>  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>  <script>
     setTimeout(() => {
-      document.getElementById('splash').classList.add('hidden');
-      document.getElementById('language-selection').classList.remove('hidden');
+      document.getElementById('splash').classList.remove('active');
+      document.getElementById('languageScreen').classList.add('active');
     }, 3000);
 
-    function setLanguage(lang) {
-      document.getElementById('language-selection').classList.add('hidden');
-      document.getElementById('auth-screen').classList.remove('hidden');
+    function selectLanguage(lang) {
+      document.getElementById('languageScreen').classList.remove('active');
+      document.getElementById('authScreen').classList.add('active');
     }
 
     function login() {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      if (email && password) {
-        document.getElementById('auth-screen').classList.add('hidden');
-        document.getElementById('main-app').classList.remove('hidden');
-        document.getElementById('tabs').classList.remove('hidden');
-        document.getElementById('profile-email').innerText = email;
-        document.getElementById('profile-id').innerText = 'user_' + Math.floor(Math.random() * 10000);
-        document.getElementById('referral-code').innerText = 'ELSA-' + Math.floor(Math.random() * 10000);
-        document.getElementById('wallet-balance').innerText = (email === 'eluxxes@gmail.com') ? 10 : 0;
-        showPage('market');
-        startChart();
-      } else {
-        alert('Invalid credentials');
-      }
+      if (!email || !password) return alert("Enter credentials");
+      document.getElementById('authScreen').classList.remove('active');
+      document.getElementById('appScreen').classList.add('active');
+      document.getElementById('userEmail').textContent = email;
+      document.getElementById('userId').textContent = 'UID' + Math.floor(Math.random() * 1000);
+      document.getElementById('refCode').textContent = 'ELSA' + Math.floor(Math.random() * 1000);
+      document.getElementById('balance').textContent = email === 'eluxxes@gmail.com' ? 10 : 0;
+      initChart();
     }
 
     function register() { login(); }
 
-    function showPage(id) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    function switchPage(id) {
+      document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
       document.getElementById(id).classList.add('active');
     }
 
     function deposit() {
-      alert('Redirecting to Paystack deposit: ₦1000');
+      alert('Paystack: ₦1000 deposit');
     }
 
     function withdraw() {
-      alert('Withdrawals must be at least $4');
+      alert('Minimum withdraw is $4');
     }
 
     function buyCommodity() {
-      alert('Commodity purchased for $2');
+      alert('Bought commodity');
     }
 
     function sellCommodity() {
-      alert('Commodity sold for $2.60. Admin fee deducted.');
+      alert('Sold for $2.60 (Admin fee deducted)');
     }
 
     function verifyUser() {
-      alert('Redirecting to Paystack for verification ($1.50)...');
-      document.getElementById('verification-badge').innerText = '✅ Verified';
+      alert('Paystack verification $1.50');
+      document.getElementById('status').textContent = '✅ Verified';
     }
 
     let chart;
-    function startChart() {
+    function initChart() {
       const ctx = document.getElementById('chartCanvas').getContext('2d');
       chart = new Chart(ctx, {
-        type: 'candlestick',
+        type: 'line',
         data: {
+          labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
           datasets: [{
-            label: 'Commodity',
+            label: 'Price',
             borderColor: 'gold',
-            backgroundColor: 'green',
-            data: [{ o: 2, h: 2.4, l: 1.9, c: 2.2 }, { o: 2.2, h: 2.5, l: 2, c: 2.4 }]
+            backgroundColor: 'rgba(255,215,0,0.2)',
+            data: [2, 2.1, 2.2, 2.3, 2.4],
+            fill: true
           }]
         },
         options: {
-          animation: false,
+          responsive: true,
+          animation: { duration: 0 },
           plugins: { legend: { display: false } }
         }
       });
