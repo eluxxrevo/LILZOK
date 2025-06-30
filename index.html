@@ -2,202 +2,212 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ELSA App – The Supreme</title>
+  <title>ELSA Coin App</title>
   <style>
-    body, html {
+    body {
       margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #000000, #FFD700);
-      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #111, #222);
+      color: #fff;
     }
-    .page { display: none; padding: 20px; }
-    .active { display: block; }
-    .splash { text-align: center; font-size: 2em; padding-top: 30vh; }
-    .nav { position: fixed; bottom: 0; width: 100%; background: #111; display: flex; justify-content: space-around; }
-    .nav button { background: none; border: none; color: gold; padding: 10px; font-size: 1em; }
-    .input { margin: 10px 0; display: block; padding: 10px; width: 100%; }
-    .btn { background: gold; color: black; border: none; padding: 10px; width: 100%; margin-top: 10px; cursor: pointer; }
-    #chartContainer { height: 300px; background: #fff; color: black; margin-top: 10px; padding: 10px; }
-    canvas { width: 100% !important; height: 300px !important; }
-    .verified-badge { color: gold; font-weight: bold; margin-left: 10px; }
+    header, footer {
+      background: #000;
+      text-align: center;
+      padding: 10px;
+    }
+    .container {
+      padding: 20px;
+    }
+    .page {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+    nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #111;
+      display: flex;
+      justify-content: space-around;
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 10px;
+    }
+    input, button {
+      margin: 5px 0;
+      padding: 10px;
+      width: 100%;
+    }
+    #chart {
+      background-color: #fff;
+      display: block;
+      margin: 0 auto;
+    }
   </style>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
 </head>
 <body>
-  <div id="splash" class="page splash" style="display: block;">
-    <h1>🌟 ELSA APP 🌟<br><small>The Supreme</small></h1>
-  </div>  <div id="language" class="page" style="display: none;">
-    <h2>Select Language</h2>
-    <button onclick="showPage('login')">English</button>
-    <button onclick="showPage('login')">Français</button>
-  </div>  <div id="login" class="page">
-    <h2>Login</h2>
-    <input class="input" id="loginEmail" placeholder="Email" />
-    <input class="input" id="loginPassword" placeholder="Password" type="password" />
-    <button class="btn" onclick="login()">Login</button>
-    <p>Don't have an account? <a href="#" onclick="showPage('register')">Register</a></p>
-  </div>  <div id="register" class="page">
-    <h2>Register</h2>
-    <input class="input" id="regEmail" placeholder="Email" />
-    <input class="input" id="regPassword" placeholder="Password" type="password" />
-    <button class="btn" onclick="register()">Register</button>
-    <p>Already have an account? <a href="#" onclick="showPage('login')">Login</a></p>
-  </div>  <div id="dashboard" class="page">
-    <h2>Welcome, <span id="userEmail"></span></h2>
-    <p>Balance: $<span id="userBalance">0.00</span></p>
-    <div id="chartContainer">
-      <canvas id="candlestickChart"></canvas>
-    </div>
-    <button class="btn" onclick="buyElsa(2)">Buy Elsa ($2)</button>
-    <button class="btn" onclick="sellElsa()">Sell Elsa</button>
-    <button class="btn" onclick="location.href='https://paystack.com/buy/casino-x-wgojzd'">Deposit (via Paystack)</button>
-    <button class="btn" onclick="logout()">Logout</button>
-    <footer style="margin-top: 30px; text-align:center; font-size: 0.8em;">Endorsed by Reverend</footer>
-  </div>  <div class="nav">
-    <button onclick="showPage('dashboard')">🏠 Home</button>
-    <button onclick="showPage('login')">👤 Login</button>
-    <button onclick="showPage('register')">📝 Register</button>
-  </div>  <script>
+  <header>
+    <h1>ELSA Coin</h1>
+    <p>Endorsed by Reverend</p>
+  </header>  <div class="container">
+    <div id="auth" class="page active">
+      <h2>Login / Register</h2>
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="register()">Register</button>
+      <button onclick="login()">Login</button>
+    </div><div id="dashboard" class="page">
+  <h2>Welcome, <span id="username"></span></h2>
+  <p>Balance: <span id="balance">0</span> ELSA</p>
+  <button onclick="buyElsa()">Buy ELSA</button>
+  <button onclick="sellElsa()">Sell ELSA</button>
+  <p id="msg"></p>
+  <h3>Live Candle Chart</h3>
+  <canvas id="chart" width="400" height="200"></canvas>
+  <h3>Referral Link</h3>
+  <p id="refLink"></p>
+  <h3>Top Referrals</h3>
+  <ul id="leaderboard"></ul>
+  <button onclick="logout()">Logout</button>
+</div>
+
+  </div>  <nav>
+    <button onclick="showPage('auth')">Auth</button>
+    <button onclick="showPage('dashboard')">Dashboard</button>
+  </nav>  <footer>
+    <p>ELSA © 2025</p>
+  </footer>  <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyC8kLmGOyODdlrvHId2Nz3opdpT0tvD5mk",
-      authDomain: "elsa-ab176.firebaseapp.com",
-      projectId: "elsa-ab176",
-      storageBucket: "elsa-ab176.firebasestorage.app",
-      messagingSenderId: "850786583459",
-      appId: "1:850786583459:android:5710287d8738f48e8e1016"
+      apiKey: "AIzaSyApuMISYyAXo7Xdxa_FAYDG-tHaU5vJA6A",
+      authDomain: "elsa-809c1.firebaseapp.com",
+      projectId: "elsa-809c1",
+      storageBucket: "elsa-809c1.firebasestorage.app",
+      messagingSenderId: "401983741723",
+      appId: "1:401983741723:android:253c41bf6a9011d0483dbe"
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    function showPage(pageId) {
-      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-      const page = document.getElementById(pageId);
-      if (page) page.style.display = 'block';
-    }
-
-    window.onload = () => {
-      setTimeout(() => {
-        showPage('language');
-        drawCandleChart();
-      }, 4000);
-    };
-
-    function login() {
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
-      auth.signInWithEmailAndPassword(email, password)
-        .then(userCred => {
-          const user = userCred.user;
-          document.getElementById('userEmail').innerText = user.email;
-          showPage('dashboard');
-          loadUserData(user.uid);
-        })
-        .catch(() => alert('Invalid login info'));
-    }
-
-    function register() {
-      const email = document.getElementById('regEmail').value;
-      const password = document.getElementById('regPassword').value;
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(userCred => {
-          const user = userCred.user;
-          db.collection("users").doc(user.uid).set({
-            balance: email === "eluxxes@gmail.com" ? 2000 : 0,
-            email: email
-          });
-          alert('Registration successful');
-          showPage('login');
-        })
-        .catch(() => alert('Registration failed'));
-    }
-
-    function loadUserData(uid) {
-      db.collection("users").doc(uid).get().then(doc => {
-        const data = doc.data();
-        document.getElementById("userBalance").innerText = data.balance.toFixed(2);
-      });
-    }
-
-    function buyElsa(amount) {
-      const user = auth.currentUser;
-      if (!user) return alert('Please log in');
-      const userRef = db.collection("users").doc(user.uid);
-      db.runTransaction(async (tx) => {
-        const doc = await tx.get(userRef);
-        const balance = doc.data().balance || 0;
-        if (balance < amount) throw "Insufficient funds";
-        tx.update(userRef, { balance: balance - amount });
-      }).then(() => {
-        alert("You bought Elsa worth $" + amount);
-        loadUserData(user.uid);
-      }).catch(err => alert(err));
-    }
-
-    function sellElsa() {
-      const user = auth.currentUser;
-      if (!user) return alert('Please log in');
-      const userRef = db.collection("users").doc(user.uid);
-      db.runTransaction(async (tx) => {
-        const doc = await tx.get(userRef);
-        const balance = doc.data().balance || 0;
-        const gain = 2.6; // resale value
-        tx.update(userRef, { balance: balance + (gain - 0.15) });
-      }).then(() => {
-        alert("Elsa sold. Admin took $0.15 maintenance fee");
-        loadUserData(user.uid);
-      }).catch(err => alert(err));
-    }
-
-    function logout() {
-      auth.signOut();
-      showPage('login');
-    }
-
-    function drawCandleChart() {
-      const ctx = document.getElementById('candlestickChart').getContext('2d');
-      const chart = new Chart(ctx, {
-        type: 'candlestick',
-        data: {
-          datasets: [{
-            label: 'ELSA',
-            data: [
-              { x: '2025-06-01', o: 200, h: 210, l: 190, c: 205 },
-              { x: '2025-06-02', o: 205, h: 215, l: 200, c: 210 },
-              { x: '2025-06-03', o: 210, h: 220, l: 205, c: 215 },
-              { x: '2025-06-04', o: 215, h: 230, l: 210, c: 225 }
-            ]
-          }]
-        },
-        options: {
-          responsive: true,
-          animation: { duration: 0 },
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { type: 'timeseries', time: { unit: 'day' } },
-            y: { beginAtZero: false }
-          }
+    let user;
+    auth.onAuthStateChanged(async (u) => {
+      if (u) {
+        user = u;
+        showPage('dashboard');
+        document.getElementById('username').textContent = u.email;
+        const doc = await db.collection('users').doc(u.uid).get();
+        if (!doc.exists) {
+          await db.collection('users').doc(u.uid).set({ balance: 0, referrals: 0 });
         }
-      });
+        updateUI();
+      }
+    });
 
-      // Simulate live updates
-      setInterval(() => {
-        const now = new Date();
-        const price = 210 + Math.floor(Math.random() * 10 - 5);
-        chart.data.datasets[0].data.push({
-          x: now,
-          o: price,
-          h: price + 5,
-          l: price - 5,
-          c: price + Math.floor(Math.random() * 5)
-        });
-        chart.update();
-      }, 5000);
+    async function register() {
+      try {
+        const email = emailEl.value;
+        const password = passwordEl.value;
+        await auth.createUserWithEmailAndPassword(email, password);
+        if (email === 'eluxxes@gmail.com') {
+          await db.collection('users').doc(auth.currentUser.uid).set({ balance: 2000, referrals: 0 });
+        }
+      } catch (e) {
+        alert(e.message);
+      }
     }
+
+    async function login() {
+      try {
+        await auth.signInWithEmailAndPassword(emailEl.value, passwordEl.value);
+      } catch (e) {
+        alert("Invalid credentials");
+      }
+    }
+
+    async function logout() {
+      await auth.signOut();
+      showPage('auth');
+    }
+
+    async function updateUI() {
+      const uid = auth.currentUser.uid;
+      const doc = await db.collection('users').doc(uid).get();
+      const data = doc.data();
+      document.getElementById('balance').textContent = data.balance;
+      document.getElementById('refLink').textContent = `${location.origin}?ref=${uid}`;
+      const topRefs = await db.collection('users').orderBy('referrals', 'desc').limit(5).get();
+      leaderboard.innerHTML = '';
+      topRefs.forEach(d => {
+        leaderboard.innerHTML += `<li>${d.id.substring(0, 6)}...: ${d.data().referrals}</li>`;
+      });
+    }
+
+    async function buyElsa() {
+      const uid = auth.currentUser.uid;
+      const doc = await db.collection('users').doc(uid).get();
+      const balance = doc.data().balance;
+      await db.collection('users').doc(uid).update({ balance: balance + 1 });
+      msg.textContent = 'Successfully bought 1 ELSA';
+      updateUI();
+    }
+
+    async function sellElsa() {
+      const uid = auth.currentUser.uid;
+      const doc = await db.collection('users').doc(uid).get();
+      const balance = doc.data().balance;
+      if (balance > 0) {
+        await db.collection('users').doc(uid).update({ balance: balance - 1 });
+        msg.textContent = 'Successfully sold 1 ELSA';
+      } else {
+        msg.textContent = 'Insufficient balance';
+      }
+      updateUI();
+    }
+
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // Live updating candlestick-style chart simulation
+    const chartCtx = document.getElementById('chart').getContext('2d');
+    let price = 100;
+    const priceData = [price];
+    const chart = new Chart(chartCtx, {
+      type: 'line',
+      data: {
+        labels: Array(10).fill(''),
+        datasets: [{
+          label: 'ELSA Price',
+          data: priceData,
+          borderColor: '#0f0',
+          backgroundColor: 'rgba(0,255,0,0.1)',
+          fill: true
+        }]
+      },
+      options: {
+        animation: false,
+        scales: {
+          y: { beginAtZero: false }
+        }
+      }
+    });
+
+    setInterval(() => {
+      price += (Math.random() - 0.5) * 3;
+      priceData.push(price);
+      if (priceData.length > 10) priceData.shift();
+      chart.data.datasets[0].data = priceData;
+      chart.update();
+    }, 1500);
   </script></body>
 </html>
