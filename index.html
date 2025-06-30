@@ -10,31 +10,23 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { margin: 0; font-family: Arial; background: #000; color: gold; }
-    .tab-bar {
-      position: fixed; bottom: 0; width: 100%; display: flex;
-      background: #111; border-top: 1px solid #333;
-    }
-    .tab-bar button {
-      flex: 1; padding: 1rem; background: none; border: none;
-      color: gold; font-weight: bold;
-    }
+    .tab-bar { position: fixed; bottom: 0; width: 100%; display: flex; background: #111; border-top: 1px solid #333; }
+    .tab-bar button { flex: 1; padding: 1rem; background: none; border: none; color: gold; font-weight: bold; }
     .page { display: none; padding: 1rem; padding-bottom: 70px; }
     .active { display: block; }
-    input, button, select {
-      width: 100%; padding: 0.6rem; margin: 0.5rem 0;
-      background: #111; border: 1px solid gold; color: gold;
-    }
+    input, button, select { width: 100%; padding: 0.6rem; margin: 0.5rem 0; background: #111; border: 1px solid gold; color: gold; }
     .chart-box { background: #111; padding: 1rem; border-radius: 8px; }
     canvas { background: #000; border: 1px solid gold; margin-top: 10px; }
     .buy-sell-box { background: #111; border-radius: 8px; padding: 1rem; margin-top: 1rem; }
     .notice { background: green; color: #fff; padding: 0.5rem; text-align: center; display: none; }
+    .settings-icon { float: right; cursor: pointer; color: gold; font-size: 18px; }
   </style>
 </head>
 <body>
   <h2 style="text-align:center;background:#111;padding:1rem;">Elsa Market</h2>
   <div id="notice" class="notice"></div>
 
-  <!-- Login Page -->
+  <!-- Login/Register -->
   <div id="loginPage" class="page active">
     <h3>Login or Register</h3>
     <input id="emailInput" placeholder="Email" type="email" />
@@ -43,7 +35,7 @@
     <button onclick="login()">Login</button>
   </div>
 
-  <!-- Home Page -->
+  <!-- Home -->
   <div id="homePage" class="page">
     <h3>Welcome <span id="userEmail"></span></h3>
     <p>Balance: $<span id="balance">0.00</span></p>
@@ -54,7 +46,7 @@
     </div>
   </div>
 
-  <!-- Market Page -->
+  <!-- Market -->
   <div id="marketPage" class="page">
     <h3>Buy Commodities ($2 each)</h3>
     <div class="buy-sell-box">
@@ -70,7 +62,7 @@
     </div>
   </div>
 
-  <!-- Wallet Page -->
+  <!-- Wallet -->
   <div id="walletPage" class="page">
     <h3>Wallet</h3>
     <p>Balance: $<span id="walletBalance">0.00</span></p>
@@ -78,19 +70,35 @@
     <button onclick="withdraw()">Withdraw ($4 min)</button>
   </div>
 
-  <!-- Profile Page -->
+  <!-- Profile -->
   <div id="profilePage" class="page">
-    <h3>Profile</h3>
+    <h3>
+      Profile 
+      <span class="settings-icon" onclick="switchPage('verifyPage')">⚙️</span>
+    </h3>
     <p>Email: <span id="profileEmail"></span></p>
     <p>User ID: <span id="profileUID"></span></p>
     <p>Referral Link:</p>
-    <p id="refLink">https://yourapp.com/register?ref=UID</p>
-    <p>Resell History:</p>
-    <ul id="resellHistory"></ul>
+    <p id="refLink"></p>
     <p><strong>Verification:</strong> <span id="verifyStatus">Not Verified</span></p>
+    <p><strong>Resell History:</strong></p>
+    <ul id="resellHistory"></ul>
   </div>
 
-  <!-- Tab Bar -->
+  <!-- Verification Page -->
+  <div id="verifyPage" class="page">
+    <h3>Verification Form</h3>
+    <input id="fullName" placeholder="Full Name" />
+    <select id="idType">
+      <option value="">Select ID Type</option>
+      <option value="NIN">NIN</option>
+      <option value="Driver's License">Driver's License</option>
+    </select>
+    <input id="photoURL" placeholder="Photo URL (use imgbb)" />
+    <button onclick="payForVerification()">Pay $1 to Verify</button>
+  </div>
+
+  <!-- Tabs -->
   <div class="tab-bar">
     <button onclick="switchPage('homePage')">🏠 Home</button>
     <button onclick="switchPage('marketPage')">💹 Market</button>
@@ -132,25 +140,20 @@
     auth.createUserWithEmailAndPassword(email, password)
       .then((cred) => {
         db.collection('users').doc(cred.user.uid).set({
-          email: email,
-          balance: email === 'eluxxes@gmail.com' ? 10 : 0,
-          gold: 0, diamond: 0, sol: 0, referrals: 0, verified: false,
-          history: [], created: Date.now()
+          email, balance: email === 'eluxxes@gmail.com' ? 10 : 0,
+          gold: 0, diamond: 0, sol: 0, referrals: 0,
+          verified: false, history: [], created: Date.now()
         });
-        showNotice('Registered & logged in!');
+        showNotice('Registered!');
         loadUser();
-      })
-      .catch(e => showNotice(e.message, 'red'));
+      }).catch(e => showNotice(e.message, 'red'));
   }
 
   function login() {
     const email = document.getElementById('emailInput').value;
     const password = document.getElementById('passwordInput').value;
     auth.signInWithEmailAndPassword(email, password)
-      .then(() => {
-        showNotice('Logged in!');
-        loadUser();
-      })
+      .then(() => { showNotice('Logged in!'); loadUser(); })
       .catch(e => showNotice(e.message, 'red'));
   }
 
@@ -159,19 +162,20 @@
       if (user) {
         currentUser = user;
         switchPage('homePage');
-        db.collection('users').doc(user.uid).onSnapshot(doc => {
-          const data = doc.data();
-          document.getElementById('userEmail').innerText = data.email;
-          document.getElementById('balance').innerText = data.balance.toFixed(2);
-          document.getElementById('walletBalance').innerText = data.balance.toFixed(2);
-          document.getElementById('goldCount').innerText = data.gold;
-          document.getElementById('diamondCount').innerText = data.diamond;
-          document.getElementById('solCount').innerText = data.sol;
-          document.getElementById('profileEmail').innerText = data.email;
+        const ref = db.collection('users').doc(user.uid);
+        ref.onSnapshot(doc => {
+          const d = doc.data();
+          document.getElementById('userEmail').innerText = d.email;
+          document.getElementById('balance').innerText = d.balance.toFixed(2);
+          document.getElementById('walletBalance').innerText = d.balance.toFixed(2);
+          document.getElementById('goldCount').innerText = d.gold;
+          document.getElementById('diamondCount').innerText = d.diamond;
+          document.getElementById('solCount').innerText = d.sol;
+          document.getElementById('profileEmail').innerText = d.email;
           document.getElementById('profileUID').innerText = user.uid;
-          document.getElementById('refLink').innerText = `https://yourapp.com/register?ref=${user.uid}`;
-          document.getElementById('verifyStatus').innerText = data.verified ? '✅ Verified' : '❌ Not Verified';
-          document.getElementById('resellHistory').innerHTML = data.history.map(h => `<li>${h}</li>`).join('');
+          document.getElementById('verifyStatus').innerText = d.verified ? '✅ Verified' : '❌ Not Verified';
+          document.getElementById('refLink').innerText = `https://elsa.com/register?ref=${user.uid}`;
+          document.getElementById('resellHistory').innerHTML = d.history.map(h => `<li>${h}</li>`).join('');
         });
       }
     });
@@ -180,27 +184,21 @@
   function buy(type) {
     const ref = db.collection('users').doc(currentUser.uid);
     db.runTransaction(async t => {
-      const doc = await t.get(ref);
-      const data = doc.data();
-      if (data.balance < 2) throw new Error('Insufficient funds');
-      t.update(ref, {
-        balance: data.balance - 2,
-        [type]: data[type] + 1
-      });
+      const doc = await t.get(ref); const d = doc.data();
+      if (d.balance < 2) throw new Error('Insufficient funds');
+      t.update(ref, { balance: d.balance - 2, [type]: d[type] + 1 });
     }).then(() => showNotice(`Bought 1 ${type}`)).catch(e => showNotice(e.message, 'red'));
   }
 
   function sell(type) {
     const ref = db.collection('users').doc(currentUser.uid);
     db.runTransaction(async t => {
-      const doc = await t.get(ref);
-      const data = doc.data();
-      if (!data.verified) throw new Error('Only verified users can sell');
-      if (data[type] < 1) throw new Error(`No ${type} to sell`);
+      const doc = await t.get(ref); const d = doc.data();
+      if (!d.verified) throw new Error('Only verified users can sell');
+      if (d[type] < 1) throw new Error(`No ${type} to sell`);
       t.update(ref, {
-        balance: data.balance + 2.45,
-        [type]: data[type] - 1,
-        history: [...data.history, `Sold 1 ${type} for $2.45`]
+        balance: d.balance + 2.45, [type]: d[type] - 1,
+        history: [...d.history, `Sold 1 ${type}`]
       });
     }).then(() => showNotice(`Sold 1 ${type}`)).catch(e => showNotice(e.message, 'red'));
   }
@@ -210,45 +208,42 @@
   }
 
   function withdraw() {
-    alert('Withdrawal submitted. Admin will process if above $4.');
+    alert('Withdraw request sent.');
   }
 
-  // Chart setup
+  function payForVerification() {
+    const name = document.getElementById('fullName').value;
+    const idType = document.getElementById('idType').value;
+    const photo = document.getElementById('photoURL').value;
+    if (!name || !idType || !photo) return showNotice('Complete all fields', 'red');
+    const ref = db.collection('users').doc(currentUser.uid);
+    ref.update({
+      verified: true,
+      verification: { name, idType, photo, time: Date.now() }
+    }).then(() => {
+      showNotice('Verified successfully!');
+      switchPage('profilePage');
+    });
+  }
+
   const ctx = document.getElementById('priceChart').getContext('2d');
-  const priceChart = new Chart(ctx, {
+  const chart = new Chart(ctx, {
     type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label: 'Commodity Price',
-        data: [],
-        borderColor: 'gold',
-        backgroundColor: 'rgba(255,215,0,0.1)',
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      animation: false,
-      scales: { y: { beginAtZero: true } }
-    }
+    data: { labels: [], datasets: [{ label: 'Price', data: [], borderColor: 'gold' }] },
+    options: { animation: false }
   });
 
-  function loadChartLoop() {
-    setInterval(() => {
-      const price = (Math.random() * 0.5 + 2).toFixed(2);
-      const now = new Date().toLocaleTimeString();
-      if (priceChart.data.labels.length > 20) {
-        priceChart.data.labels.shift();
-        priceChart.data.datasets[0].data.shift();
-      }
-      priceChart.data.labels.push(now);
-      priceChart.data.datasets[0].data.push(price);
-      priceChart.update();
-    }, 5000);
-  }
+  setInterval(() => {
+    const now = new Date().toLocaleTimeString();
+    const val = (2 + Math.random()).toFixed(2);
+    if (chart.data.labels.length > 20) {
+      chart.data.labels.shift(); chart.data.datasets[0].data.shift();
+    }
+    chart.data.labels.push(now);
+    chart.data.datasets[0].data.push(val);
+    chart.update();
+  }, 5000);
 
-  loadChartLoop();
   loadUser();
 </script>
 </body>
