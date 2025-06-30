@@ -142,8 +142,11 @@
       <button onclick="switchPage(3)">👤</button>
     </div>
   </div>  <footer>Endorsed by Reverend</footer>  <script>
-    // JavaScript functions from previous code are reused here.
-    // Code handles login, chart updates, referrals, verification, etc.
-    // We'll ensure the chart is live and pages only visible when logged in.
+    window.onload = () => {
+      setTimeout(() => {
+        document.getElementById('splash').classList.remove('active');
+        document.getElementById('languageScreen').classList.add('active');
+      }, 3000); // 3 seconds splash screen
+    }
   </script></body>
 </html>
