@@ -1,119 +1,74 @@
 <!DOCTYPE html><html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Elsa App</title>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #000;
-      color: gold;
-    }
-    header {
-      background: #111;
-      text-align: center;
-      padding: 1rem;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-    section { display: none; padding: 1rem; }
-    section.active { display: block; }
-    input, button {
-      display: block;
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 5px;
-    }
+    body { margin: 0; font-family: Arial, sans-serif; background: #000; color: gold; }
+    .container { padding: 20px; }
+    header { background: #111; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; }
+    .tabs { display: flex; position: fixed; bottom: 0; width: 100%; background: #111; }
+    .tabs button { flex: 1; padding: 10px; border: none; background: #111; color: gold; font-size: 16px; }
+    .section { display: none; padding: 20px; }
+    .active { display: block; }
+    input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
     button { background: gold; color: black; font-weight: bold; }
-    .tabs {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background: #111;
-      display: flex;
-      border-top: 1px solid gold;
-    }
-    .tabs button {
-      flex: 1;
-      background: transparent;
-      color: gold;
-      border: none;
-      padding: 10px;
-      font-size: 1rem;
-    }
-    canvas { background: #222; border-radius: 10px; margin-top: 20px; }
     .hidden { display: none; }
+    canvas { background: #111; margin-top: 20px; border-radius: 10px; }
   </style>
 </head>
 <body>
-  <header>Elsa App</header>  <section id="login" class="active">
-    <h2>Login</h2>
-    <input id="loginEmail" placeholder="Email">
-    <input id="loginPassword" type="password" placeholder="Password">
-    <button onclick="login()">Login</button>
-    <p>Don't have an account? <a href="#" onclick="show('register')">Register</a></p>
-  </section>  <section id="register">
-    <h2>Register</h2>
-    <input id="regEmail" placeholder="Email">
-    <input id="regPassword" type="password" placeholder="Password">
-    <input id="refCode" placeholder="Referral code (optional)">
-    <button onclick="register()">Register</button>
-    <p>Already have an account? <a href="#" onclick="show('login')">Login</a></p>
-  </section>  <section id="market">
-    <h2>Live Commodity Chart</h2>
-    <canvas id="liveChart"></canvas>
-    <p>Current Price: $<span id="currentPrice">2.00</span></p>
-    <button onclick="buy()">Buy at $2</button>
-    <button onclick="sell()">Sell at $2.60</button>
-  </section>  <section id="wallet">
-    <h2>Your Wallet</h2>
-    <p>Email: <span id="userEmail"></span></p>
-    <p>Balance: $<span id="userBalance"></span></p>
-    <p>Status: <span id="userStatus"></span></p>
-    <button onclick="verify()">Verify ($1.50)</button>
-    <button onclick="deposit()">Deposit</button>
-    <button onclick="withdraw()">Withdraw</button>
-  </section>  <section id="profile">
-    <h2>Your Profile</h2>
-    <p>Referral Link:</p>
-    <input id="referralLink" readonly>
-    <p>Referrals: <span id="refCount"></span>/8</p>
-  </section>  <section id="leaderboard">
-    <h2>Leaderboard</h2>
-    <div id="leaderboardList">Loading...</div>
-  </section>  <div class="tabs hidden" id="navTabs">
-    <button onclick="navigate('market')"><i class="material-icons">show_chart</i></button>
-    <button onclick="navigate('wallet')"><i class="material-icons">account_balance_wallet</i></button>
-    <button onclick="navigate('profile')"><i class="material-icons">person</i></button>
-    <button onclick="navigate('leaderboard')"><i class="material-icons">emoji_events</i></button>
+  <header>Elsa App</header>
+  <div class="container">
+    <div id="auth" class="section active">
+      <h2>Login</h2>
+      <input id="loginEmail" type="email" placeholder="Email">
+      <input id="loginPassword" type="password" placeholder="Password">
+      <button onclick="login()">Login</button>
+      <p>Don't have an account? <a href="#" onclick="toggleSection('register')">Register</a></p>
+    </div><div id="register" class="section">
+  <h2>Register</h2>
+  <input id="regEmail" type="email" placeholder="Email">
+  <input id="regPassword" type="password" placeholder="Password">
+  <input id="refCode" type="text" placeholder="Referral Code (optional)">
+  <button onclick="register()">Register</button>
+  <p>Have an account? <a href="#" onclick="toggleSection('auth')">Login</a></p>
+</div>
+
+<div id="market" class="section">
+  <h2>Market</h2>
+  <canvas id="chart" width="300" height="200"></canvas>
+  <p>Current Price: $<span id="price">0.00</span></p>
+  <button onclick="buyCommodity()">Buy for $2</button>
+  <button onclick="sellCommodity()">Sell for $2.60</button>
+</div>
+
+<div id="wallet" class="section">
+  <h2>Wallet</h2>
+  <p>Email: <span id="userEmail"></span></p>
+  <p>Balance: $<span id="balance">0.00</span></p>
+  <p>Status: <span id="verifyStatus"></span></p>
+  <button onclick="verifyUser()">Verify Account ($1.50)</button>
+  <button onclick="depositFunds()">Deposit</button>
+  <button onclick="withdrawFunds()">Withdraw</button>
+</div>
+
+<div id="profile" class="section">
+  <h2>Profile</h2>
+  <p>Referral Code: <input id="referralLink" readonly></p>
+  <p>Referrals: <span id="referralCount">0</span>/8</p>
+</div>
+
+  </div>  <div class="tabs hidden" id="tabs">
+    <button onclick="showSection('market')"><span class="material-icons">show_chart</span></button>
+    <button onclick="showSection('wallet')"><span class="material-icons">account_balance_wallet</span></button>
+    <button onclick="showSection('profile')"><span class="material-icons">person</span></button>
   </div>  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signInWithEmailAndPassword,
-      createUserWithEmailAndPassword
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      getDoc,
-      setDoc,
-      updateDoc,
-      collection,
-      addDoc,
-      onSnapshot,
-      getDocs,
-      increment,
-      query,
-      orderBy,
-      limit
-    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, addDoc, collection, increment } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC8kLmGOyODdlrvHId2Nz3opdpT0tvD5mk",
@@ -125,17 +80,59 @@
     const auth = getAuth();
     const db = getFirestore();
 
-    const $ = id => document.getElementById(id);
-    const show = page => {
-      document.querySelectorAll("section").forEach(sec => sec.classList.remove("active"));
-      $(page).classList.add("active");
-    };
-    const navigate = page => show(page);
+    const chartEl = document.getElementById("chart");
+    let chart;
 
-    window.register = async () => {
-      const email = $("regEmail").value;
-      const password = $("regPassword").value;
-      const refCode = $("refCode").value;
+    onSnapshot(collection(db, "chart"), snapshot => {
+      const data = snapshot.docs.map(doc => doc.data().price);
+      if (chart) {
+        chart.data.labels = data.map((_, i) => i);
+        chart.data.datasets[0].data = data;
+        chart.update();
+        document.getElementById("price").textContent = data[data.length - 1].toFixed(2);
+      }
+    });
+
+    function initChart() {
+      chart = new Chart(chartEl, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Commodity Price',
+            borderColor: 'gold',
+            data: [],
+            fill: false
+          }]
+        },
+        options: { scales: { x: { display: false } } }
+      });
+    }
+
+    function toggleSection(id) {
+      document.querySelectorAll(".section").forEach(el => el.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    function showSection(id) {
+      toggleSection(id);
+    }
+
+    async function login() {
+      const email = loginEmail.value;
+      const password = loginPassword.value;
+      try {
+        const user = await signInWithEmailAndPassword(auth, email, password);
+        initUser(user.user);
+      } catch (e) {
+        alert("Login failed: " + e.message);
+      }
+    }
+
+    async function register() {
+      const email = regEmail.value;
+      const password = regPassword.value;
+      const refCode = refCode.value;
       const userCred = await createUserWithEmailAndPassword(auth, email, password);
       await setDoc(doc(db, "users", userCred.user.uid), {
         email,
@@ -145,131 +142,92 @@
         referredBy: refCode || null
       });
       if (refCode) {
-        const q = query(collection(db, "users"));
-        const snap = await getDocs(q);
-        snap.forEach(async userDoc => {
-          if (userDoc.id === refCode) {
-            await updateDoc(doc(db, "users", refCode), {
-              referrals: increment(1)
-            });
-          }
-        });
+        const refUser = doc(db, "users", refCode);
+        const refSnap = await getDoc(refUser);
+        if (refSnap.exists()) {
+          await updateDoc(refUser, { referrals: increment(1) });
+        }
       }
-      login();
-    };
-
-    window.login = async () => {
-      try {
-        const email = $("loginEmail").value;
-        const password = $("loginPassword").value;
-        const userCred = await signInWithEmailAndPassword(auth, email, password);
-        init(userCred.user);
-      } catch (e) {
-        alert("Login failed");
-      }
-    };
-
-    const init = async user => {
-      $("login").classList.remove("active");
-      $("navTabs").classList.remove("hidden");
-      navigate("wallet");
-      const snap = await getDoc(doc(db, "users", user.uid));
-      const data = snap.data();
-      $("userEmail").innerText = data.email;
-      $("userBalance").innerText = data.balance.toFixed(2);
-      $("userStatus").innerText = data.verified ? "✅ Verified" : "Not Verified";
-      $("referralLink").value = `${location.origin}?ref=${user.uid}`;
-      $("refCount").innerText = data.referrals;
-      loadLeaderboard();
-    };
-
-    window.verify = async () => {
-      const user = auth.currentUser;
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
-      const d = snap.data();
-      if (d.balance >= 1.5) {
-        await updateDoc(ref, { verified: true, balance: d.balance - 1.5 });
-        alert("Verified successfully");
-      } else alert("Insufficient funds");
-    };
-
-    window.deposit = () => {
-      window.open("https://paystack.com/buy/lilzok-vjmgrv", "_blank");
-    };
-
-    window.withdraw = async () => {
-      const user = auth.currentUser;
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
-      const d = snap.data();
-      if (d.balance >= 4) {
-        await updateDoc(ref, { balance: d.balance - 4 });
-        alert("Withdraw success");
-      } else alert("Min $4 to withdraw");
-    };
-
-    window.buy = async () => {
-      const user = auth.currentUser;
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
-      const d = snap.data();
-      if (d.balance >= 2) {
-        await updateDoc(ref, { balance: d.balance - 2 });
-        await addDoc(collection(db, "resales"), { price: 2.6, time: Date.now() });
-        alert("Bought successfully");
-      } else alert("Insufficient funds");
-    };
-
-    window.sell = async () => {
-      const user = auth.currentUser;
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
-      const d = snap.data();
-      if (d.verified) {
-        await updateDoc(ref, { balance: d.balance + 2.6 });
-        alert("Sold successfully");
-      } else alert("You must be verified to sell");
-    };
-
-    function loadLeaderboard() {
-      const q = query(collection(db, "users"), orderBy("referrals", "desc"), limit(10));
-      getDocs(q).then(snap => {
-        let html = '<ol>';
-        snap.forEach(docu => {
-          const d = docu.data();
-          html += `<li>${d.email}: ${d.referrals} referrals</li>`;
-        });
-        html += '</ol>';
-        $("leaderboardList").innerHTML = html;
-      });
+      loginEmail.value = email;
+      loginPassword.value = password;
+      toggleSection('auth');
     }
 
-    onSnapshot(collection(db, "resales"), snap => {
-      const data = snap.docs.map(doc => doc.data().price);
-      if (chart) {
-        chart.data.labels = data.map((_, i) => i);
-        chart.data.datasets[0].data = data;
-        chart.update();
-      }
-      $("currentPrice").innerText = data[data.length - 1]?.toFixed(2) || '2.00';
+    async function initUser(user) {
+      document.getElementById("tabs").classList.remove("hidden");
+      toggleSection("wallet");
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      userEmail.textContent = data.email;
+      balance.textContent = data.balance.toFixed(2);
+      verifyStatus.textContent = data.verified ? "✅ Verified" : "Not Verified";
+      referralLink.value = `${location.origin}?ref=${user.uid}`;
+      referralCount.textContent = data.referrals;
+    }
+
+    async function verifyUser() {
+      const user = auth.currentUser;
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      if (data.balance >= 1.5) {
+        await updateDoc(ref, { balance: data.balance - 1.5, verified: true });
+        alert("Verification successful");
+        verifyStatus.textContent = "✅ Verified";
+      } else alert("Insufficient balance");
+    }
+
+    async function buyCommodity() {
+      const user = auth.currentUser;
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      if (data.balance >= 2) {
+        await updateDoc(ref, { balance: data.balance - 2 });
+        await addDoc(collection(db, "chart"), { price: 2.6, time: Date.now() });
+        alert("Purchase successful");
+      } else alert("Insufficient balance");
+    }
+
+    async function sellCommodity() {
+      const user = auth.currentUser;
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      if (data.verified) {
+        await updateDoc(ref, { balance: data.balance + 2.6 });
+        alert("Sale complete");
+      } else alert("Only verified users can sell");
+    }
+
+    function depositFunds() {
+      window.open("https://paystack.com/buy/lilzok-vjmgrv", "_blank");
+    }
+
+    async function withdrawFunds() {
+      const user = auth.currentUser;
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      if (data.balance >= 4) {
+        await updateDoc(ref, { balance: data.balance - 4 });
+        alert("Withdraw processed");
+      } else alert("Minimum $4 required");
+    }
+
+    onAuthStateChanged(auth, user => {
+      if (user) initUser(user);
     });
 
-    let chart;
-    setTimeout(() => {
-      chart = new Chart($("liveChart"), {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: [{ label: 'Price', borderColor: 'gold', data: [] }]
-        },
-        options: {
-          responsive: true,
-          scales: { x: { display: false } }
-        }
-      });
-    }, 500);
+    window.login = login;
+    window.register = register;
+    window.verifyUser = verifyUser;
+    window.buyCommodity = buyCommodity;
+    window.sellCommodity = sellCommodity;
+    window.depositFunds = depositFunds;
+    window.withdrawFunds = withdrawFunds;
 
-    onAuthStateChanged(auth, user => { if (user) init(user); });
+    initChart();
   </script></body>
 </html>
