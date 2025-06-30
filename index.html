@@ -9,39 +9,24 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: black;
-      color: gold;
-    }
+    body { margin: 0; font-family: Arial; background: #000; color: gold; }
     .tab-bar {
-      position: fixed;
-      bottom: 0;
-      display: flex;
-      width: 100%;
-      background: #111;
+      position: fixed; bottom: 0; width: 100%; display: flex;
+      background: #111; border-top: 1px solid #333;
     }
     .tab-bar button {
-      flex: 1;
-      padding: 1rem;
-      color: gold;
-      background: none;
-      border: none;
-      font-weight: bold;
+      flex: 1; padding: 1rem; background: none; border: none;
+      color: gold; font-weight: bold;
     }
-    .page {
-      display: none;
-      padding: 1rem;
-      padding-bottom: 60px;
-    }
+    .page { display: none; padding: 1rem; padding-bottom: 70px; }
     .active { display: block; }
-    canvas { background: #222; margin-top: 1rem; }
-    input, button {
-      width: 100%;
-      padding: 0.6rem;
-      margin: 0.5rem 0;
+    input, button, select {
+      width: 100%; padding: 0.6rem; margin: 0.5rem 0;
+      background: #111; border: 1px solid gold; color: gold;
     }
+    .chart-box { background: #111; padding: 1rem; border-radius: 8px; }
+    canvas { background: #000; border: 1px solid gold; margin-top: 10px; }
+    .buy-sell-box { background: #111; border-radius: 8px; padding: 1rem; margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -50,8 +35,8 @@
   <!-- Login Page -->
   <div id="loginPage" class="page active">
     <h3>Login or Register</h3>
-    <input id="email" placeholder="Email" type="email" />
-    <input id="password" placeholder="Password" type="password" />
+    <input id="emailInput" placeholder="Email" type="email" />
+    <input id="passwordInput" placeholder="Password" type="password" />
     <button onclick="register()">Register</button>
     <button onclick="login()">Login</button>
   </div>
@@ -60,21 +45,27 @@
   <div id="homePage" class="page">
     <h3>Welcome <span id="userEmail"></span></h3>
     <p>Balance: $<span id="balance">0.00</span></p>
-    <p>Referral Code: <span id="refCode"></span></p>
-    <canvas id="priceChart" height="120"></canvas>
+    <p>Gold: <span id="goldCount">0</span> | Diamond: <span id="diamondCount">0</span> | SOL: <span id="solCount">0</span></p>
+    <div class="chart-box">
+      <h4>📈 Live Price Chart</h4>
+      <canvas id="priceChart" height="120"></canvas>
+    </div>
   </div>
 
   <!-- Market Page -->
   <div id="marketPage" class="page">
-    <h3>Market</h3>
-    <p>Buy for $2:</p>
-    <button onclick="buy('Gold')">Buy Gold</button>
-    <button onclick="buy('Diamond')">Buy Diamond</button>
-    <button onclick="buy('SOL')">Buy SOL</button>
-    <p>Sell for $2.60 (Verified only):</p>
-    <button onclick="sell('Gold')">Sell Gold</button>
-    <button onclick="sell('Diamond')">Sell Diamond</button>
-    <button onclick="sell('SOL')">Sell SOL</button>
+    <h3>Buy Commodities ($2 each)</h3>
+    <div class="buy-sell-box">
+      <button onclick="buy('gold')">Buy Gold</button>
+      <button onclick="buy('diamond')">Buy Diamond</button>
+      <button onclick="buy('sol')">Buy SOL</button>
+    </div>
+    <h3>Sell Commodities ($2.60)</h3>
+    <div class="buy-sell-box">
+      <button onclick="sell('gold')">Sell Gold</button>
+      <button onclick="sell('diamond')">Sell Diamond</button>
+      <button onclick="sell('sol')">Sell SOL</button>
+    </div>
   </div>
 
   <!-- Wallet Page -->
@@ -87,18 +78,17 @@
 
   <!-- Earn Page -->
   <div id="earnPage" class="page">
-    <h3>Verify ID</h3>
-    <input id="idUrl" placeholder="Paste ID Image URL" />
-    <button onclick="uploadID()">Submit</button>
+    <h3>Verify Your ID</h3>
+    <input id="idUrl" placeholder="Paste your ID image URL here" />
+    <button onclick="uploadID()">Submit ID</button>
     <p id="verifyStatus"></p>
+    <p id="referralStatus"></p>
   </div>
 
-  <!-- Leaderboard -->
+  <!-- Leaderboard Page -->
   <div id="leaderboardPage" class="page">
-    <h3>Top Earners</h3>
-    <ul id="topEarners"></ul>
-    <h3>Top Referrals</h3>
-    <ul id="topReferrals"></ul>
+    <h3>Top Earners</h3><ul id="topEarners"></ul>
+    <h3>Top Referrers</h3><ul id="topReferrals"></ul>
   </div>
 
   <!-- Profile Page -->
@@ -106,12 +96,11 @@
     <h3>My Profile</h3>
     <p>Email: <span id="profileEmail"></span></p>
     <p>Status: <span id="profileVerified"></span></p>
-    <p>Total Earnings: $<span id="profileEarnings">0</span></p>
-    <h4>Resell History</h4>
-    <ul id="resellLog"></ul>
+    <p>Total Earnings: $<span id="profileEarnings">0.00</span></p>
+    <h4>Resell History</h4><ul id="resellLog"></ul>
   </div>
 
-  <!-- Navigation -->
+  <!-- Tab Navigation -->
   <div class="tab-bar">
     <button onclick="showPage('homePage')">🏠</button>
     <button onclick="showPage('marketPage')">🛒</button>
@@ -136,6 +125,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
     let currentUser = null;
+    let chart;
 
     function showPage(id) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -150,19 +140,17 @@
       auth.createUserWithEmailAndPassword(email, pass).then(cred => {
         const bal = email === 'eluxxes@gmail.com' ? 10 : 0;
         return db.collection('users').doc(cred.user.uid).set({
-          email, balance: bal, earnings: 0, referrals: 0, verified: false, uid: cred.user.uid
+          email, balance: bal, earnings: 0, referrals: 0, verified: false,
+          gold: 0, diamond: 0, sol: 0, uid: cred.user.uid
         });
-      }).then(() => login());
+      }).then(login);
     }
 
     function login() {
-      const email = emailInput.value;
-      const pass = passwordInput.value;
-      auth.signInWithEmailAndPassword(email, pass).then(cred => {
+      auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value).then(cred => {
         currentUser = cred.user;
         showPage('homePage');
-        loadUser();
-        loadChart();
+        loadUser(); initChart(); loadChartLoop();
       });
     }
 
@@ -171,16 +159,51 @@
       ref.onSnapshot(doc => {
         const d = doc.data();
         userEmail.innerText = d.email;
+        profileEmail.innerText = d.email;
+        profileVerified.innerText = d.verified ? '✔ Verified' : 'Not Verified';
         balance.innerText = d.balance.toFixed(2);
         walletBalance.innerText = d.balance.toFixed(2);
-        refCode.innerText = currentUser.uid;
-        verifyStatus.innerText = d.verified ? '✔ Verified' : 'Not Verified';
+        profileEarnings.innerText = d.earnings.toFixed(2);
+        goldCount.innerText = d.gold || 0;
+        diamondCount.innerText = d.diamond || 0;
+        solCount.innerText = d.sol || 0;
+        verifyStatus.innerText = d.verified ? 'You are verified ✅' : 'Upload ID to verify';
+        referralStatus.innerText = `Referrals: ${d.referrals}/8`;
+      });
+    }
+
+    function buy(type) {
+      const ref = db.collection('users').doc(currentUser.uid);
+      db.runTransaction(async t => {
+        const snap = await t.get(ref); const d = snap.data();
+        if (d.balance >= 2) {
+          let update = { balance: d.balance - 2 };
+          update[type] = (d[type] || 0) + 1;
+          t.update(ref, update);
+          alert(`${type} bought.`);
+        } else alert('Insufficient funds');
+      });
+    }
+
+    function sell(type) {
+      const ref = db.collection('users').doc(currentUser.uid);
+      ref.get().then(doc => {
+        const d = doc.data(); if (!d.verified) return alert('Only verified users can sell.');
+        if (d[type] < 1) return alert('You don’t own any of this commodity.');
+        const earn = 2.45;
+        ref.update({
+          balance: d.balance + earn,
+          earnings: (d.earnings || 0) + earn,
+          [type]: d[type] - 1
+        });
+        db.collection('resells').add({ uid: currentUser.uid, item: type, amount: earn, time: new Date().toLocaleString() });
+        alert(`${type} sold. $2.45 credited.`);
       });
     }
 
     function deposit() {
       window.open('https://paystack.com/buy/lilzok-vjmgrv', '_blank');
-      alert('Deposit ₦1000 via Paystack. Your balance will be updated manually.');
+      alert('Deposit ₦1000 via Paystack. Balance will be updated manually.');
     }
 
     function withdraw() {
@@ -189,68 +212,36 @@
         const d = doc.data();
         if (d.balance >= 4) {
           ref.update({ balance: d.balance - 4 });
-          alert('Withdrawal of $4 processed (manually).');
-        } else {
-          alert('Minimum $4 required.');
-        }
-      });
-    }
-
-    function buy(item) {
-      const ref = db.collection('users').doc(currentUser.uid);
-      db.runTransaction(async t => {
-        const docSnap = await t.get(ref);
-        const d = docSnap.data();
-        if (d.balance >= 2) {
-          t.update(ref, { balance: d.balance - 2 });
-          alert(item + ' bought.');
-        } else alert('Insufficient funds');
-      });
-    }
-
-    function sell(item) {
-      const ref = db.collection('users').doc(currentUser.uid);
-      ref.get().then(doc => {
-        const d = doc.data();
-        if (!d.verified) return alert('You must be verified.');
-        const amt = 2.45;
-        ref.update({
-          balance: d.balance + amt,
-          earnings: (d.earnings || 0) + amt
-        });
-        db.collection('resells').add({
-          uid: currentUser.uid,
-          email: d.email,
-          item, amount: amt,
-          time: new Date().toLocaleString()
-        });
-        alert('Sold for $2.60 (you get $2.45)');
+          alert('Withdraw request of $4 successful.');
+        } else alert('Minimum $4 required.');
       });
     }
 
     function uploadID() {
       const url = idUrl.value;
-      if (!url) return alert('Paste ID URL');
-      db.collection('users').doc(currentUser.uid).update({
-        verified: true, id_uploaded: true, id_url: url
-      });
-      alert('Verified. You can now sell.');
+      if (!url) return alert('Paste your ID image link.');
+      db.collection('users').doc(currentUser.uid).update({ verified: true, id_uploaded: true, id_url: url });
+      alert('ID submitted. You are now verified!');
     }
 
-    function loadChart() {
+    function initChart() {
       const ctx = document.getElementById('priceChart').getContext('2d');
-      const chart = new Chart(ctx, {
+      chart = new Chart(ctx, {
         type: 'line',
-        data: { labels: [], datasets: [{ label: 'Price', data: [], borderColor: 'gold' }] },
-        options: { scales: { y: { beginAtZero: true } } }
+        data: { labels: [], datasets: [{ label: 'Price Index', data: [], borderColor: 'gold', fill: false }] },
+        options: { animation: false, scales: { y: { beginAtZero: true } } }
       });
+    }
+
+    function loadChartLoop() {
       setInterval(() => {
         db.collection('settings').doc('prices').get().then(doc => {
-          const data = doc.data();
+          const d = doc.data();
           const now = new Date().toLocaleTimeString();
+          const avg = (d.gold + d.diamond + d.sol) / 3;
           chart.data.labels.push(now);
-          chart.data.datasets[0].data.push((data.gold + data.diamond + data.sol) / 3);
-          if (chart.data.labels.length > 10) {
+          chart.data.datasets[0].data.push(avg);
+          if (chart.data.labels.length > 15) {
             chart.data.labels.shift();
             chart.data.datasets[0].data.shift();
           }
@@ -261,15 +252,13 @@
 
     function loadLeaderboard() {
       db.collection('users').orderBy('earnings', 'desc').limit(5).get().then(snap => {
-        topEarners.innerHTML = '';
-        snap.forEach(doc => {
+        topEarners.innerHTML = ''; snap.forEach(doc => {
           const d = doc.data();
           topEarners.innerHTML += `<li>${d.email}: $${d.earnings.toFixed(2)}</li>`;
         });
       });
       db.collection('users').orderBy('referrals', 'desc').limit(5).get().then(snap => {
-        topReferrals.innerHTML = '';
-        snap.forEach(doc => {
+        topReferrals.innerHTML = ''; snap.forEach(doc => {
           const d = doc.data();
           topReferrals.innerHTML += `<li>${d.email}: ${d.referrals} referrals</li>`;
         });
@@ -277,13 +266,6 @@
     }
 
     function loadProfile() {
-      const ref = db.collection('users').doc(currentUser.uid);
-      ref.get().then(doc => {
-        const d = doc.data();
-        profileEmail.innerText = d.email;
-        profileVerified.innerText = d.verified ? '✔ Verified' : 'Not Verified';
-        profileEarnings.innerText = d.earnings.toFixed(2);
-      });
       db.collection('resells').where('uid', '==', currentUser.uid).get().then(snap => {
         resellLog.innerHTML = '';
         snap.forEach(doc => {
@@ -294,4 +276,4 @@
     }
   </script>
 </body>
-</html>
+        </html
