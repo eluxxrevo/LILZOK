@@ -1,377 +1,177 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Elsa - The Supreme Coin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elsa - The Supreme</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
     body {
-      background: linear-gradient(to bottom, #0a0a0a, #111);
-      color: #f3f3f3;
-      font-family: 'Segoe UI', sans-serif;
-    }
-    .badge {
-      background: gold;
-      color: black;
-      padding: 2px 6px;
-      font-size: 0.7rem;
-      border-radius: 6px;
-      margin-left: 6px;
-    }
-    .tab-icon {
-      width: 24px;
-      height: 24px;
-    }
-    .tab-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      display: flex;
-      justify-content: space-around;
-      padding: 10px;
-      background: #0f0f0f;
-      border-top: 1px solid #333;
-    }
-    .active-tab {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0d0d0d;
       color: gold;
     }
-    .hidden-tab {
-      display: none;
-    }
-    .loader {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      flex-direction: column;
-      font-size: 2rem;
-      color: gold;
-      animation: fadeOut 1s ease-in-out 3s forwards;
-    }
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        visibility: hidden;
-      }
-    }
+    .hidden { display: none; }
+    .chart-container { height: 60vh; width: 100%; }
   </style>
 </head>
 <body>
-
-<!-- Loading Animation -->
-<div id="loading" class="loader">
-  <p>The Supreme</p>
-  <p>ELSA</p>
-</div>
-
-<!-- Language Selection -->
-<div id="languageSelect" class="text-center mt-20 hidden">
-  <h2 class="text-xl mb-4">Select Language</h2>
-  <button onclick="selectLanguage('en')" class="bg-gold px-4 py-2 rounded-full mx-2">English</button>
-  <button onclick="selectLanguage('fr')" class="bg-gold px-4 py-2 rounded-full mx-2">Français</button>
-</div>
-
-<!-- Auth Page -->
-<div id="authPage" class="hidden text-center mt-10">
-  <h2 class="text-2xl mb-4">Login / Register</h2>
-  <input type="email" id="email" placeholder="Email" class="mb-2 px-4 py-2 border rounded w-4/5"/><br>
-  <input type="password" id="password" placeholder="Password" class="mb-4 px-4 py-2 border rounded w-4/5"/><br>
-  <input type="text" id="referralCode" placeholder="Referral Code (Optional)" class="mb-4 px-4 py-2 border rounded w-4/5"/><br>
-  <button onclick="loginOrRegister()" class="bg-gold text-black px-6 py-2 rounded-full">Enter</button>
-  <p id="authError" class="text-red-500 mt-3"></p>
-</div>
-
-<!-- Main App Pages -->
-<div id="mainApp" class="hidden">
-
-  <!-- Page Content Placeholder -->
-  <div id="pageContainer">
-    <!-- PAGE CONTENT WILL GO HERE -->
+  <!-- Splash Screen -->
+  <div id="splash" class="fixed inset-0 flex flex-col justify-center items-center bg-black text-gold z-50">
+    <h1 class="text-4xl mb-2 animate-pulse font-bold">THE SUPREME</h1>
+    <img src="https://cdn-icons-png.flaticon.com/512/535/535239.png" alt="Elsa" class="w-20 h-20 animate-bounce">
+  </div>  <!-- Language Selection -->  <div id="languageSelect" class="hidden fixed inset-0 bg-black flex flex-col justify-center items-center">
+    <h2 class="text-xl mb-4">Select Language</h2>
+    <button onclick="startApp('en')" class="bg-gold text-black px-4 py-2 mb-2">English</button>
+    <button onclick="startApp('fr')" class="bg-gold text-black px-4 py-2">Français</button>
+  </div>  <!-- Login/Register Form -->  <div id="authForm" class="hidden p-6">
+    <h2 id="formTitle" class="text-2xl font-bold mb-4">Login</h2>
+    <input type="email" id="authEmail" placeholder="Email" class="w-full mb-2 p-2 bg-gray-800 text-white rounded">
+    <input type="password" id="authPassword" placeholder="Password" class="w-full mb-2 p-2 bg-gray-800 text-white rounded">
+    <button onclick="login()" id="loginBtn" class="w-full bg-gold text-black p-2 rounded mb-2">Login</button>
+    <button onclick="register()" id="registerBtn" class="w-full bg-gold text-black p-2 rounded">Register</button>
+    <p id="authError" class="text-red-500 text-sm mt-2 hidden"></p>
+  </div>  <!-- App Navigation & Pages -->  <div id="mainApp" class="hidden">
+    <nav class="fixed bottom-0 left-0 right-0 bg-black flex justify-around border-t border-gold">
+      <button onclick="showPage('chart')"><i class="fas fa-chart-line"></i></button>
+      <button onclick="showPage('buy')"><i class="fas fa-coins"></i></button>
+      <button onclick="showPage('wallet')"><i class="fas fa-wallet"></i></button>
+      <button onclick="showPage('leaderboard')"><i class="fas fa-trophy"></i></button>
+      <button onclick="showPage('profile')"><i class="fas fa-user"></i></button>
+    </nav><!-- Chart Page -->
+<div id="page-chart" class="p-4 chart-container">
+  <canvas id="elsaChart"></canvas>
+  <div class="mt-4">
+    <label>Enter amount ($):</label>
+    <input type="number" id="buyAmount" class="w-full p-2 bg-gray-800 text-white rounded" min="2">
+    <button onclick="buyElsa()" class="bg-green-500 w-full py-2 rounded mt-2">Buy Elsa</button>
+    <button onclick="resellElsa()" class="bg-yellow-600 w-full py-2 rounded mt-2">Resell Elsa</button>
   </div>
-
-  <!-- Navigation -->
-  <div class="tab-bar">
-    <button onclick="navigateTo('chart')" id="tab-chart" class="active-tab">
-      <img src="https://img.icons8.com/ios-filled/50/gold/combo-chart.png" class="tab-icon"/>
-    </button>
-    <button onclick="navigateTo('wallet')" id="tab-wallet">
-      <img src="https://img.icons8.com/ios-filled/50/gold/wallet-app.png" class="tab-icon"/>
-    </button>
-    <button onclick="navigateTo('leaderboard')" id="tab-leaderboard">
-      <img src="https://img.icons8.com/ios-filled/50/gold/leaderboard.png" class="tab-icon"/>
-    </button>
-    <button onclick="navigateTo('profile')" id="tab-profile">
-      <img src="https://img.icons8.com/ios-filled/50/gold/user.png" class="tab-icon"/>
-    </button>
-  </div>
-
 </div>
 
-<!-- FIREBASE CONFIG -->
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyApuMISYyAXo7Xdxa_FAYDG-tHaU5vJA6A",
-  authDomain: "elsa-809c1.firebaseapp.com",
-  projectId: "elsa-809c1",
-  storageBucket: "elsa-809c1.appspot.com",
-  messagingSenderId: "401983741723",
-  appId: "1:401983741723:android:253c41bf6a9011d0483dbe"
-};
-</script>
+<!-- Wallet & Referral Page -->
+<div id="page-wallet" class="hidden p-4">
+  <h3 class="text-xl font-bold">Wallet</h3>
+  <p>Balance: <span id="walletBalance">$0</span></p>
+  <p>Elsa: <span id="elsaBalance">0</span></p>
+  <button onclick="deposit()" class="bg-blue-500 py-2 w-full mt-2 rounded">Deposit</button>
+  <button onclick="withdrawRequest()" class="bg-purple-600 py-2 w-full mt-2 rounded">Withdraw</button>
+  <hr class="my-4">
+  <h3 class="text-xl">Referrals</h3>
+  <p>Link: <span id="referralLink"></span></p>
+  <p>Count: <span id="refCount">0</span> / 8</p>
+</div>
 
-<!-- ACTUAL LOGIC -->
-<script src="elsa-app-logic.js"></script>
+<!-- Leaderboard Page -->
+<div id="page-leaderboard" class="hidden p-4">
+  <h3 class="text-xl font-bold">Top Users</h3>
+  <ul id="leaderList"></ul>
+</div>
 
-</body>
-</html>
-<script>
-let currentUser = null;
-let currentLang = 'en';
+<!-- Profile Page -->
+<div id="page-profile" class="hidden p-4">
+  <h3 class="text-xl">My Profile</h3>
+  <p>ID: <span id="uid"></span></p>
+  <p>Email: <span id="email"></span></p>
+  <button onclick="toggleTheme()" class="bg-yellow-500 mt-2 py-2 w-full rounded">Toggle Theme</button>
+  <button onclick="logout()" class="bg-red-600 mt-2 py-2 w-full rounded">Logout</button>
+</div>
 
-function selectLanguage(lang) {
-  currentLang = lang;
-  document.getElementById('languageSelect').classList.add('hidden');
-  document.getElementById('authPage').classList.remove('hidden');
-}
+  </div>  <script>
+    // Firebase Init
+    const firebaseConfig = {
+      apiKey: "AIzaSyApuMISYyAXo7Xdxa_FAYDG-tHaU5vJA6A",
+      authDomain: "elsa-809c1.firebaseapp.com",
+      projectId: "elsa-809c1",
+      storageBucket: "elsa-809c1.firebasestorage.app",
+      messagingSenderId: "401983741723",
+      appId: "1:401983741723:android:253c41bf6a9011d0483dbe"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-function showError(msg) {
-  const errorBox = document.getElementById('authError');
-  errorBox.innerText = msg;
-  setTimeout(() => errorBox.innerText = "", 3000);
-}
+    // Splash to Language
+    setTimeout(() => {
+      document.getElementById('splash').classList.add('hidden');
+      document.getElementById('languageSelect').classList.remove('hidden');
+    }, 4000);
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-window.onload = () => {
-  setTimeout(() => {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('languageSelect').classList.remove('hidden');
-  }, 4000);
-};
-
-async function loginOrRegister() {
-  const email = document.getElementById("email").value.trim();
-  const pass = document.getElementById("password").value.trim();
-  const ref = document.getElementById("referralCode").value.trim();
-
-  if (!email || !pass) return showError("Fill all fields");
-
-  try {
-    const result = await auth.signInWithEmailAndPassword(email, pass);
-    afterLogin(result.user);
-  } catch (e) {
-    if (e.code === "auth/user-not-found") {
-      try {
-        const reg = await auth.createUserWithEmailAndPassword(email, pass);
-        await db.collection("users").doc(reg.user.uid).set({
-          email,
-          balance: 0,
-          elsa: 0,
-          referrals: 0,
-          refLink: reg.user.uid.slice(0, 8),
-          referredBy: ref || null,
-          verified: false,
-          lord: false,
-          history: []
-        });
-
-        // Add referral count to referrer
-        if (ref) {
-          const refQuery = await db.collection("users").where("refLink", "==", ref).get();
-          if (!refQuery.empty) {
-            const refDoc = refQuery.docs[0];
-            await db.collection("users").doc(refDoc.id).update({
-              referrals: firebase.firestore.FieldValue.increment(1)
-            });
-          }
-        }
-
-        afterLogin(reg.user);
-      } catch (err) {
-        showError("Invalid registration");
-      }
-    } else {
-      showError("Invalid login");
+    // Start App with Language
+    function startApp(lang) {
+      document.getElementById('languageSelect').classList.add('hidden');
+      document.getElementById('authForm').classList.remove('hidden');
     }
-  }
-}
 
-function afterLogin(user) {
-  currentUser = user;
-  if (user.email === "eluxxes@gmail.com") {
-    db.collection("users").doc(user.uid).update({ elsa: 2000 });
-  }
-  document.getElementById("authPage").classList.add("hidden");
-  document.getElementById("mainApp").classList.remove("hidden");
-  loadPage("chart");
-}
+    // Auth Functions
+    function login() {
+      const email = document.getElementById('authEmail').value;
+      const password = document.getElementById('authPassword').value;
+      auth.signInWithEmailAndPassword(email, password)
+        .then(user => initApp(user.user))
+        .catch(() => showError('Invalid login'));
+    }
 
-function navigateTo(page) {
-  document.querySelectorAll(".tab-bar button").forEach(btn => btn.classList.remove("active-tab"));
-  document.getElementById(`tab-${page}`).classList.add("active-tab");
-  loadPage(page);
-}
+    function register() {
+      const email = document.getElementById('authEmail').value;
+      const password = document.getElementById('authPassword').value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(user => {
+          db.collection("users").doc(user.user.uid).set({ balance: 0, elsa: 0, referrals: 0 });
+          initApp(user.user);
+        })
+        .catch(() => showError('Invalid registration'));
+    }
 
-function loadPage(page) {
-  if (!currentUser) return;
-  const pageContainer = document.getElementById("pageContainer");
-  if (page === "chart") {
-    pageContainer.innerHTML = `
-      <div class="p-4">
-        <h2 class="text-xl mb-2">Live Elsa Chart</h2>
-        <div id="chart" class="w-full h-60 mb-4"></div>
-        <div class="flex items-center space-x-2">
-          <input id="buyAmount" type="number" min="2" placeholder="Amount $" class="border px-2 py-1 rounded w-1/2" />
-          <button onclick="buyElsa()" class="bg-yellow-500 text-black px-4 py-1 rounded">Buy</button>
-        </div>
-        <div class="mt-3">
-          <button onclick="resellElsa()" class="bg-green-500 text-white px-4 py-2 rounded">Resell</button>
-        </div>
-      </div>
-    `;
-    renderChart();
-  }
+    function showError(msg) {
+      const err = document.getElementById('authError');
+      err.innerText = msg;
+      err.classList.remove('hidden');
+      setTimeout(() => err.classList.add('hidden'), 3000);
+    }
 
-  if (page === "wallet") {
-    db.collection("users").doc(currentUser.uid).get().then(doc => {
-      const data = doc.data();
-      pageContainer.innerHTML = `
-        <div class="p-4">
-          <h2 class="text-xl mb-2">Wallet</h2>
-          <p>Balance: $${data.balance}</p>
-          <p>Elsa: ${data.elsa.toFixed(3)}</p>
-          <div class="mt-3">
-            <button onclick="location.href='https://paystack.com/buy/lilzok-vjmgrv'" class="bg-blue-500 text-white px-4 py-2 rounded">Deposit</button>
-            <button onclick="withdrawPage()" class="bg-purple-500 text-white px-4 py-2 rounded ml-2">Withdraw</button>
-          </div>
-        </div>
-      `;
+    // Init App
+    function initApp(user) {
+      document.getElementById('authForm').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      document.getElementById('uid').textContent = user.uid;
+      document.getElementById('email').textContent = user.email;
+      document.getElementById('referralLink').textContent = `https://elsa.app/register?ref=${user.uid}`;
+      loadWallet(user.uid);
+    }
+
+    function showPage(page) {
+      document.querySelectorAll('[id^="page-"]').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`page-${page}`).classList.remove('hidden');
+    }
+
+    function logout() {
+      auth.signOut();
+      location.reload();
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('bg-black');
+      document.body.classList.toggle('bg-white');
+    }
+
+    // Dummy Chart Setup (you will link with Firestore next)
+    const ctx = document.getElementById('elsaChart').getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'candlestick', // Simulate candle chart
+      data: {
+        datasets: [{
+          label: 'Elsa Price',
+          data: [
+            {o: 2000, h: 2100, l: 1950, c: 2050, t: 1},
+            {o: 2050, h: 2150, l: 2000, c: 2100, t: 2},
+          ]
+        }]
+      }
     });
-  }
-
-  if (page === "leaderboard") {
-    db.collection("users").orderBy("referrals", "desc").limit(10).get().then(snapshot => {
-      let html = `<div class="p-4"><h2 class="text-xl mb-2">Leaderboard</h2>`;
-      snapshot.forEach((doc, i) => {
-        html += `<p>${i+1}. ${doc.data().email} - ${doc.data().referrals} refs</p>`;
-      });
-      html += `</div>`;
-      pageContainer.innerHTML = html;
-    });
-  }
-
-  if (page === "profile") {
-    db.collection("users").doc(currentUser.uid).get().then(doc => {
-      const data = doc.data();
-      pageContainer.innerHTML = `
-        <div class="p-4">
-          <h2 class="text-xl mb-2">Profile</h2>
-          <p><strong>Email:</strong> ${data.email}</p>
-          <p><strong>ID:</strong> ${currentUser.uid}</p>
-          <p><strong>Ref Link:</strong> <span class="text-blue-400">${data.refLink}</span></p>
-          <p><strong>Referrals:</strong> ${data.referrals}</p>
-          ${data.verified ? `<p class="badge">Verified</p>` : `<p>Not Verified</p>`}
-          <div class="mt-3">
-            <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded">Logout</button>
-          </div>
-        </div>
-      `;
-    });
-  }
-}
-
-function logout() {
-  auth.signOut().then(() => location.reload());
-}
-
-function renderChart() {
-  const chart = new ApexCharts(document.querySelector("#chart"), {
-    chart: { type: 'candlestick', height: 300 },
-    series: [{
-      data: generateCandles()
-    }],
-    xaxis: { type: 'datetime' }
-  });
-  chart.render();
-}
-
-function generateCandles() {
-  const base = new Date().getTime();
-  const series = [];
-  let open = 2000;
-
-  for (let i = 0; i < 20; i++) {
-    const high = open + Math.random() * 100;
-    const low = open - Math.random() * 80;
-    const close = low + Math.random() * (high - low);
-    series.push({
-      x: base + i * 60000,
-      y: [open, high, low, close]
-    });
-    open = close;
-  }
-
-  return series;
-}
-
-function buyElsa() {
-  const amount = parseFloat(document.getElementById("buyAmount").value);
-  if (amount < 2) return alert("Minimum $2");
-  const elsa = amount / 2000;
-
-  db.collection("users").doc(currentUser.uid).update({
-    elsa: firebase.firestore.FieldValue.increment(elsa),
-    balance: firebase.firestore.FieldValue.increment(-amount)
-  });
-
-  alert(`Purchased ${elsa.toFixed(3)} Elsa`);
-}
-
-function resellElsa() {
-  db.collection("users").doc(currentUser.uid).get().then(doc => {
-    const user = doc.data();
-    if (!user.verified) return alert("Verify account before reselling");
-
-    const profit = user.elsa * 2000 * 0.9;
-    db.collection("users").doc(currentUser.uid).update({
-      elsa: 0,
-      balance: firebase.firestore.FieldValue.increment(profit)
-    });
-
-    alert(`Resold for $${profit.toFixed(2)} (10% fee applied)`);
-  });
-}
-
-function withdrawPage() {
-  const amt = prompt("Enter amount to withdraw");
-  const bank = prompt("Enter bank: Opay, Kuda, FirstBank, Zenith, etc.");
-  const acct = prompt("Enter wallet/account number");
-
-  if (!amt || !bank || !acct) return;
-
-  db.collection("withdrawals").add({
-    uid: currentUser.uid,
-    amount: parseFloat(amt),
-    bank,
-    acct,
-    status: "pending",
-    time: Date.now()
-  });
-
-  alert("Withdrawal request sent. You will receive it within 2 hours.");
-}
-</script>
+  </script></body>
+</html>
