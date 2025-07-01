@@ -3,401 +3,375 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Elsa Coin - The Supreme</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
+  <title>Elsa - The Supreme Coin</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
   <style>
     body {
-      margin: 0;
-      font-family: 'Roboto', sans-serif;
-      background: linear-gradient(to bottom, #000000, #111111);
-      color: #fff;
-      overflow: hidden;
+      background: linear-gradient(to bottom, #0a0a0a, #111);
+      color: #f3f3f3;
+      font-family: 'Segoe UI', sans-serif;
     }
-    .splash {
+    .badge {
+      background: gold;
+      color: black;
+      padding: 2px 6px;
+      font-size: 0.7rem;
+      border-radius: 6px;
+      margin-left: 6px;
+    }
+    .tab-icon {
+      width: 24px;
+      height: 24px;
+    }
+    .tab-bar {
       position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      background: #0f0f0f;
+      border-top: 1px solid #333;
+    }
+    .active-tab {
+      color: gold;
+    }
+    .hidden-tab {
+      display: none;
+    }
+    .loader {
+      position: fixed;
+      top: 0; left: 0;
       width: 100%;
       height: 100%;
       background: black;
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
       z-index: 9999;
-    }
-    .splash h1 {
-      font-size: 2.5em;
-      color: gold;
-    }
-    .splash p {
-      font-size: 1.2em;
-      color: #aaa;
-    }
-    .hidden { display: none; }
-    .tab-bar {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      background: #111;
-      border-top: 1px solid #333;
-    }
-    .tab-bar button {
-      flex: 1;
-      padding: 10px;
-      background: none;
-      border: none;
-      color: white;
-      font-size: 14px;
-    }
-    .tab-bar button.active {
-      color: gold;
-    }
-    .page {
-      display: none;
-      padding: 20px;
-      height: calc(100vh - 60px);
-      overflow-y: auto;
-    }
-    .page.active {
-      display: block;
-    }
-    .login, .register {
-      display: flex;
       flex-direction: column;
-      gap: 10px;
-      max-width: 300px;
-      margin: auto;
-      margin-top: 20vh;
+      font-size: 2rem;
+      color: gold;
+      animation: fadeOut 1s ease-in-out 3s forwards;
     }
-    input, select {
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: none;
-    }
-    button {
-      background: gold;
-      color: #000;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .chart-box {
-      width: 100%;
-      height: 70vh;
-      background: #000;
-      border: 1px solid #333;
-      margin-bottom: 10px;
-    }
-    .action-box {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .tooltip {
-      background: #222;
-      color: #fff;
-      padding: 5px 10px;
-      border-radius: 3px;
-      font-size: 12px;
-      position: absolute;
-      top: 5px;
-      right: 5px;
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
     }
   </style>
 </head>
 <body>
 
-<!-- Splash Animation -->
-<div class="splash" id="splash">
-  <h1>The Supreme</h1>
-  <p>Loading Elsa Coin...</p>
+<!-- Loading Animation -->
+<div id="loading" class="loader">
+  <p>The Supreme</p>
+  <p>ELSA</p>
 </div>
 
-<!-- Authentication -->
-<div class="page active" id="languageSelect">
-  <h2>Select Language</h2>
-  <button onclick="nextPage('loginPage')">🇬🇧 English</button>
-  <button onclick="nextPage('loginPage')">🇫🇷 French</button>
+<!-- Language Selection -->
+<div id="languageSelect" class="text-center mt-20 hidden">
+  <h2 class="text-xl mb-4">Select Language</h2>
+  <button onclick="selectLanguage('en')" class="bg-gold px-4 py-2 rounded-full mx-2">English</button>
+  <button onclick="selectLanguage('fr')" class="bg-gold px-4 py-2 rounded-full mx-2">Français</button>
 </div>
 
-<div class="page" id="loginPage">
-  <h2>Login</h2>
-  <form onsubmit="login(event)" class="login">
-    <input type="email" id="loginEmail" placeholder="Email" required/>
-    <input type="password" id="loginPass" placeholder="Password" required/>
-    <button type="submit">Login</button>
-    <button type="button" onclick="nextPage('registerPage')">Register</button>
-    <p id="loginError" style="color:red;"></p>
-  </form>
+<!-- Auth Page -->
+<div id="authPage" class="hidden text-center mt-10">
+  <h2 class="text-2xl mb-4">Login / Register</h2>
+  <input type="email" id="email" placeholder="Email" class="mb-2 px-4 py-2 border rounded w-4/5"/><br>
+  <input type="password" id="password" placeholder="Password" class="mb-4 px-4 py-2 border rounded w-4/5"/><br>
+  <input type="text" id="referralCode" placeholder="Referral Code (Optional)" class="mb-4 px-4 py-2 border rounded w-4/5"/><br>
+  <button onclick="loginOrRegister()" class="bg-gold text-black px-6 py-2 rounded-full">Enter</button>
+  <p id="authError" class="text-red-500 mt-3"></p>
 </div>
 
-<div class="page" id="registerPage">
-  <h2>Register</h2>
-  <form onsubmit="register(event)" class="register">
-    <input type="email" id="regEmail" placeholder="Email" required/>
-    <input type="password" id="regPass" placeholder="Password" required/>
-    <input type="text" id="refCode" placeholder="Referral Code (Optional)" />
-    <button type="submit">Register</button>
-    <button type="button" onclick="nextPage('loginPage')">Back to Login</button>
-    <p id="regError" style="color:red;"></p>
-  </form>
-</div>
+<!-- Main App Pages -->
+<div id="mainApp" class="hidden">
 
-<!-- App Pages -->
-<div class="page" id="chartPage">
-  <h2>Elsa Market</h2>
-  <div class="chart-box" id="liveChart">📈 Loading chart...</div>
-  <div class="action-box">
-    <button onclick="buyElsa()">Buy Elsa</button>
-    <button onclick="sellElsa()">Sell Elsa</button>
+  <!-- Page Content Placeholder -->
+  <div id="pageContainer">
+    <!-- PAGE CONTENT WILL GO HERE -->
   </div>
-  <small>1 Elsa = $2000 | 20M Max Supply</small>
+
+  <!-- Navigation -->
+  <div class="tab-bar">
+    <button onclick="navigateTo('chart')" id="tab-chart" class="active-tab">
+      <img src="https://img.icons8.com/ios-filled/50/gold/combo-chart.png" class="tab-icon"/>
+    </button>
+    <button onclick="navigateTo('wallet')" id="tab-wallet">
+      <img src="https://img.icons8.com/ios-filled/50/gold/wallet-app.png" class="tab-icon"/>
+    </button>
+    <button onclick="navigateTo('leaderboard')" id="tab-leaderboard">
+      <img src="https://img.icons8.com/ios-filled/50/gold/leaderboard.png" class="tab-icon"/>
+    </button>
+    <button onclick="navigateTo('profile')" id="tab-profile">
+      <img src="https://img.icons8.com/ios-filled/50/gold/user.png" class="tab-icon"/>
+    </button>
+  </div>
+
 </div>
 
-<div class="page" id="walletPage">
-  <h2>Wallet</h2>
-  <p><strong>Balance:</strong> $<span id="walletBalance">0.00</span></p>
-  <p><strong>Elsa Owned:</strong> <span id="elsaBalance">0</span> ELSA</p>
-  <button onclick="deposit()">Deposit</button>
-  <button onclick="withdraw()">Withdraw</button>
-  <h4>Transaction History</h4>
-  <div id="txnHistory">None yet.</div>
-</div>
-
-<div class="page" id="profilePage">
-  <h2>Profile</h2>
-  <p><strong>Name:</strong> <span id="userName">-</span></p>
-  <p><strong>Email:</strong> <span id="userEmail">-</span></p>
-  <p><strong>Referral Link:</strong> <input id="refLink" readonly/></p>
-  <p><strong>Referrals:</strong> <span id="refCount">0</span> / 8</p>
-  <p><strong>Verified:</strong> <span id="verifiedBadge">❌</span></p>
-  <button onclick="logout()">Logout</button>
-</div>
-
-<div class="page" id="leaderboardPage">
-  <h2>Leaderboard</h2>
-  <p>🔝 Most Referrals</p>
-  <div id="topReferrals">Loading...</div>
-  <p>💰 Top Earners</p>
-  <div id="topEarners">Loading...</div>
-</div>
-
-<!-- Navigation Tabs -->
-<div class="tab-bar" id="navBar" style="display:none;">
-  <button onclick="showTab('chartPage')" class="active">📈 Home</button>
-  <button onclick="showTab('walletPage')">💳 Wallet</button>
-  <button onclick="showTab('profilePage')">👤 Profile</button>
-  <button onclick="showTab('leaderboardPage')">🏆 Leaderboard</button>
-</div>
-
-<script>
-  // Splash screen timer
-  setTimeout(() => {
-    document.getElementById('splash').style.display = 'none';
-    document.getElementById('languageSelect').classList.add('active');
-  }, 4000);
-
-  function nextPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
-
-  function showTab(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
-    Array.from(document.querySelectorAll('.tab-bar button')).find(b => b.textContent.includes(document.getElementById(id).querySelector('h2').textContent)).classList.add('active');
-  }
-</script>
-
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<!-- FIREBASE CONFIG -->
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyApuMISYyAXo7Xdxa_FAYDG-tHaU5vJA6A",
   authDomain: "elsa-809c1.firebaseapp.com",
   projectId: "elsa-809c1",
-  storageBucket: "elsa-809c1.firebasestorage.app",
+  storageBucket: "elsa-809c1.appspot.com",
   messagingSenderId: "401983741723",
   appId: "1:401983741723:android:253c41bf6a9011d0483dbe"
 };
+</script>
+
+<!-- ACTUAL LOGIC -->
+<script src="elsa-app-logic.js"></script>
+
+</body>
+</html>
+<script>
+let currentUser = null;
+let currentLang = 'en';
+
+function selectLanguage(lang) {
+  currentLang = lang;
+  document.getElementById('languageSelect').classList.add('hidden');
+  document.getElementById('authPage').classList.remove('hidden');
+}
+
+function showError(msg) {
+  const errorBox = document.getElementById('authError');
+  errorBox.innerText = msg;
+  setTimeout(() => errorBox.innerText = "", 3000);
+}
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let currentUser = null;
+window.onload = () => {
+  setTimeout(() => {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('languageSelect').classList.remove('hidden');
+  }, 4000);
+};
 
-// Auth Functions
-function login(e) {
-  e.preventDefault();
-  const email = loginEmail.value;
-  const pass = loginPass.value;
-  auth.signInWithEmailAndPassword(email, pass).then(user => {
-    currentUser = user.user;
-    afterLogin();
-  }).catch(() => {
-    loginError.textContent = "Invalid login details!";
-    setTimeout(() => loginError.textContent = "", 3000);
-  });
-}
+async function loginOrRegister() {
+  const email = document.getElementById("email").value.trim();
+  const pass = document.getElementById("password").value.trim();
+  const ref = document.getElementById("referralCode").value.trim();
 
-function register(e) {
-  e.preventDefault();
-  const email = regEmail.value;
-  const pass = regPass.value;
-  auth.createUserWithEmailAndPassword(email, pass).then(cred => {
-    currentUser = cred.user;
-    const refCode = refCodeInput.value || "";
-    db.collection("users").doc(currentUser.uid).set({
-      email,
-      uid: currentUser.uid,
-      balance: 0,
-      elsa: 0,
-      referrals: [],
-      referredBy: refCode,
-      verified: false,
-      lord: false,
-      history: [],
-      timestamp: Date.now()
-    });
-    afterLogin();
-  }).catch(() => {
-    regError.textContent = "Email already in use!";
-    setTimeout(() => regError.textContent = "", 3000);
-  });
-}
+  if (!email || !pass) return showError("Fill all fields");
 
-function afterLogin() {
-  nextPage("chartPage");
-  navBar.style.display = "flex";
-  db.collection("users").doc(currentUser.uid).get().then(doc => {
-    const data = doc.data();
-    if (currentUser.email === "eluxxes@gmail.com") {
-      db.collection("users").doc(currentUser.uid).update({ elsa: 2000 });
+  try {
+    const result = await auth.signInWithEmailAndPassword(email, pass);
+    afterLogin(result.user);
+  } catch (e) {
+    if (e.code === "auth/user-not-found") {
+      try {
+        const reg = await auth.createUserWithEmailAndPassword(email, pass);
+        await db.collection("users").doc(reg.user.uid).set({
+          email,
+          balance: 0,
+          elsa: 0,
+          referrals: 0,
+          refLink: reg.user.uid.slice(0, 8),
+          referredBy: ref || null,
+          verified: false,
+          lord: false,
+          history: []
+        });
+
+        // Add referral count to referrer
+        if (ref) {
+          const refQuery = await db.collection("users").where("refLink", "==", ref).get();
+          if (!refQuery.empty) {
+            const refDoc = refQuery.docs[0];
+            await db.collection("users").doc(refDoc.id).update({
+              referrals: firebase.firestore.FieldValue.increment(1)
+            });
+          }
+        }
+
+        afterLogin(reg.user);
+      } catch (err) {
+        showError("Invalid registration");
+      }
+    } else {
+      showError("Invalid login");
     }
-    userEmail.textContent = data.email;
-    walletBalance.textContent = (data.balance || 0).toFixed(2);
-    elsaBalance.textContent = data.elsa || 0;
-    refLink.value = `https://elsa.app?ref=${data.uid}`;
-    refCount.textContent = (data.referrals || []).length;
-    verifiedBadge.textContent = data.verified ? "✅" : "❌";
-    fetchChart();
-    loadLeaderboard();
-  });
+  }
+}
+
+function afterLogin(user) {
+  currentUser = user;
+  if (user.email === "eluxxes@gmail.com") {
+    db.collection("users").doc(user.uid).update({ elsa: 2000 });
+  }
+  document.getElementById("authPage").classList.add("hidden");
+  document.getElementById("mainApp").classList.remove("hidden");
+  loadPage("chart");
+}
+
+function navigateTo(page) {
+  document.querySelectorAll(".tab-bar button").forEach(btn => btn.classList.remove("active-tab"));
+  document.getElementById(`tab-${page}`).classList.add("active-tab");
+  loadPage(page);
+}
+
+function loadPage(page) {
+  if (!currentUser) return;
+  const pageContainer = document.getElementById("pageContainer");
+  if (page === "chart") {
+    pageContainer.innerHTML = `
+      <div class="p-4">
+        <h2 class="text-xl mb-2">Live Elsa Chart</h2>
+        <div id="chart" class="w-full h-60 mb-4"></div>
+        <div class="flex items-center space-x-2">
+          <input id="buyAmount" type="number" min="2" placeholder="Amount $" class="border px-2 py-1 rounded w-1/2" />
+          <button onclick="buyElsa()" class="bg-yellow-500 text-black px-4 py-1 rounded">Buy</button>
+        </div>
+        <div class="mt-3">
+          <button onclick="resellElsa()" class="bg-green-500 text-white px-4 py-2 rounded">Resell</button>
+        </div>
+      </div>
+    `;
+    renderChart();
+  }
+
+  if (page === "wallet") {
+    db.collection("users").doc(currentUser.uid).get().then(doc => {
+      const data = doc.data();
+      pageContainer.innerHTML = `
+        <div class="p-4">
+          <h2 class="text-xl mb-2">Wallet</h2>
+          <p>Balance: $${data.balance}</p>
+          <p>Elsa: ${data.elsa.toFixed(3)}</p>
+          <div class="mt-3">
+            <button onclick="location.href='https://paystack.com/buy/lilzok-vjmgrv'" class="bg-blue-500 text-white px-4 py-2 rounded">Deposit</button>
+            <button onclick="withdrawPage()" class="bg-purple-500 text-white px-4 py-2 rounded ml-2">Withdraw</button>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  if (page === "leaderboard") {
+    db.collection("users").orderBy("referrals", "desc").limit(10).get().then(snapshot => {
+      let html = `<div class="p-4"><h2 class="text-xl mb-2">Leaderboard</h2>`;
+      snapshot.forEach((doc, i) => {
+        html += `<p>${i+1}. ${doc.data().email} - ${doc.data().referrals} refs</p>`;
+      });
+      html += `</div>`;
+      pageContainer.innerHTML = html;
+    });
+  }
+
+  if (page === "profile") {
+    db.collection("users").doc(currentUser.uid).get().then(doc => {
+      const data = doc.data();
+      pageContainer.innerHTML = `
+        <div class="p-4">
+          <h2 class="text-xl mb-2">Profile</h2>
+          <p><strong>Email:</strong> ${data.email}</p>
+          <p><strong>ID:</strong> ${currentUser.uid}</p>
+          <p><strong>Ref Link:</strong> <span class="text-blue-400">${data.refLink}</span></p>
+          <p><strong>Referrals:</strong> ${data.referrals}</p>
+          ${data.verified ? `<p class="badge">Verified</p>` : `<p>Not Verified</p>`}
+          <div class="mt-3">
+            <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded">Logout</button>
+          </div>
+        </div>
+      `;
+    });
+  }
 }
 
 function logout() {
   auth.signOut().then(() => location.reload());
 }
 
-// Buy/Sell Elsa
+function renderChart() {
+  const chart = new ApexCharts(document.querySelector("#chart"), {
+    chart: { type: 'candlestick', height: 300 },
+    series: [{
+      data: generateCandles()
+    }],
+    xaxis: { type: 'datetime' }
+  });
+  chart.render();
+}
+
+function generateCandles() {
+  const base = new Date().getTime();
+  const series = [];
+  let open = 2000;
+
+  for (let i = 0; i < 20; i++) {
+    const high = open + Math.random() * 100;
+    const low = open - Math.random() * 80;
+    const close = low + Math.random() * (high - low);
+    series.push({
+      x: base + i * 60000,
+      y: [open, high, low, close]
+    });
+    open = close;
+  }
+
+  return series;
+}
+
 function buyElsa() {
-  const usd = prompt("How much in USD? (Min $2)");
-  const amount = parseFloat(usd);
-  if (isNaN(amount) || amount < 2) return alert("Invalid amount");
+  const amount = parseFloat(document.getElementById("buyAmount").value);
+  if (amount < 2) return alert("Minimum $2");
   const elsa = amount / 2000;
+
   db.collection("users").doc(currentUser.uid).update({
     elsa: firebase.firestore.FieldValue.increment(elsa),
-    balance: firebase.firestore.FieldValue.increment(-amount),
-    history: firebase.firestore.FieldValue.arrayUnion({
-      type: "buy",
-      elsa,
-      amount,
-      date: Date.now()
-    })
-  }).then(() => alert("Elsa purchased!"));
+    balance: firebase.firestore.FieldValue.increment(-amount)
+  });
+
+  alert(`Purchased ${elsa.toFixed(3)} Elsa`);
 }
 
-function sellElsa() {
+function resellElsa() {
   db.collection("users").doc(currentUser.uid).get().then(doc => {
     const user = doc.data();
-    if (!user.verified) return alert("Please verify first by referring 8 users.");
-    const amount = prompt("How many Elsa to sell?");
-    const sellAmt = parseFloat(amount);
-    if (isNaN(sellAmt) || sellAmt <= 0 || sellAmt > user.elsa) return alert("Invalid amount");
-    const value = sellAmt * 2000 * 0.9; // 10% fee
+    if (!user.verified) return alert("Verify account before reselling");
+
+    const profit = user.elsa * 2000 * 0.9;
     db.collection("users").doc(currentUser.uid).update({
-      elsa: firebase.firestore.FieldValue.increment(-sellAmt),
-      balance: firebase.firestore.FieldValue.increment(value),
-      history: firebase.firestore.FieldValue.arrayUnion({
-        type: "resell",
-        elsa: sellAmt,
-        amount: value,
-        date: Date.now()
-      })
-    }).then(() => alert("Resell successful!"));
+      elsa: 0,
+      balance: firebase.firestore.FieldValue.increment(profit)
+    });
+
+    alert(`Resold for $${profit.toFixed(2)} (10% fee applied)`);
   });
 }
 
-// Withdraw
-function withdraw() {
-  const amount = prompt("Amount to withdraw (min $5)");
-  const bank = prompt("Bank (Opay, Kuda, FirstBank, etc)");
-  const acc = prompt("Account Number");
-  if (parseFloat(amount) < 5) return alert("Minimum is $5");
+function withdrawPage() {
+  const amt = prompt("Enter amount to withdraw");
+  const bank = prompt("Enter bank: Opay, Kuda, FirstBank, Zenith, etc.");
+  const acct = prompt("Enter wallet/account number");
+
+  if (!amt || !bank || !acct) return;
+
   db.collection("withdrawals").add({
     uid: currentUser.uid,
-    amount: parseFloat(amount),
+    amount: parseFloat(amt),
     bank,
-    account: acc,
+    acct,
     status: "pending",
-    date: Date.now()
-  }).then(() => alert("Withdraw request sent. Processed within 2hrs."));
-}
-
-// Deposit
-function deposit() {
-  window.location.href = "https://paystack.com/buy/lilzok-vjmgrv";
-}
-
-// Chart (Candle simulation)
-let chart;
-function fetchChart() {
-  const ctx = document.getElementById("liveChart");
-  if (chart) chart.destroy();
-  const prices = Array.from({ length: 30 }, () => 2000 + Math.random() * 50 - 25);
-  chart = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: prices.map((_, i) => i + 1),
-      datasets: [{
-        label: "Elsa Price (USD)",
-        data: prices,
-        borderColor: "gold",
-        backgroundColor: "rgba(255, 215, 0, 0.2)",
-        fill: true
-      }]
-    },
-    options: {
-      responsive: true,
-      animation: { duration: 1000 },
-      plugins: { legend: { display: false } }
-    }
+    time: Date.now()
   });
-}
 
-// Leaderboard
-function loadLeaderboard() {
-  db.collection("users").orderBy("balance", "desc").limit(5).get().then(snapshot => {
-    topEarners.innerHTML = "";
-    snapshot.forEach(doc => {
-      topEarners.innerHTML += `<p>${doc.data().email} - $${(doc.data().balance || 0).toFixed(2)}</p>`;
-    });
-  });
-  db.collection("users").orderBy("referrals.length", "desc").limit(5).get().then(snapshot => {
-    topReferrals.innerHTML = "";
-    snapshot.forEach(doc => {
-      topReferrals.innerHTML += `<p>${doc.data().email} - ${doc.data().referrals?.length || 0} referrals</p>`;
-    });
-  });
+  alert("Withdrawal request sent. You will receive it within 2 hours.");
 }
 </script>
-</body>
-</html>
