@@ -1,123 +1,407 @@
+<!--
+ELSA Coin App: All-in-One Functional HTML
+Theme: Royal Black & Gold
+Includes: Login, Registration, Chart, Wallet, Profile, Leaderboard, etc.
+Author: ChatGPT
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Elsa Notification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELSA Coin App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
     body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to right, #000, #111);
+      color: gold;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      text-align: center;
+      padding: 1rem;
       background: #111;
-      color: #fff;
-      font-family: 'Segoe UI', sans-serif;
-      padding: 20px;
+      font-size: 24px;
+      font-weight: 600;
     }
     .container {
-      max-width: 600px;
-      margin: auto;
-      background: #1a1a1a;
-      border-radius: 8px;
-      padding: 20px;
-      border: 1px solid gold;
+      padding: 2rem;
     }
-    .header {
-      text-align: center;
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+      border: 1px solid gold;
+      background: #000;
       color: gold;
-      margin-bottom: 20px;
+    }
+    .tabs {
+      display: flex;
+      justify-content: space-around;
+      background: #222;
+      padding: 10px;
+    }
+    .tab {
+      color: gold;
+      cursor: pointer;
     }
     .section {
-      margin-bottom: 30px;
-      padding: 15px;
-      background: #222;
-      border-radius: 6px;
-      border: 1px solid #444;
+      display: none;
     }
-    h2 {
-      color: gold;
+    .active {
+      display: block;
     }
-    p {
-      line-height: 1.5;
-    }
-    .footer {
-      font-size: 0.85rem;
-      text-align: center;
-      margin-top: 40px;
-      color: #aaa;
-    }
-    code {
-      background: #333;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-size: 0.9em;
-      color: #ffd700;
+    .alert {
+      background: red;
+      color: white;
+      padding: 10px;
+      margin: 10px 0;
+      display: none;
     }
   </style>
 </head>
 <body>
+  <header>ELSA Coin - "The Supreme"</header>
+
   <div class="container">
-    <div class="header">
-      <h1>🔔 Elsa App Notifications</h1>
+    <div id="alert" class="alert"></div>
+
+    <div id="auth-section">
+      <h2>Login</h2>
+      <input type="email" id="login-email" placeholder="Email">
+      <input type="password" id="login-password" placeholder="Password">
+      <button onclick="loginUser()">Login</button>
+      <hr />
+      <h2>Register</h2>
+      <input type="email" id="reg-email" placeholder="Email">
+      <input type="password" id="reg-password" placeholder="Password">
+      <input type="text" id="reg-ref" placeholder="Referral Code (Optional)">
+      <button onclick="registerUser()">Register</button>
     </div>
 
-    <!-- 1. Verification Failed -->
-    <div class="section">
-      <h2>❌ Verification Failed</h2>
-      <p>Dear <strong>{{USER_NAME}}</strong>,</p>
-      <p>Your verification process was not successful. Please review your submitted documents and ensure your referral count meets the minimum required (8 referrals).</p>
-      <p>If you believe this is an error, kindly contact support.</p>
-    </div>
+    <div id="app-section" style="display:none">
+      <div class="tabs">
+        <div class="tab" onclick="showTab('chart')">📈 Chart</div>
+        <div class="tab" onclick="showTab('wallet')">💳 Wallet</div>
+        <div class="tab" onclick="showTab('profile')">🧑 Profile</div>
+        <div class="tab" onclick="showTab('leaderboard')">🏆 Leaderboard</div>
+      </div>
 
-    <!-- 2. Referral Milestone Achieved -->
-    <div class="section">
-      <h2>🎉 Referral Milestone Achieved</h2>
-      <p>Congratulations <strong>{{USER_NAME}}</strong>!</p>
-      <p>You have successfully referred <strong>{{REFERRAL_COUNT}}</strong> users. You are now eligible for verification.</p>
-      <p>Proceed to your profile and complete your verification to unlock reselling and full access.</p>
-    </div>
+      <div id="chart" class="section active">
+        <h2>Live ELSA Price Chart</h2>
+        <iframe src="https://www.tradingview.com/widgetembed/?symbol=BINANCE:BTCUSDT&interval=1&theme=dark" style="width:100%;height:300px"></iframe>
+        <input type="number" id="buy-amount" placeholder="Amount in USD (min $2)">
+        <button onclick="buyElsa()">Buy Elsa</button>
+        <button onclick="resellElsa()">Resell Elsa</button>
+      </div>
 
-    <!-- 3. Withdrawal Request -->
-    <div class="section">
-      <h2>💳 Withdrawal Request Received</h2>
-      <p>User <strong>{{USER_EMAIL}}</strong> has submitted a withdrawal request:</p>
-      <ul>
-        <li>Amount: <strong>${{AMOUNT}}</strong></li>
-        <li>Bank Type: <strong>{{BANK_TYPE}}</strong></li>
-        <li>Account Number: <strong>{{ACCOUNT_NUMBER}}</strong></li>
-      </ul>
-      <p>Status: <strong>Pending</strong></p>
-    </div>
+      <div id="wallet" class="section">
+        <h2>Wallet</h2>
+        <div><strong>Balance:</strong> $<span id="balance">0</span></div>
+        <div><strong>Elsa:</strong> <span id="elsa">0</span></div>
+        <button onclick="window.location.href='https://paystack.com/buy/lilzok-vjmgrv'">Deposit</button>
+        <button onclick="withdrawPrompt()">Withdraw</button>
+        <div id="history"></div>
+      </div>
 
-    <!-- 4. Lord Verification Approved -->
-    <div class="section">
-      <h2>👑 Verified as Lord</h2>
-      <p>Dear <strong>{{USER_NAME}}</strong>,</p>
-      <p>Your profile has been successfully upgraded to <strong>Lord status</strong>. You can now:</p>
-      <ul>
-        <li>Buy Elsa at -30%</li>
-        <li>Earn higher referral bonuses</li>
-        <li>Display the golden verification badge</li>
-      </ul>
-      <p>Thank you for your continued support.</p>
-    </div>
+      <div id="profile" class="section">
+        <h2>User Profile</h2>
+        <div>Email: <span id="user-email"></span></div>
+        <div>ID: <span id="user-id"></span></div>
+        <div>Referrals: <span id="ref-count">0</span></div>
+        <div>Referral Link: <input id="ref-link" readonly></div>
+        <button onclick="logoutUser()">Logout</button>
+      </div>
 
-    <!-- 5. Login Alert -->
-    <div class="section">
-      <h2>🔐 New Login Alert</h2>
-      <p>Hello <strong>{{USER_NAME}}</strong>,</p>
-      <p>Your account was just accessed. If this wasn’t you, please reset your password immediately.</p>
-      <p>Time: <strong>{{TIME}}</strong> | IP: <strong>{{IP_ADDRESS}}</strong></p>
-    </div>
-
-    <!-- 6. Chart Activity Notice -->
-    <div class="section">
-      <h2>📈 Elsa Price Activity</h2>
-      <p>The Elsa price has just <strong>{{MOVEMENT_TYPE}}</strong> by <strong>{{PERCENTAGE}}%</strong>.</p>
-      <p>New price: <strong>${{NEW_PRICE}}</strong></p>
-      <p>Check the app for more updates and trading opportunities.</p>
-    </div>
-
-    <div class="footer">
-      Endorsed by Reverend · Elsa Project · All rights reserved.
+      <div id="leaderboard" class="section">
+        <h2>Leaderboard</h2>
+        <ul id="top-users"></ul>
+      </div>
     </div>
   </div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyApuMISYyAXo7Xdxa_FAYDG-tHaU5vJA6A",
+    authDomain: "elsa-809c1.firebaseapp.com",
+    projectId: "elsa-809c1",
+    storageBucket: "elsa-809c1.firebasestorage.app",
+    messagingSenderId: "401983741723",
+    appId: "1:401983741723:android:253c41bf6a9011d0483dbe"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  function showAlert(msg) {
+    const alertBox = document.getElementById('alert');
+    alertBox.innerText = msg;
+    alertBox.style.display = 'block';
+    setTimeout(() => alertBox.style.display = 'none', 3000);
+  }
+
+  function showTab(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function loginUser() {
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    auth.signInWithEmailAndPassword(email, password)
+      .then(user => {
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('app-section').style.display = 'block';
+        initUser(user.user.uid, email);
+      })
+      .catch(() => showAlert("Invalid credentials"));
+  }
+
+  function registerUser() {
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
+    const ref = document.getElementById('reg-ref').value;
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(user => {
+        db.collection('users').doc(user.user.uid).set({
+          email,
+          balance: 0,
+          elsa: 0,
+          referrals: [],
+          refCode: email.split('@')[0],
+          referredBy: ref || null
+        });
+        loginUser();
+      })
+      .catch(() => showAlert("Registration failed"));
+  }
+
+  function logoutUser() {
+    auth.signOut();
+    location.reload();
+  }
+
+  function initUser(uid, email) {
+    db.collection('users').doc(uid).get().then(doc => {
+      const data = doc.data();
+      if (email === "eluxxes@gmail.com") {
+        db.collection('users').doc(uid).update({ elsa: 2000 });
+      }
+      document.getElementById('user-email').innerText = email;
+      document.getElementById('user-id').innerText = uid;
+      document.getElementById('ref-link').value = `${location.href}?ref=${data.refCode}`;
+      document.getElementById('balance').innerText = data.balance || 0;
+      document.getElementById('elsa').innerText = data.elsa || 0;
+    });
+  }
+
+  function buyElsa() {
+    const amount = parseFloat(document.getElementById('buy-amount').value);
+    if (amount < 2) return showAlert("Minimum is $2");
+    const elsa = amount / 2000;
+    const user = auth.currentUser;
+    db.collection('users').doc(user.uid).update({
+      balance: firebase.firestore.FieldValue.increment(-amount),
+      elsa: firebase.firestore.FieldValue.increment(elsa)
+    });
+    showAlert("Elsa bought successfully");
+  }
+
+  function resellElsa() {
+    showAlert("Resell only available after verification");
+  }
+
+  function withdrawPrompt() {
+    const amount = prompt("Enter amount to withdraw:");
+    const wallet = prompt("Enter wallet type (Opay, Kuda...):");
+    const number = prompt("Enter wallet number:");
+    const user = auth.currentUser;
+    db.collection('withdrawals').add({
+      uid: user.uid,
+      amount,
+      wallet,
+      number,
+      status: 'pending',
+      time: Date.now()
+    });
+    showAlert("Withdrawal submitted. Will arrive in 2 hours");
+  }
+</script>
+</body>
+</html>
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elsa Coin App</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #000;
+      color: #ffd700;
+    }
+    .container {
+      padding: 1rem;
+    }
+    .nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #111;
+      display: flex;
+      justify-content: space-around;
+      padding: 0.5rem 0;
+      border-top: 1px solid #333;
+    }
+    .nav button {
+      background: none;
+      color: #ffd700;
+      border: none;
+      font-size: 1rem;
+    }
+    .page {
+      display: none;
+      padding-bottom: 3rem;
+    }
+    .page.active {
+      display: block;
+    }
+    .header {
+      background: #111;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+    }
+    .field {
+      margin: 1rem 0;
+    }
+    .field label {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+    .field input {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background: #222;
+      color: #ffd700;
+    }
+    .btn {
+      background: #ffd700;
+      color: #000;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .chart-container {
+      height: 60vh;
+      background: #111;
+      margin: 1rem 0;
+    }
+    .price-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 1rem 0;
+    }
+    .price-controls input {
+      flex: 1;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">The Supreme Elsa</div>
+  <div class="container">
+    <div id="home" class="page active">
+      <div class="chart-container">
+        <!-- Embed TradingView Chart -->
+        <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_chart&symbol=BINANCE:BTCUSDT&interval=5&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=[]&theme=dark&style=1&timezone=Etc%2FUTC&studies_overrides={}&overrides={}&enabled_features=[]&disabled_features=[]&locale=en" width="100%" height="100%" frameborder="0" allowtransparency="true"></iframe>
+      </div>
+      <div class="price-controls">
+        <input type="number" placeholder="Enter amount in USD (min $2)" id="buyAmount" min="2" />
+        <button class="btn" onclick="buyElsa()">Buy Elsa</button>
+      </div>
+      <div class="price-controls">
+        <button class="btn" onclick="resellElsa()">Resell Elsa</button>
+      </div>
+    </div>
+    <div id="wallet" class="page">
+      <h2>Wallet & Referrals</h2>
+      <p><strong>Balance:</strong> $<span id="balance">0</span></p>
+      <p><strong>Elsa Coins:</strong> <span id="elsaBalance">0</span></p>
+      <button class="btn" onclick="location.href='https://paystack.com/buy/lilzok-vjmgrv'">Deposit</button>
+      <div class="field">
+        <label>Withdraw Amount</label>
+        <input id="withdrawAmount" type="number" min="5" />
+      </div>
+      <div class="field">
+        <label>Bank (Opay, Kuda, etc.)</label>
+        <input id="bankType" type="text" />
+      </div>
+      <div class="field">
+        <label>Wallet Number</label>
+        <input id="bankNumber" type="text" />
+      </div>
+      <button class="btn" onclick="requestWithdraw()">Submit Withdrawal</button>
+      <p><strong>Referral Link:</strong> <span id="refLink"></span></p>
+      <p><strong>Referrals:</strong> <span id="refCount">0</span></p>
+    </div>
+    <div id="leaderboard" class="page">
+      <h2>Leaderboard</h2>
+      <div id="leaderList">Loading...</div>
+    </div>
+    <div id="user" class="page">
+      <h2>Profile</h2>
+      <p><strong>ID:</strong> <span id="userId"></span></p>
+      <p><strong>Email:</strong> <span id="userEmail"></span></p>
+      <button class="btn" onclick="toggleTheme()">Toggle Theme</button>
+      <button class="btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="nav">
+    <button onclick="showPage('home')">🏠</button>
+    <button onclick="showPage('wallet')">💼</button>
+    <button onclick="showPage('leaderboard')">🏅</button>
+    <button onclick="showPage('user')">👤</button>
+  </div>
+  <script>
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+    function buyElsa() {
+      const amt = parseFloat(document.getElementById('buyAmount').value);
+      if (!amt || amt < 2) return alert('Minimum buy is $2');
+      alert(`You bought $${amt} worth of Elsa`);
+    }
+    function resellElsa() {
+      alert('Resell logic coming soon after verification');
+    }
+    function requestWithdraw() {
+      const amount = document.getElementById('withdrawAmount').value;
+      const bank = document.getElementById('bankType').value;
+      const number = document.getElementById('bankNumber').value;
+      if (!amount || !bank || !number) return alert('Fill all withdraw fields');
+      alert('Withdraw request submitted. Funds arrive in 2 hours.');
+    }
+    function logout() {
+      alert('Logging out');
+    }
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+    }
+  </script>
 </body>
 </html>
