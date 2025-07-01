@@ -1,177 +1,123 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Elsa - The Supreme</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Elsa Notification</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #0d0d0d;
+      background: #111;
+      color: #fff;
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: #1a1a1a;
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid gold;
+    }
+    .header {
+      text-align: center;
+      color: gold;
+      margin-bottom: 20px;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 15px;
+      background: #222;
+      border-radius: 6px;
+      border: 1px solid #444;
+    }
+    h2 {
       color: gold;
     }
-    .hidden { display: none; }
-    .chart-container { height: 60vh; width: 100%; }
+    p {
+      line-height: 1.5;
+    }
+    .footer {
+      font-size: 0.85rem;
+      text-align: center;
+      margin-top: 40px;
+      color: #aaa;
+    }
+    code {
+      background: #333;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 0.9em;
+      color: #ffd700;
+    }
   </style>
 </head>
 <body>
-  <!-- Splash Screen -->
-  <div id="splash" class="fixed inset-0 flex flex-col justify-center items-center bg-black text-gold z-50">
-    <h1 class="text-4xl mb-2 animate-pulse font-bold">THE SUPREME</h1>
-    <img src="https://cdn-icons-png.flaticon.com/512/535/535239.png" alt="Elsa" class="w-20 h-20 animate-bounce">
-  </div>  <!-- Language Selection -->  <div id="languageSelect" class="hidden fixed inset-0 bg-black flex flex-col justify-center items-center">
-    <h2 class="text-xl mb-4">Select Language</h2>
-    <button onclick="startApp('en')" class="bg-gold text-black px-4 py-2 mb-2">English</button>
-    <button onclick="startApp('fr')" class="bg-gold text-black px-4 py-2">Français</button>
-  </div>  <!-- Login/Register Form -->  <div id="authForm" class="hidden p-6">
-    <h2 id="formTitle" class="text-2xl font-bold mb-4">Login</h2>
-    <input type="email" id="authEmail" placeholder="Email" class="w-full mb-2 p-2 bg-gray-800 text-white rounded">
-    <input type="password" id="authPassword" placeholder="Password" class="w-full mb-2 p-2 bg-gray-800 text-white rounded">
-    <button onclick="login()" id="loginBtn" class="w-full bg-gold text-black p-2 rounded mb-2">Login</button>
-    <button onclick="register()" id="registerBtn" class="w-full bg-gold text-black p-2 rounded">Register</button>
-    <p id="authError" class="text-red-500 text-sm mt-2 hidden"></p>
-  </div>  <!-- App Navigation & Pages -->  <div id="mainApp" class="hidden">
-    <nav class="fixed bottom-0 left-0 right-0 bg-black flex justify-around border-t border-gold">
-      <button onclick="showPage('chart')"><i class="fas fa-chart-line"></i></button>
-      <button onclick="showPage('buy')"><i class="fas fa-coins"></i></button>
-      <button onclick="showPage('wallet')"><i class="fas fa-wallet"></i></button>
-      <button onclick="showPage('leaderboard')"><i class="fas fa-trophy"></i></button>
-      <button onclick="showPage('profile')"><i class="fas fa-user"></i></button>
-    </nav><!-- Chart Page -->
-<div id="page-chart" class="p-4 chart-container">
-  <canvas id="elsaChart"></canvas>
-  <div class="mt-4">
-    <label>Enter amount ($):</label>
-    <input type="number" id="buyAmount" class="w-full p-2 bg-gray-800 text-white rounded" min="2">
-    <button onclick="buyElsa()" class="bg-green-500 w-full py-2 rounded mt-2">Buy Elsa</button>
-    <button onclick="resellElsa()" class="bg-yellow-600 w-full py-2 rounded mt-2">Resell Elsa</button>
+  <div class="container">
+    <div class="header">
+      <h1>🔔 Elsa App Notifications</h1>
+    </div>
+
+    <!-- 1. Verification Failed -->
+    <div class="section">
+      <h2>❌ Verification Failed</h2>
+      <p>Dear <strong>{{USER_NAME}}</strong>,</p>
+      <p>Your verification process was not successful. Please review your submitted documents and ensure your referral count meets the minimum required (8 referrals).</p>
+      <p>If you believe this is an error, kindly contact support.</p>
+    </div>
+
+    <!-- 2. Referral Milestone Achieved -->
+    <div class="section">
+      <h2>🎉 Referral Milestone Achieved</h2>
+      <p>Congratulations <strong>{{USER_NAME}}</strong>!</p>
+      <p>You have successfully referred <strong>{{REFERRAL_COUNT}}</strong> users. You are now eligible for verification.</p>
+      <p>Proceed to your profile and complete your verification to unlock reselling and full access.</p>
+    </div>
+
+    <!-- 3. Withdrawal Request -->
+    <div class="section">
+      <h2>💳 Withdrawal Request Received</h2>
+      <p>User <strong>{{USER_EMAIL}}</strong> has submitted a withdrawal request:</p>
+      <ul>
+        <li>Amount: <strong>${{AMOUNT}}</strong></li>
+        <li>Bank Type: <strong>{{BANK_TYPE}}</strong></li>
+        <li>Account Number: <strong>{{ACCOUNT_NUMBER}}</strong></li>
+      </ul>
+      <p>Status: <strong>Pending</strong></p>
+    </div>
+
+    <!-- 4. Lord Verification Approved -->
+    <div class="section">
+      <h2>👑 Verified as Lord</h2>
+      <p>Dear <strong>{{USER_NAME}}</strong>,</p>
+      <p>Your profile has been successfully upgraded to <strong>Lord status</strong>. You can now:</p>
+      <ul>
+        <li>Buy Elsa at -30%</li>
+        <li>Earn higher referral bonuses</li>
+        <li>Display the golden verification badge</li>
+      </ul>
+      <p>Thank you for your continued support.</p>
+    </div>
+
+    <!-- 5. Login Alert -->
+    <div class="section">
+      <h2>🔐 New Login Alert</h2>
+      <p>Hello <strong>{{USER_NAME}}</strong>,</p>
+      <p>Your account was just accessed. If this wasn’t you, please reset your password immediately.</p>
+      <p>Time: <strong>{{TIME}}</strong> | IP: <strong>{{IP_ADDRESS}}</strong></p>
+    </div>
+
+    <!-- 6. Chart Activity Notice -->
+    <div class="section">
+      <h2>📈 Elsa Price Activity</h2>
+      <p>The Elsa price has just <strong>{{MOVEMENT_TYPE}}</strong> by <strong>{{PERCENTAGE}}%</strong>.</p>
+      <p>New price: <strong>${{NEW_PRICE}}</strong></p>
+      <p>Check the app for more updates and trading opportunities.</p>
+    </div>
+
+    <div class="footer">
+      Endorsed by Reverend · Elsa Project · All rights reserved.
+    </div>
   </div>
-</div>
-
-<!-- Wallet & Referral Page -->
-<div id="page-wallet" class="hidden p-4">
-  <h3 class="text-xl font-bold">Wallet</h3>
-  <p>Balance: <span id="walletBalance">$0</span></p>
-  <p>Elsa: <span id="elsaBalance">0</span></p>
-  <button onclick="deposit()" class="bg-blue-500 py-2 w-full mt-2 rounded">Deposit</button>
-  <button onclick="withdrawRequest()" class="bg-purple-600 py-2 w-full mt-2 rounded">Withdraw</button>
-  <hr class="my-4">
-  <h3 class="text-xl">Referrals</h3>
-  <p>Link: <span id="referralLink"></span></p>
-  <p>Count: <span id="refCount">0</span> / 8</p>
-</div>
-
-<!-- Leaderboard Page -->
-<div id="page-leaderboard" class="hidden p-4">
-  <h3 class="text-xl font-bold">Top Users</h3>
-  <ul id="leaderList"></ul>
-</div>
-
-<!-- Profile Page -->
-<div id="page-profile" class="hidden p-4">
-  <h3 class="text-xl">My Profile</h3>
-  <p>ID: <span id="uid"></span></p>
-  <p>Email: <span id="email"></span></p>
-  <button onclick="toggleTheme()" class="bg-yellow-500 mt-2 py-2 w-full rounded">Toggle Theme</button>
-  <button onclick="logout()" class="bg-red-600 mt-2 py-2 w-full rounded">Logout</button>
-</div>
-
-  </div>  <script>
-    // Firebase Init
-    const firebaseConfig = {
-      apiKey: "AIzaSyApuMISYyAXo7Xdxa_FAYDG-tHaU5vJA6A",
-      authDomain: "elsa-809c1.firebaseapp.com",
-      projectId: "elsa-809c1",
-      storageBucket: "elsa-809c1.firebasestorage.app",
-      messagingSenderId: "401983741723",
-      appId: "1:401983741723:android:253c41bf6a9011d0483dbe"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // Splash to Language
-    setTimeout(() => {
-      document.getElementById('splash').classList.add('hidden');
-      document.getElementById('languageSelect').classList.remove('hidden');
-    }, 4000);
-
-    // Start App with Language
-    function startApp(lang) {
-      document.getElementById('languageSelect').classList.add('hidden');
-      document.getElementById('authForm').classList.remove('hidden');
-    }
-
-    // Auth Functions
-    function login() {
-      const email = document.getElementById('authEmail').value;
-      const password = document.getElementById('authPassword').value;
-      auth.signInWithEmailAndPassword(email, password)
-        .then(user => initApp(user.user))
-        .catch(() => showError('Invalid login'));
-    }
-
-    function register() {
-      const email = document.getElementById('authEmail').value;
-      const password = document.getElementById('authPassword').value;
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(user => {
-          db.collection("users").doc(user.user.uid).set({ balance: 0, elsa: 0, referrals: 0 });
-          initApp(user.user);
-        })
-        .catch(() => showError('Invalid registration'));
-    }
-
-    function showError(msg) {
-      const err = document.getElementById('authError');
-      err.innerText = msg;
-      err.classList.remove('hidden');
-      setTimeout(() => err.classList.add('hidden'), 3000);
-    }
-
-    // Init App
-    function initApp(user) {
-      document.getElementById('authForm').classList.add('hidden');
-      document.getElementById('mainApp').classList.remove('hidden');
-      document.getElementById('uid').textContent = user.uid;
-      document.getElementById('email').textContent = user.email;
-      document.getElementById('referralLink').textContent = `https://elsa.app/register?ref=${user.uid}`;
-      loadWallet(user.uid);
-    }
-
-    function showPage(page) {
-      document.querySelectorAll('[id^="page-"]').forEach(p => p.classList.add('hidden'));
-      document.getElementById(`page-${page}`).classList.remove('hidden');
-    }
-
-    function logout() {
-      auth.signOut();
-      location.reload();
-    }
-
-    function toggleTheme() {
-      document.body.classList.toggle('bg-black');
-      document.body.classList.toggle('bg-white');
-    }
-
-    // Dummy Chart Setup (you will link with Firestore next)
-    const ctx = document.getElementById('elsaChart').getContext('2d');
-    const chart = new Chart(ctx, {
-      type: 'candlestick', // Simulate candle chart
-      data: {
-        datasets: [{
-          label: 'Elsa Price',
-          data: [
-            {o: 2000, h: 2100, l: 1950, c: 2050, t: 1},
-            {o: 2050, h: 2150, l: 2000, c: 2100, t: 2},
-          ]
-        }]
-      }
-    });
-  </script></body>
+</body>
 </html>
