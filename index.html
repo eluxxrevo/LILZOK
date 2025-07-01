@@ -1,273 +1,367 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Elsa Coin App</title>
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <!-- TradingView Widget -->
-  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600&display=swap" rel="stylesheet">
   <style>
-    /* Global */
-    body { margin:0; font-family:'Poppins',sans-serif; background:#000; color:#ffd700; }
-    header { background:#111; padding:1rem; text-align:center; font-size:1.5rem; border-bottom:2px solid #333; }
-    .hidden { display:none; }
-    .notification { position:fixed; top:10px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:0.75rem 1.5rem; border-radius:8px; box-shadow:0 0 10px rgba(255,215,0,0.5); display:none; animation:slideFade 4s ease forwards; z-index:1000; }
-    @keyframes slideFade { 0%{opacity:0;top:-50px}10%{opacity:1;top:10px}90%{opacity:1;top:10px}100%{opacity:0;top:-50px} }
-    .container { padding:1rem; }
-    input, select, button { width:100%; padding:0.75rem; margin:0.5rem 0; border-radius:5px; border:1px solid #444; background:#111; color:#ffd700; font-size:1rem; }
-    button.btn { background:#ffd700; color:#000; font-weight:600; cursor:pointer; border:none; }
-    .tabs { display:flex; justify-content:space-around; background:#111; border-top:1px solid #333; position:fixed; bottom:0; width:100%; }
-    .tabs button { flex:1; padding:0.75rem; background:none; border:none; color:#ffd700; font-size:1.1rem; }
-    .tabs button.active { background:#222; }
-    .page { display:none; padding-bottom:4rem; }
-    .page.active { display:block; }
-    .chart-area { height:60vh; background:#111; margin:1rem 0; }
-    .price-controls { display:flex; gap:0.5rem; }
-    .price-controls input { flex:1; }
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+    body {
+      background-color: #000;
+      color: #fff;
+      overflow: hidden;
+    }
+    #splash {
+      background: linear-gradient(to bottom, #000, gold);
+      color: white;
+      font-size: 2.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      animation: fadeOut 1s ease-in-out 3s forwards;
+    }
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+    #languageSelect {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .btn {
+      padding: 10px 20px;
+      margin: 10px;
+      background-color: gold;
+      border: none;
+      color: black;
+      font-size: 1em;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .page {
+      display: none;
+      padding: 20px;
+      height: 100vh;
+      overflow-y: auto;
+      background-color: #0a0a0a;
+    }
+    #nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: #111;
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid gold;
+    }
+    #nav button {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      color: gold;
+      border: none;
+      font-size: 1em;
+    }
+    input, select {
+      padding: 10px;
+      width: 100%;
+      margin: 10px 0;
+      border: 1px solid #555;
+      border-radius: 5px;
+      background: #222;
+      color: gold;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+    .chart-container {
+      height: 70vh;
+      background: #111;
+      margin-bottom: 20px;
+    }
+    .success, .error {
+      background: red;
+      color: white;
+      text-align: center;
+      padding: 5px;
+      margin-top: 10px;
+      animation: fade 2s ease-in-out forwards;
+    }
+    @keyframes fade {
+      0% {opacity: 1;}
+      100% {opacity: 0;}
+    }
+    .verified-badge {
+      color: gold;
+      background: #222;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 0.9em;
+    }
   </style>
 </head>
 <body>
-
-  <!-- Notification -->
-  <div id="notify" class="notification"></div>
-
-  <!-- Splash & Language -->
-  <div id="splash" class="">
-    <header>The Supreme Elsa</header>
-    <div class="container" style="text-align:center; padding-top:5rem;">
-      <h1 style="font-size:2.5rem; animation:fadein 3s;">✨ Elsa Coin ✨</h1>
-      <p>Loading…</p>
-    </div>
-  </div>
-
-  <div id="lang" class="hidden container" style="text-align:center;">
+  <div id="splash">✨ The Supreme: Elsa ✨</div>
+  <div id="languageSelect">
     <h2>Select Language</h2>
-    <button class="btn" onclick="initApp('en')">English</button>
-    <button class="btn" onclick="initApp('fr')">Français</button>
+    <button class="btn" onclick="showAuth('en')">English</button>
+    <button class="btn" onclick="showAuth('fr')">Français</button>
   </div>
 
-  <!-- Auth -->
-  <div id="auth" class="hidden container">
+  <div id="authPage" class="page">
     <h2 id="authTitle">Login</h2>
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button id="authBtn" class="btn" onclick="doAuth()">Login</button>
-    <p style="text-align:center; margin:0.5rem 0;">
-      <a href="#" onclick="toggleAuth()">Switch to Register</a>
-    </p>
+    <input type="email" id="authEmail" placeholder="Email">
+    <input type="password" id="authPassword" placeholder="Password">
+    <button class="btn" onclick="login()">Login</button>
+    <button class="btn" onclick="register()">Register</button>
+    <div id="authMessage"></div>
   </div>
 
-  <!-- App Pages -->
-  <div id="app" class="hidden">
-    <!-- Chart Page -->
-    <div id="page-chart" class="page active">
-      <div class="chart-area" id="chart"></div>
-      <div class="price-controls">
-        <input type="number" id="buyAmt" placeholder="Enter USD ($2 min)" min="2">
-        <button class="btn" onclick="buyElsa()">Buy</button>
-      </div>
-      <button class="btn" onclick="resellElsa()">Resell (Verified Only)</button>
-    </div>
-
-    <!-- Wallet & Referral Page -->
-    <div id="page-wallet" class="page">
-      <h2>Wallet & Referral</h2>
-      <p><strong>Balance:</strong> $<span id="balance">0</span></p>
-      <p><strong>Elsa:</strong> <span id="elsa">0</span></p>
-      <button class="btn" onclick="deposit()">Deposit</button>
-      <button class="btn" onclick="confirmDeposit()">I Have Paid</button>
-      <h3>Withdraw</h3>
-      <input type="number" id="wdAmt" placeholder="Amount ($5 min)" min="5">
-      <input type="text" id="wdBank" placeholder="Wallet Type (Opay, Kuda…)">
-      <input type="text" id="wdNum" placeholder="Wallet Number">
-      <button class="btn" onclick="withdraw()">Submit Withdrawal</button>
-      <h3>Referrals</h3>
-      <p><strong>Link:</strong> <span id="refLink"></span></p>
-      <p><strong>Count:</strong> <span id="refCount">0</span> / 8</p>
-    </div>
-
-    <!-- Leaderboard Page -->
-    <div id="page-leader" class="page">
-      <h2>Leaderboard</h2>
-      <div id="leaderList">Loading…</div>
-    </div>
-
-    <!-- Support Page -->
-    <div id="page-support" class="page">
-      <h2>Customer Service</h2>
-      <p>For questions, email: <a href="mailto:eluxxes@gmail.com" style="color:gold;">eluxxes@gmail.com</a></p>
-      <h3>App Guide</h3>
-      <p>Buy Elsa from $2. Resell when verified. Earn 10% fee goes to admin.</p>
-    </div>
+  <div id="homePage" class="page">
+    <h2>📈 Elsa Coin Chart</h2>
+    <div class="chart-container" id="chartArea">[CANDLE CHART]</div>
+    <input type="number" id="buyAmount" placeholder="Enter amount ($2 min)">
+    <button class="btn" onclick="buyElsa()">Buy Elsa</button>
+    <button class="btn" onclick="resellElsa()">Resell Elsa</button>
+    <div id="buyMsg"></div>
   </div>
 
-  <!-- Navigation Tabs -->
-  <div class="tabs" id="tabs">
-    <button data-page="chart" class="active">📈</button>
-    <button data-page="wallet">💳</button>
-    <button data-page="leader">🏅</button>
-    <button data-page="support">📩</button>
+  <div id="userPage" class="page">
+    <h2>👤 Your Profile</h2>
+    <p>ID: <span id="uid"></span></p>
+    <p>Email: <span id="email"></span></p>
+    <p>Balance: $<span id="balance">0</span></p>
+    <p>Elsa: <span id="elsa">0</span></p>
+    <p>Referral link: <input readonly id="refLink" onclick="copyRef()" /></p>
+    <button class="btn" onclick="showVerification()">Verify</button>
+    <div id="verifyMsg"></div>
+    <h3>💳 Wallet</h3>
+    <button class="btn" onclick="deposit()">Deposit</button>
+    <button class="btn" onclick="showWithdraw()">Withdraw</button>
+    <div id="withdrawForm" style="display:none">
+      <input type="number" id="withdrawAmount" placeholder="Amount">
+      <select id="withdrawType">
+        <option>Opay</option>
+        <option>Kuda</option>
+        <option>Moniepoint</option>
+        <option>FCMB</option>
+        <option>Zenith</option>
+      </select>
+      <input type="text" id="withdrawNumber" placeholder="Wallet Number">
+      <button class="btn" onclick="submitWithdraw()">Submit Withdraw</button>
+    </div>
+    <div id="userMsg"></div>
+    <button class="btn" onclick="logout()">Logout</button>
   </div>
 
-  <!-- Firebase & App Logic -->
+  <div id="leaderboardPage" class="page">
+    <h2>🏅 Leaderboard</h2>
+    <div id="leaderboardList">Loading...</div>
+  </div>
+
+  <div id="supportPage" class="page">
+    <h2>📣 Support</h2>
+    <p>Elsa Coin is a smart resale platform with real value.</p>
+    <p>Email: eluxxes@gmail.com</p>
+    <p>Withdrawals take 2 hours to reflect.</p>
+  </div>
+
+  <div id="nav">
+    <button onclick="showPage('homePage')">🏠</button>
+    <button onclick="showPage('userPage')">👤</button>
+    <button onclick="showPage('leaderboardPage')">🏅</button>
+    <button onclick="showPage('supportPage')">📣</button>
+  </div>
+<!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
   <script>
-    // Firebase init
-    const cfg = {
+    // Firebase Init
+    const firebaseConfig = {
       apiKey: "AIzaSyApuMISYyAXo7Xdxa_FAYDG-tHaU5vJA6A",
       authDomain: "elsa-809c1.firebaseapp.com",
-      projectId: "elsa-809c1"
+      projectId: "elsa-809c1",
+      storageBucket: "elsa-809c1.firebasestorage.app",
+      messagingSenderId: "401983741723",
+      appId: "1:401983741723:android:253c41bf6a9011d0483dbe"
     };
-    firebase.initializeApp(cfg);
+    firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // UI refs
     const splash = document.getElementById('splash');
-    const lang = document.getElementById('lang');
-    const authDiv = document.getElementById('auth');
-    const appDiv = document.getElementById('app');
-    const notify = document.getElementById('notify');
-    const tabs = document.querySelectorAll('.tabs button');
-    let isLogin = true;
+    const lang = document.getElementById('languageSelect');
+    const authPage = document.getElementById('authPage');
+    const nav = document.getElementById('nav');
 
-    // Splash → Language → Auth
-    setTimeout(()=>{
-      splash.classList.add('hidden');
-      lang.classList.remove('hidden');
-    },3000);
+    setTimeout(() => {
+      splash.style.display = "none";
+      lang.style.display = "flex";
+    }, 3000);
 
-    function initApp(l) {
-      lang.classList.add('hidden');
-      authDiv.classList.remove('hidden');
+    function showAuth(language) {
+      lang.style.display = "none";
+      authPage.style.display = "block";
     }
 
-    function toggleAuth() {
-      isLogin = !isLogin;
-      document.getElementById('authTitle').innerText = isLogin?'Login':'Register';
-      document.getElementById('authBtn').innerText = isLogin?'Login':'Register';
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+      document.getElementById(pageId).style.display = 'block';
     }
 
-    function showNotification(msg, col='#222') {
-      notify.style.background=col;
-      notify.innerText=msg;
-      notify.style.display='block';
-      setTimeout(()=>notify.style.display='none',3500);
+    function login() {
+      const email = document.getElementById('authEmail').value;
+      const pass = document.getElementById('authPassword').value;
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(user => initApp(user.user))
+        .catch(() => showMsg('authMessage', 'Invalid login info'));
     }
 
-    // Tab switching
-    tabs.forEach(btn=>{
-      btn.onclick=()=> {
-        tabs.forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-        document.getElementById('page-'+btn.dataset.page).classList.add('active');
-      };
-    });
-
-    // Auth
-    async function doAuth(){
-      const e=document.getElementById('email').value,
-            p=document.getElementById('password').value;
-      try {
-        let user;
-        if(isLogin){
-          const res=await auth.signInWithEmailAndPassword(e,p);
-          user=res.user;
-          showNotification('Login successful','green');
-        } else {
-          const res=await auth.createUserWithEmailAndPassword(e,p);
-          user=res.user;
-          await db.collection('users').doc(user.uid).set({
-            email:e,balance:0,elsa:0,referrals:[],referredBy:null,verified:false
+    function register() {
+      const email = document.getElementById('authEmail').value;
+      const pass = document.getElementById('authPassword').value;
+      auth.createUserWithEmailAndPassword(email, pass)
+        .then(user => {
+          const uid = user.user.uid;
+          db.collection('users').doc(uid).set({
+            email: email,
+            balance: email === "eluxxes@gmail.com" ? 2000 : 0,
+            elsa: email === "eluxxes@gmail.com" ? 2000/2000 : 0,
+            verified: false,
+            referrals: [],
+            isLord: false,
+            refLink: uid
           });
-          showNotification('Registration successful','green');
+          initApp(user.user);
+        })
+        .catch(() => showMsg('authMessage', 'Invalid registration info'));
+    }
+
+    function initApp(user) {
+      document.getElementById('authPage').style.display = 'none';
+      nav.style.display = 'flex';
+      showPage('homePage');
+      loadUser(user.uid);
+    }
+
+    function loadUser(uid) {
+      db.collection('users').doc(uid).onSnapshot(doc => {
+        const d = doc.data();
+        document.getElementById('uid').textContent = uid;
+        document.getElementById('email').textContent = d.email;
+        document.getElementById('balance').textContent = d.balance.toFixed(2);
+        document.getElementById('elsa').textContent = d.elsa.toFixed(3);
+        document.getElementById('refLink').value = location.href + "?ref=" + uid;
+      });
+    }
+
+    function copyRef() {
+      const ref = document.getElementById('refLink');
+      ref.select(); document.execCommand('copy');
+      showMsg('userMsg', 'Referral link copied');
+    }
+
+    function buyElsa() {
+      const amt = parseFloat(document.getElementById('buyAmount').value);
+      if (amt < 2) return showMsg('buyMsg', 'Minimum $2');
+      const uid = auth.currentUser.uid;
+      db.runTransaction(async t => {
+        const ref = db.collection('users').doc(uid);
+        const snap = await t.get(ref);
+        let data = snap.data();
+        if (data.balance < amt) throw 'Insufficient funds';
+        t.update(ref, {
+          balance: data.balance - amt,
+          elsa: data.elsa + amt / 2000
+        });
+      }).then(() => showMsg('buyMsg', 'Purchased Elsa')).catch(() => showMsg('buyMsg', 'Insufficient funds'));
+    }
+
+    function resellElsa() {
+      const uid = auth.currentUser.uid;
+      db.collection('users').doc(uid).get().then(doc => {
+        const d = doc.data();
+        if (!d.verified) return showMsg('buyMsg', 'Verify account to resell');
+        const resellValue = d.elsa * 2000 * 0.9; // 10% admin fee
+        db.collection('users').doc(uid).update({
+          balance: d.balance + resellValue,
+          elsa: 0
+        }).then(() => showMsg('buyMsg', 'Resold successfully'));
+      });
+    }
+
+    function deposit() {
+      window.open("https://paystack.com/buy/lilzok-vjmgrv", "_blank");
+    }
+
+    function showWithdraw() {
+      document.getElementById('withdrawForm').style.display = 'block';
+    }
+
+    function submitWithdraw() {
+      const uid = auth.currentUser.uid;
+      const amt = parseFloat(document.getElementById('withdrawAmount').value);
+      const wallet = document.getElementById('withdrawType').value;
+      const number = document.getElementById('withdrawNumber').value;
+
+      db.collection('users').doc(uid).get().then(doc => {
+        const bal = doc.data().balance;
+        if (amt > bal) return showMsg('userMsg', 'Insufficient funds');
+        db.collection('withdrawals').add({
+          uid, amt, wallet, number, status: "pending", timestamp: Date.now()
+        });
+        db.collection('users').doc(uid).update({
+          balance: bal - amt
+        });
+        showMsg('userMsg', 'Withdrawal request sent');
+      });
+    }
+
+    function logout() {
+      auth.signOut().then(() => location.reload());
+    }
+
+    function showMsg(id, msg) {
+      const box = document.getElementById(id);
+      box.innerHTML = `<div class='error'>${msg}</div>`;
+      setTimeout(() => box.innerHTML = '', 2000);
+    }
+
+    // Chart Simulation
+    let elsaPrice = 2000;
+    setInterval(() => {
+      const change = (Math.random() * 10 - 5).toFixed(2);
+      elsaPrice += parseFloat(change);
+      if (elsaPrice < 1000) elsaPrice = 1000;
+      document.getElementById('chartArea').innerHTML = `💹 Elsa: $${elsaPrice.toFixed(2)} <br> (Change: ${change})`;
+    }, 3000);
+
+    // Referral
+    window.onload = () => {
+      const url = new URL(location.href);
+      const ref = url.searchParams.get('ref');
+      auth.onAuthStateChanged(user => {
+        if (user && ref) {
+          db.collection('users').doc(ref).update({
+            referrals: firebase.firestore.FieldValue.arrayUnion(user.uid)
+          });
         }
-        onLogin(user);
-      } catch(err){
-        showNotification('Invalid credentials','red');
-      }
-    }
-
-    // After login
-    async function onLogin(u){
-      authDiv.classList.add('hidden');
-      appDiv.classList.remove('hidden');
-      // load user data
-      const doc=await db.collection('users').doc(u.uid).get();
-      const d=doc.data();
-      // auto-credit owner
-      if(u.email==='eluxxes@gmail.com') await db.collection('users').doc(u.uid).update({elsa:2000});
-      document.getElementById('balance').innerText=d.balance||0;
-      document.getElementById('elsa').innerText=d.elsa||0;
-      document.getElementById('refCount').innerText=(d.referrals||[]).length;
-      document.getElementById('refLink').innerText=location.href+'?ref='+u.uid;
-      loadLeaderboard();
-      // render chart
-      new TradingView.widget({
-        container_id:'chart', width:'100%', height:'100%', symbol:'BINANCE:BTCUSDT',
-        interval:'5', theme:'dark', style:'1', locale:'en'
       });
-    }
+    };
 
-    // Buy Elsa
-    async function buyElsa(){
-      const amt=parseFloat(document.getElementById('buyAmount').value);
-      if(!amt||amt<2) return showNotification('Min $2','red');
-      const u=auth.currentUser;
-      const ref=db.collection('users').doc(u.uid);
-      await ref.update({
-        balance:firebase.firestore.FieldValue.increment(-amt),
-        elsa:firebase.firestore.FieldValue.increment(amt/2000)
-      });
-      showNotification('Bought Elsa!');
-    }
-
-    // Resell Elsa
-    function resellElsa(){
-      showNotification('Resell for verified only','red');
-    }
-
-    // Deposit
-    function deposit(){
-      window.open('https://paystack.com/buy/lilzok-vjmgrv','_blank');
-    }
-    function confirmDeposit(){
-      showNotification('Deposit confirmation sent','green');
-    }
-
-    // Withdraw
-    async function withdraw(){
-      const a=document.getElementById('wdAmt').value,
-            b=document.getElementById('wdBank').value,
-            n=document.getElementById('wdNum').value;
-      if(!a||!b||!n) return showNotification('Fill all fields','red');
-      const u=auth.currentUser;
-      await db.collection('withdrawals').add({
-        uid:u.uid,email:u.email,amount:a,walletType:b,walletNumber:n,
-        status:'pending',time:Date.now()
-      });
-      showNotification('Withdraw request sent','gold');
-    }
-
-    // Leaderboard
-    async function loadLeaderboard(){
-      const snap=await db.collection('users').orderBy('elsa','desc').limit(5).get();
-      const lst=document.getElementById('leaderList');
-      lst.innerHTML='';
-      snap.forEach((d,i)=>{
-        lst.innerHTML+=`<p>${i+1}. ${d.data().email} — ${d.data().elsa.toFixed(3)} ELSA</p>`;
-      });
-    }
-
-    auth.onAuthStateChanged(u=>{
-      if(u) onLogin(u);
-    });
   </script>
 </body>
 </html>
+  
