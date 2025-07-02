@@ -50,8 +50,8 @@
             border-radius: 10px;
             margin: 20px 0;
         }
-        .splash-screen img {
-            width: 200px;
+        .splash-screen h1 {
+            font-size: 48px;
             animation: pulse 3s ease-in-out;
         }
         @keyframes pulse {
@@ -79,7 +79,7 @@
 <body>
     <div id="splash-screen" class="page active">
         <div class="splash-screen">
-            <img src="https://via.placeholder.com/200x200/ffd700/1a1a1a?text=Supreme+Elsa" alt="Supreme Elsa">
+            <h1>Supreme Elsa</h1>
         </div>
     </div>
 
@@ -164,7 +164,7 @@
             <h3>Transaction History</h3>
             <ul id="transactions"></ul>
             <h3>Settings</h3>
-            <input type="text" id="new-username" placeholder="New “…New Username">
+            <input type="text" id="new-username" placeholder="New Username">
             <input type="password" id="new-password" placeholder="New Password">
             <button onclick="updateProfile()">Update Profile</button>
             <button onclick="showPage('home-page')">Back to Home</button>
@@ -222,8 +222,13 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Page Navigation
+        // Page Navigation with Auth Check
         function showPage(pageId) {
+            if (pageId !== 'auth-page' && !auth.currentUser) {
+                alert("Please log in or register to access this page.");
+                showPage('auth-page');
+                return;
+            }
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
         }
@@ -316,6 +321,8 @@
                     const referrers = snapshot.docs.map(doc => doc.data());
                     document.getElementById("top-referrers").innerHTML = referrers.map(r => `<li>${r.username} - ${r.referrals} referrals (${r.verification})</li>`).join("");
                 });
+            } else {
+                showPage('auth-page');
             }
         });
 
@@ -505,13 +512,13 @@
 
         // Support Chat
         function sendMessage() {
-            const message = document.getElementById("chat-input").value;
-            if (!message) return;
+            const comment = document.getElementById("chat-input").value;
+            if (!comment) return;
             const user = auth.currentUser;
             if (!user) return alert("Please log in");
             db.collection("support").add({
                 userId: user.uid,
-                message,
+                message: comment,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
                 document.getElementById("chat-input").value = "";
@@ -524,4 +531,4 @@
         });
     </script>
 </body>
-</html>
+            </html>
