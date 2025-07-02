@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elsa App</title>
+    <title>Supreme Elsa App</title>
     <style>
         body {
             background-color: #1a1a1a; /* Royal black */
@@ -52,7 +52,7 @@
         }
         .splash-screen img {
             width: 200px;
-            animation: pulse 2s infinite;
+            animation: pulse 3s ease-in-out;
         }
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -79,13 +79,13 @@
 <body>
     <div id="splash-screen" class="page active">
         <div class="splash-screen">
-            <img src="https://via.placeholder.com/200?text=Elsa+Logo" alt="Elsa Logo">
+            <img src="https://via.placeholder.com/200x200/ffd700/1a1a1a?text=Supreme+Elsa" alt="Supreme Elsa">
         </div>
     </div>
 
     <div id="auth-page" class="page">
         <div class="container">
-            <h1>Elsa</h1>
+            <h1>Supreme Elsa</h1>
             <div class="auth-box">
                 <h2>Login</h2>
                 <form id="login-form">
@@ -164,7 +164,7 @@
             <h3>Transaction History</h3>
             <ul id="transactions"></ul>
             <h3>Settings</h3>
-            <input type="text" id="new-username" placeholder="New Username">
+            <input type="text" id="new-username" placeholder="New “…New Username">
             <input type="password" id="new-password" placeholder="New Password">
             <button onclick="updateProfile()">Update Profile</button>
             <button onclick="showPage('home-page')">Back to Home</button>
@@ -209,7 +209,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.0/dist/chartjs-chart-financial.min.js"></script>
     <script>
-        // Firebase Config from JSON
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyApuMISYyAXo7Xdxa_FAYDG-tHaU5vJA6A",
             authDomain: "elsa-809c1.firebaseapp.com",
@@ -228,7 +228,7 @@
             document.getElementById(pageId).classList.add('active');
         }
 
-        // Splash Screen
+        // Splash Screen (3 seconds)
         setTimeout(() => showPage('auth-page'), 3000);
 
         // Authentication
@@ -272,7 +272,7 @@
                             db.collection("users").doc(user.uid).update({
                                 verification: "platinum",
                                 badge: "golden-lion",
-                                wallet: 2000 * 2000 // 2000 Elsa at $2000 each
+                                wallet: 2000 * 2000
                             });
                         }
                         showPage('home-page');
@@ -345,7 +345,7 @@
 
             // Simulate price updates
             setInterval(() => {
-                const change = Math.random() * 100 - 50; // Random fluctuation
+                const change = Math.random() * 100 - 50;
                 elsaPrice += change;
                 document.getElementById("elsa-price").textContent = elsaPrice.toFixed(2);
                 chartData.push({
@@ -394,8 +394,8 @@
                 const data = doc.data();
                 if (data.wallet < amount * elsaPrice) return alert("Insufficient funds");
                 let profit = amount * elsaPrice;
-                if (elsaPrice < 2000) profit *= 0.7; // -30% if price is down
-                else profit *= 1.3; // +30% if price is up
+                if (elsaPrice < 2000) profit *= 0.7;
+                else profit *= 1.3;
                 const maintenanceFee = ["bird", "boss"].includes(data.verification) ? 0.1 : data.verification === "lord" ? 0.2 : 0;
                 db.collection("transactions").add({
                     userId: user.uid,
@@ -437,7 +437,6 @@
         // Deposit (Paystack Placeholder)
         function deposit() {
             alert("Paystack deposit initiated. Configure Paystack SDK for full functionality.");
-            // Add PaystackPop.setup with your public key
         }
 
         // Withdrawal Form
@@ -458,7 +457,6 @@
                 if (data.verification === "none") return alert("You must be verified to withdraw");
                 if (data.wallet < amount) return alert("Insufficient funds");
                 
-                // Store withdrawal request in Firestore
                 db.collection("withdrawals").add({
                     userId: user.uid,
                     email: user.email,
@@ -469,7 +467,6 @@
                     status: "pending",
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 }).then(() => {
-                    // Update wallet
                     db.collection("users").doc(user.uid).update({
                         wallet: firebase.firestore.FieldValue.increment(-amount)
                     });
@@ -479,7 +476,6 @@
                     document.getElementById("account-number").value = "";
                     document.getElementById("withdraw-amount").value = "";
                     
-                    // Simulate email (replace with actual email integration)
                     console.log(`Withdrawal Request:
                         Email: ${user.email}
                         Username: ${data.username}
