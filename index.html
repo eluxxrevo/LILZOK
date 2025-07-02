@@ -218,7 +218,12 @@
             messagingSenderId: "401983741723",
             appId: "1:401983741723:android:253c41bf6a9011d0483dbe"
         };
-        firebase.initializeApp(firebaseConfig);
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization failed:", error);
+        }
         const auth = firebase.auth();
         const db = firebase.firestore();
 
@@ -226,15 +231,23 @@
         function showPage(pageId) {
             if (pageId !== 'auth-page' && !auth.currentUser) {
                 alert("Please log in or register to access this page.");
-                showPage('auth-page');
-                return;
+                pageId = 'auth-page';
             }
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                console.log(`Switched to page: ${pageId}`);
+            } else {
+                console.error(`Page not found: ${pageId}`);
+            }
         }
 
         // Splash Screen (3 seconds)
-        setTimeout(() => showPage('auth-page'), 3000);
+        setTimeout(() => {
+            console.log("Splash screen timeout triggered");
+            showPage('auth-page');
+        }, 3000);
 
         // Authentication
         document.getElementById("login-form")?.addEventListener("submit", (e) => {
@@ -242,7 +255,10 @@
             const email = document.getElementById("login-email").value;
             const password = document.getElementById("login-password").value;
             auth.signInWithEmailAndPassword(email, password)
-                .then(() => showPage('home-page'))
+                .then(() => {
+                    console.log("Login successful");
+                    showPage('home-page');
+                })
                 .catch((error) => alert(error.message));
         });
 
@@ -280,6 +296,7 @@
                                 wallet: 2000 * 2000
                             });
                         }
+                        console.log("Registration successful");
                         showPage('home-page');
                     });
                 })
@@ -512,13 +529,13 @@
 
         // Support Chat
         function sendMessage() {
-            const comment = document.getElementById("chat-input").value;
-            if (!comment) return;
+            const message = document.getElementById("chat-input").value;
+            if (!message) return;
             const user = auth.currentUser;
             if (!user) return alert("Please log in");
             db.collection("support").add({
                 userId: user.uid,
-                message: comment,
+                message,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
                 document.getElementById("chat-input").value = "";
@@ -531,4 +548,4 @@
         });
     </script>
 </body>
-            </html>
+</html>
