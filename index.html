@@ -1,22 +1,12 @@
-Here's the complete, fully functional 2000+ line code for your Elsa trading platform with all requested features:
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Elsa Trading Platform</title>
-    <!-- TradingView Lightweight Charts -->
-    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-    <!-- Font Awesome -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@2.0.2/build/global/luxon.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Animate.css -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         :root {
             --primary: #FFD700;
@@ -37,13 +27,14 @@ Here's the complete, fully functional 2000+ line code for your Elsa trading plat
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
             background-color: var(--bg-dark);
             color: var(--text-light);
             min-height: 100vh;
+            overflow-x: hidden;
         }
         
         /* Loading Animation */
@@ -1116,6 +1107,38 @@ Here's the complete, fully functional 2000+ line code for your Elsa trading plat
             transform: translateY(0);
         }
         
+        /* Transaction Notification */
+        .transaction-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(30,30,30,0.95);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            z-index: 100;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .transaction-notification.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .transaction-notification.buy {
+            border-left: 4px solid var(--success);
+        }
+        
+        .transaction-notification.sell {
+            border-left: 4px solid var(--danger);
+        }
+        
         /* Endorsement Footer */
         .endorsement-footer {
             text-align: center;
@@ -1315,9 +1338,9 @@ Here's the complete, fully functional 2000+ line code for your Elsa trading plat
                 <button class="timeframe-btn" data-timeframe="1w">1W</button>
             </div>
             
-            <!-- TradingView Chart -->
+            <!-- Trading Chart -->
             <div class="chart-container">
-                <div id="tradingChart"></div>
+                <canvas id="tradingChart"></canvas>
             </div>
             
             <!-- Trading Actions -->
@@ -1739,64 +1762,18 @@ Here's the complete, fully functional 2000+ line code for your Elsa trading plat
         const tierUpgradeEffect = document.getElementById('tierUpgradeEffect');
         const soundNotification = document.getElementById('soundNotification');
         
-        // Initialize TradingView Chart
-        const chart = LightweightCharts.createChart(document.getElementById('tradingChart'), {
-            width: document.getElementById('tradingChart').clientWidth,
-            height: document.getElementById('tradingChart').clientHeight,
-            layout: {
-                backgroundColor: '#121212',
-                textColor: '#F5F5F5',
-            },
-            grid: {
-                vertLines: {
-                    color: 'rgba(255, 255, 255, 0.05)',
-                },
-                horzLines: {
-                    color: 'rgba(255, 255, 255, 0.05)',
-                },
-            },
-            crosshair: {
-                mode: LightweightCharts.CrosshairMode.Normal,
-            },
-            rightPriceScale: {
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-            },
-            timeScale: {
-                borderColor: 'rgba(255, 255, 255, 0.1)',
-            },
-        });
-
-        // Candlestick Series
-        const candleSeries = chart.addCandlestickSeries({
-            upColor: '#4CAF50',
-            downColor: '#F44336',
-            borderDownColor: '#F44336',
-            borderUpColor: '#4CAF50',
-            wickDownColor: '#F44336',
-            wickUpColor: '#4CAF50',
-        });
-
-        // Volume Series
-        const volumeSeries = chart.addHistogramSeries({
-            color: 'rgba(76, 175, 80, 0.5)',
-            priceFormat: {
-                type: 'volume',
-            },
-            priceScaleId: '',
-            scaleMargins: {
-                top: 0.8,
-                bottom: 0,
-            },
-        });
-
-        // Generate Mock Data
+        // Initialize Chart.js
+        const ctx = document.getElementById('tradingChart').getContext('2d');
+        let tradingChart;
+        
+        // Generate mock trading data
         function generateMockData() {
-            const now = new Date();
+            const now = luxon.DateTime.now();
             const data = [];
             let currentPrice = 2000;
             
             for (let i = 100; i >= 0; i--) {
-                const time = new Date(now - i * 60 * 60 * 1000);
+                const time = now.minus({hours: i});
                 const open = currentPrice;
                 const change = (Math.random() * 2 - 1) * 20;
                 currentPrice += change;
@@ -1806,7 +1783,7 @@ Here's the complete, fully functional 2000+ line code for your Elsa trading plat
                 const volume = Math.floor(Math.random() * 1000) + 500;
                 
                 data.push({
-                    time: Math.floor(time.getTime() / 1000),
+                    time: time.toISO(),
                     open,
                     high,
                     low,
@@ -1818,21 +1795,68 @@ Here's the complete, fully functional 2000+ line code for your Elsa trading plat
             return data;
         }
 
-        // Apply Data to Chart
-        const chartData = generateMockData();
-        candleSeries.setData(chartData.map(d => ({
-            time: d.time,
-            open: d.open,
-            high: d.high,
-            low: d.low,
-            close: d.close
-        })));
-        
-        volumeSeries.setData(chartData.map(d => ({
-            time: d.time,
-            value: d.volume,
-            color: d.close >= d.open ? 'rgba(76, 175, 80, 0.5)' : 'rgba(244, 67, 54, 0.5)'
-        })));
+        // Initialize Trading Chart
+        function initTradingChart() {
+            const chartData = generateMockData();
+            
+            tradingChart = new Chart(ctx, {
+                type: 'candlestick',
+                data: {
+                    datasets: [{
+                        label: 'Elsa Price',
+                        data: chartData.map(d => ({
+                            x: luxon.DateTime.fromISO(d.time).toJSDate(),
+                            o: d.open,
+                            h: d.high,
+                            l: d.low,
+                            c: d.close
+                        })),
+                        color: {
+                            up: '#4CAF50',
+                            down: '#F44336',
+                            unchanged: '#999',
+                        },
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'hour'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const point = context.raw;
+                                    return [
+                                        `Open: $${point.o}`,
+                                        `High: $${point.h}`,
+                                        `Low: $${point.l}`,
+                                        `Close: $${point.c}`
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -2194,4 +2218,165 @@ Here's the complete, fully functional 2000+ line code for your Elsa trading plat
             if (e.target.closest('.reply-btn')) {
                 const commentId = e.target.closest('.reply-btn').dataset.commentId;
                 const replyForm = e.target.closest('.comment').querySelector('.reply-form');
-                replyForm.style.display = replyForm
+                replyForm.style.display = 'flex';
+                
+                // Focus on reply input
+                replyForm.querySelector('.reply-input').focus();
+            }
+            
+            // Reply submit button
+            if (e.target.classList.contains('reply-submit')) {
+                const replyForm = e.target.closest('.reply-form');
+                const replyInput = replyForm.querySelector('.reply-input');
+                const replyText = replyInput.value.trim();
+                
+                if (replyText) {
+                    const commentElement = e.target.closest('.comment');
+                    const repliesContainer = commentElement.querySelector('.replies');
+                    
+                    const newReply = {
+                        user: "CurrentUser",
+                        content: replyText,
+                        timestamp: new Date().toLocaleTimeString(),
+                        tier: 'platinum'
+                    };
+                    
+                    const replyElement = document.createElement('div');
+                    replyElement.className = 'comment';
+                    replyElement.style.marginTop = '10px';
+                    replyElement.style.padding = '10px';
+                    replyElement.style.backgroundColor = '#252525';
+                    
+                    replyElement.innerHTML = `
+                        <div class="comment-header">
+                            <div class="comment-user">
+                                ${getTierBadge(newReply.tier)}
+                                <span>${newReply.user}</span>
+                            </div>
+                            <span class="comment-time">${newReply.timestamp}</span>
+                        </div>
+                        <div class="comment-content">
+                            ${newReply.content}
+                        </div>
+                    `;
+                    
+                    repliesContainer.insertBefore(replyElement, replyForm);
+                    replyInput.value = '';
+                }
+            }
+        });
+
+        // Buy/Sell Actions
+        document.getElementById('buyBtn').addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('buyAmount').value);
+            if (isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid amount");
+                return;
+            }
+            
+            const currentPrice = parseFloat(document.getElementById('currentPrice').textContent.replace(/[^0-9.]/g, ''));
+            const total = amount * currentPrice;
+            
+            // Simulate transaction
+            showTransactionNotification(`Bought ${amount.toFixed(2)} Elsa for $${total.toFixed(2)}`, 'buy');
+        });
+
+        document.getElementById('sellBtn').addEventListener('click', function() {
+            const amount = parseFloat(document.getElementById('sellAmount').value);
+            if (isNaN(amount) || amount <= 0) {
+                alert("Please enter a valid amount");
+                return;
+            }
+            
+            const currentPrice = parseFloat(document.getElementById('currentPrice').textContent.replace(/[^0-9.]/g, ''));
+            const total = amount * currentPrice;
+            
+            // Simulate transaction
+            showTransactionNotification(`Sold ${amount.toFixed(2)} Elsa for $${total.toFixed(2)}`, 'sell');
+        });
+
+        // Show transaction notification
+        function showTransactionNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `transaction-notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'buy' ? 'plus-circle' : 'minus-circle'}"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Simulate price updates
+        function simulatePriceChanges() {
+            const priceElement = document.getElementById('currentPrice');
+            const changeElement = document.getElementById('priceChange');
+            
+            let currentPrice = 2000;
+            let lastPrice = 2000;
+            
+            setInterval(() => {
+                // Generate random price change (-1% to +1%)
+                const changePercent = (Math.random() * 2 - 1) / 100;
+                currentPrice = lastPrice * (1 + changePercent);
+                
+                // Update UI
+                priceElement.textContent = `$${currentPrice.toFixed(2)}`;
+                
+                const changeValue = currentPrice - lastPrice;
+                const changePercentage = (changeValue / lastPrice) * 100;
+                
+                changeElement.innerHTML = `
+                    <span class="${changeValue >= 0 ? 'positive' : 'negative'}">
+                        ${changeValue >= 0 ? '+' : ''}${changePercentage.toFixed(2)}%
+                    </span>
+                    <span>($${changeValue >= 0 ? '+' : ''}${changeValue.toFixed(2)})</span>
+                `;
+                
+                // Update buy/sell totals
+                document.getElementById('buyTotal').value = `$${(document.getElementById('buyAmount').value * currentPrice).toFixed(2)}`;
+                document.getElementById('sellTotal').value = `$${(document.getElementById('sellAmount').value * currentPrice).toFixed(2)}`;
+                
+                lastPrice = currentPrice;
+            }, 5000); // Update every 5 seconds
+        }
+
+        // Deposit/Withdrawal Actions
+        document.getElementById('depositBtn').addEventListener('click', function() {
+            // In a real app, this would open a Paystack payment modal
+            alert("Redirecting to Paystack for deposit processing...");
+        });
+        
+        document.getElementById('withdrawBtn').addEventListener('click', function() {
+            // In a real app, this would open a withdrawal form
+            alert("Processing withdrawal request...");
+        });
+
+        // Initialize app
+        window.addEventListener('DOMContentLoaded', function() {
+            // Hide loading screen after 3 seconds
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                authContainer.style.display = 'flex';
+            }, 3000);
+            
+            // Initialize trading chart
+            initTradingChart();
+            
+            // Start price simulation
+            simulatePriceChanges();
+        });
+    </script>
+</body>
+</html>
