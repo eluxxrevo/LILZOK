@@ -3,1882 +3,750 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elsa Trading Platform</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/luxon@2.0.2/build/global/luxon.min.js"></script>
+    <title>Elsa Trading Platform | $50M Asset Trading</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@2.4.0/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.0"></script>
     <style>
         :root {
-            --primary: #FFD700;
-            --secondary: #D4AF37;
-            --bg-dark: #121212;
-            --bg-darker: #0A0A0A;
-            --text-light: #F5F5F5;
-            --text-dim: #AAAAAA;
-            --success: #4CAF50;
-            --danger: #F44336;
-            --bird: #C0C0C0;
-            --boss: #CD7F32;
-            --lord: #B9F2FF;
-            --platinum: #FFD700;
+            --primary-bg: #0a0a0a;
+            --secondary-bg: #1a1a1a;
+            --accent-gold: #d4af37;
+            --light-gold: #f0e6d2;
+            --text-light: #ffffff;
+            --text-muted: #aaaaaa;
+            --success: #28a745;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --warning: #ffc107;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
-            background-color: var(--bg-dark);
+            font-family: 'Montserrat', sans-serif;
+            background: var(--primary-bg);
             color: var(--text-light);
             min-height: 100vh;
             overflow-x: hidden;
         }
-        
-        /* Loading Animation */
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+
+        .app-container {
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
+            min-height: 100vh;
         }
-        
-        .loading-logo {
-            width: 150px;
-            height: 150px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 30px;
-            animation: pulse 2s infinite;
-        }
-        
-        .loading-logo i {
-            font-size: 60px;
-            color: #121212;
-        }
-        
-        .loading-text {
-            font-size: 24px;
-            margin-top: 20px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* Auth Screens */
-        .auth-container {
-            display: none;
+
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(to bottom, #1a1a1a, #0a0a0a);
+            border-right: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 20px 0;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
-            z-index: 999;
-            justify-content: center;
-            align-items: center;
+            height: 100vh;
+            z-index: 100;
         }
-        
-        .auth-box {
-            background-color: #1e1e1e;
-            padding: 40px;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border: 1px solid #333;
+
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%230a0a0a"/><path d="M0 0L100 100M100 0L0 100" stroke="%231a1a1a" stroke-width="0.5"/></svg>');
         }
-        
-        .auth-header {
+
+        .logo {
             text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .auth-header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .auth-header p {
-            color: #aaa;
-        }
-        
-        .form-group {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
             margin-bottom: 20px;
         }
-        
+
+        .logo h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--accent-gold);
+            font-size: 28px;
+            letter-spacing: 2px;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 0 20px;
+        }
+
+        .nav-links li {
+            margin-bottom: 10px;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: var(--text-light);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--accent-gold);
+        }
+
+        .nav-links a i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .page-header h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--accent-gold);
+            font-size: 28px;
+        }
+
+        .card {
+            background: var(--secondary-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 25px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 18px 25px;
+            background: rgba(212, 175, 55, 0.05);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--accent-gold);
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .chart-container {
+            height: 400px;
+            position: relative;
+        }
+
+        .price-display {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .price-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin: 10px 0;
+        }
+
+        .price-change {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .positive {
+            color: var(--success);
+        }
+
+        .negative {
+            color: var(--danger);
+        }
+
+        .trading-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .trading-card {
+            padding: 20px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .trading-card h3 {
+            margin-bottom: 15px;
+            color: var(--accent-gold);
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #ddd;
             font-weight: 500;
         }
-        
-        .form-group input, .form-group select {
+
+        .form-control {
             width: 100%;
             padding: 12px 15px;
-            background-color: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 5px;
-            color: #fff;
-            font-size: 16px;
-        }
-        
-        .form-group small {
-            display: block;
-            margin-top: 5px;
-            color: #777;
-            font-size: 12px;
-        }
-        
-        .btn-primary {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border: none;
-            border-radius: 5px;
-            color: #121212;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-        }
-        
-        .auth-footer {
-            text-align: center;
-            margin-top: 20px;
-            color: #777;
-        }
-        
-        .auth-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        /* Main App Container */
-        .app-container {
-            display: none;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        /* App Header */
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid #333;
-            margin-bottom: 20px;
-        }
-        
-        .app-logo {
-            font-size: 24px;
-            font-weight: bold;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: var(--primary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            color: #121212;
-            position: relative;
-            cursor: pointer;
-        }
-        
-        /* Navigation */
-        .app-nav {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #333;
-        }
-        
-        .nav-item {
-            padding: 10px 15px;
-            cursor: pointer;
-            color: #aaa;
-            font-weight: 500;
-            transition: all 0.3s;
-            border-bottom: 2px solid transparent;
-        }
-        
-        .nav-item.active {
-            color: var(--primary);
-            border-bottom: 2px solid var(--primary);
-        }
-        
-        .nav-item:hover {
-            color: var(--primary);
-        }
-        
-        /* Pages */
-        .page {
-            display: none;
-        }
-        
-        .page.active {
-            display: block;
-        }
-        
-        /* Home Page */
-        .price-display {
-            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #333;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .price-value {
-            font-size: 36px;
-            font-weight: bold;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .price-change {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 16px;
-        }
-        
-        .price-change.positive {
-            color: var(--success);
-        }
-        
-        .price-change.negative {
-            color: var(--danger);
-        }
-        
-        /* Chart Container */
-        .chart-container {
-            height: 400px;
-            margin-bottom: 20px;
-            background-color: #1e1e1e;
-            border-radius: 10px;
-            padding: 15px;
-            border: 1px solid #333;
-            position: relative;
-        }
-        
-        .chart-controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .timeframe-btn {
-            padding: 5px 15px;
-            background-color: #2a2a2a;
-            border: 1px solid var(--primary);
-            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
             color: var(--text-light);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .timeframe-btn.active {
-            background-color: var(--primary);
-            color: #121212;
-            font-weight: bold;
-        }
-        
-        /* Trading Actions */
-        .trading-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .action-card {
-            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid #333;
-        }
-        
-        .action-card h3 {
-            margin-bottom: 15px;
-            color: var(--primary);
-        }
-        
-        .action-input {
-            margin-bottom: 15px;
-        }
-        
-        .action-input label {
-            display: block;
-            margin-bottom: 8px;
-            color: #ddd;
-        }
-        
-        .action-input input {
-            width: 100%;
-            padding: 10px 15px;
-            background-color: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 5px;
-            color: #fff;
-        }
-        
-        .action-btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .buy-btn {
-            background: linear-gradient(135deg, var(--success) 0%, #2E7D32 100%);
-            color: white;
-        }
-        
-        .sell-btn {
-            background: linear-gradient(135deg, var(--danger) 0%, #C62828 100%);
-            color: white;
-        }
-        
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* Comments Section */
-        .comments-section {
-            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid #333;
-        }
-        
-        .comments-section h3 {
-            margin-bottom: 15px;
-            color: var(--primary);
-        }
-        
-        .comment-input-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .comment-input {
-            flex: 1;
-            padding: 12px 15px;
-            background-color: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 5px;
-            color: #fff;
-        }
-        
-        .comment-submit {
-            padding: 12px 20px;
-            background-color: var(--primary);
-            border: none;
-            border-radius: 5px;
-            color: #121212;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        .comment {
-            padding: 15px;
-            background-color: #2a2a2a;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            border-left: 3px solid var(--primary);
-        }
-        
-        .comment-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: #aaa;
-        }
-        
-        .comment-user {
-            font-weight: 600;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .comment-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .comment-action {
-            color: #aaa;
-            font-size: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .comment-action:hover {
-            color: var(--primary);
-        }
-        
-        .replies {
-            margin-top: 15px;
-            padding-left: 20px;
-            border-left: 2px solid rgba(255, 215, 0, 0.2);
-        }
-        
-        .reply-form {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .reply-input {
-            flex: 1;
-            padding: 8px 12px;
-            background-color: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 5px;
-            color: #fff;
-        }
-        
-        .reply-submit {
-            padding: 8px 15px;
-            background-color: #2a2a2a;
-            border: 1px solid var(--primary);
-            border-radius: 5px;
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        /* User Page */
-        .user-info {
-            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #333;
-        }
-        
-        .user-header {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .user-avatar-large {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background-color: var(--primary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #121212;
-            position: relative;
-        }
-        
-        .user-details h2 {
-            margin-bottom: 5px;
-            color: var(--primary);
-        }
-        
-        .user-id {
-            color: #aaa;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        
-        .user-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-card {
-            background-color: #2a2a2a;
-            border-radius: 5px;
-            padding: 15px;
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: var(--primary);
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: #aaa;
-        }
-        
-        .user-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .user-action-btn {
-            padding: 12px;
-            background-color: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 5px;
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-        
-        .user-action-btn.primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: #121212;
-        }
-        
-        .user-action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* Referral Section */
-        .referral-section {
-            background-color: #1e1e1e;
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid #333;
-            margin-bottom: 20px;
-        }
-        
-        .referral-section h3 {
-            margin-bottom: 15px;
-            color: var(--primary);
-        }
-        
-        .referral-code {
-            background-color: #2a2a2a;
-            padding: 15px;
-            border-radius: 5px;
-            font-family: monospace;
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 18px;
-            letter-spacing: 2px;
-        }
-        
-        .referral-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .referral-stat-card {
-            background-color: #2a2a2a;
-            border-radius: 5px;
-            padding: 15px;
-            text-align: center;
-        }
-        
-        .referral-stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: var(--primary);
-        }
-        
-        .referral-stat-label {
-            font-size: 12px;
-            color: #aaa;
-        }
-        
-        .referral-progress {
-            margin-bottom: 15px;
-        }
-        
-        .progress-bar {
-            height: 10px;
-            background-color: #333;
-            border-radius: 5px;
-            overflow: hidden;
-            margin-top: 5px;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border-radius: 5px;
-            transition: width 0.5s ease;
-        }
-        
-        .progress-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 5px;
-            font-size: 12px;
-            color: #aaa;
-        }
-        
-        .copy-btn {
-            width: 100%;
-            padding: 10px;
-            background-color: #2a2a2a;
-            border: 1px solid var(--primary);
-            border-radius: 5px;
-            color: var(--primary);
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        /* Tier Upgrade Section */
-        .tier-upgrade {
-            background-color: #1e1e1e;
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid #333;
-        }
-        
-        .tier-upgrade h3 {
-            margin-bottom: 15px;
-            color: var(--primary);
-        }
-        
-        .tier-card {
-            background-color: #2a2a2a;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 3px solid;
-        }
-        
-        .tier-card.bird {
-            border-left-color: var(--bird);
-        }
-        
-        .tier-card.boss {
-            border-left-color: var(--boss);
-        }
-        
-        .tier-card.lord {
-            border-left-color: var(--lord);
-        }
-        
-        .tier-card.platinum {
-            border-left-color: var(--platinum);
-        }
-        
-        .tier-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        
-        .tier-name {
-            font-weight: 600;
-        }
-        
-        .tier-price {
-            color: var(--primary);
-        }
-        
-        .tier-requirements {
-            font-size: 14px;
-            color: #aaa;
-            margin-bottom: 10px;
-        }
-        
-        .tier-benefits {
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-        
-        .tier-benefits li {
-            margin-bottom: 5px;
-        }
-        
-        .upgrade-btn {
-            width: 100%;
-            padding: 8px;
-            background-color: var(--primary);
-            border: none;
-            border-radius: 5px;
-            color: #121212;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        /* Leaderboard Page */
-        .leaderboard-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .leaderboard-tab {
-            padding: 10px 20px;
-            background-color: #2a2a2a;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .leaderboard-tab.active {
-            background-color: var(--primary);
-            color: #121212;
-        }
-        
-        .leaderboard-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        
-        .leaderboard-table th {
-            background-color: #2a2a2a;
-            padding: 12px 15px;
-            text-align: left;
-        }
-        
-        .leaderboard-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #333;
-        }
-        
-        .leaderboard-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .leaderboard-user {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .leaderboard-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background-color: var(--primary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 12px;
-            font-weight: bold;
-            color: #121212;
-        }
-        
-        /* Transactions Page */
-        .transactions-list {
-            background-color: #1e1e1e;
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid #333;
-        }
-        
-        .transaction {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px 0;
-            border-bottom: 1px solid #333;
-        }
-        
-        .transaction:last-child {
-            border-bottom: none;
-        }
-        
-        .transaction-info {
-            flex: 1;
-        }
-        
-        .transaction-type {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .transaction-type.buy {
-            color: var(--success);
-        }
-        
-        .transaction-type.sell {
-            color: var(--danger);
-        }
-        
-        .transaction-date {
-            font-size: 12px;
-            color: #aaa;
-        }
-        
-        .transaction-amount {
-            font-weight: 600;
-        }
-        
-        /* Support Page */
-        .customer-service {
-            background-color: #1e1e1e;
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid #333;
-        }
-        
-        .chat-container {
-            height: 400px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            padding-right: 10px;
-        }
-        
-        .chat-message {
-            margin-bottom: 15px;
-            max-width: 80%;
-        }
-        
-        .user-message {
-            margin-left: auto;
-            text-align: right;
-        }
-        
-        .support-message {
-            margin-right: auto;
-        }
-        
-        .message-bubble {
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+
+        .btn {
             display: inline-block;
-            padding: 10px 15px;
-            border-radius: 18px;
-            font-size: 14px;
-        }
-        
-        .user-bubble {
-            background-color: var(--primary);
-            color: #121212;
-            border-bottom-right-radius: 0;
-        }
-        
-        .support-bubble {
-            background-color: #2a2a2a;
-            color: #fff;
-            border-bottom-left-radius: 0;
-        }
-        
-        .message-time {
-            font-size: 11px;
-            color: #aaa;
-            margin-top: 5px;
-        }
-        
-        .chat-input {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .chat-input input {
-            flex: 1;
-            padding: 12px 15px;
-            background-color: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 5px;
-            color: #fff;
-        }
-        
-        .chat-input button {
-            padding: 12px 20px;
-            background-color: var(--primary);
+            padding: 12px 25px;
+            background: var(--accent-gold);
+            color: var(--primary-bg);
             border: none;
-            border-radius: 5px;
-            color: #121212;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
         }
-        
-        /* Tier Badges */
+
+        .btn:hover {
+            background: #c19d2e;
+            transform: translateY(-2px);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
         .tier-badge {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
             font-weight: 600;
-            margin-left: 8px;
-            animation: pulse 2s infinite;
+            margin-right: 8px;
         }
-        
-        .tier-badge.bird {
-            background: linear-gradient(135deg, var(--bird) 0%, #A0A0A0 100%);
-            color: #333;
-        }
-        
-        .tier-badge.boss {
-            background: linear-gradient(135deg, var(--boss) 0%, #A05A2C 100%);
-            color: #FFF;
-        }
-        
-        .tier-badge.lord {
-            background: linear-gradient(135deg, var(--lord) 0%, #7EC0EE 100%);
-            color: #0066CC;
-        }
-        
-        .tier-badge.platinum {
-            background: linear-gradient(135deg, var(--platinum) 0%, var(--secondary) 100%);
-            color: #000;
-            animation: glow 1.5s infinite alternate;
-        }
-        
-        /* User Badges in Comments */
-        .user-badge {
-            width: 16px;
-            height: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-size: 10px;
-        }
-        
+
         .badge-bird {
-            background-color: var(--bird);
-            color: #333;
+            background: rgba(192, 192, 192, 0.2);
+            color: silver;
         }
-        
+
         .badge-boss {
-            background-color: var(--boss);
-            color: white;
+            background: rgba(205, 127, 50, 0.2);
+            color: #cd7f32;
         }
-        
+
         .badge-lord {
-            background-color: var(--lord);
-            color: #0066CC;
+            background: rgba(185, 242, 255, 0.2);
+            color: #b9f2ff;
         }
-        
+
         .badge-platinum {
-            background-color: var(--platinum);
-            color: #000;
-            box-shadow: 0 0 5px gold;
+            background: rgba(229, 228, 226, 0.2);
+            color: #e5e4e2;
         }
-        
-        /* Tier Logos */
-        .tier-logo {
-            width: 24px;
-            height: 24px;
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #0a0a0a, #d4af37);
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50%;
-            margin-right: 5px;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin: 0 auto 20px;
+            position: relative;
+            border: 3px solid var(--accent-gold);
         }
-        
-        .logo-bird {
-            background-color: var(--bird);
+
+        .badge-icon {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border: 2px solid var(--primary-bg);
+        }
+
+        .badge-icon.bird {
+            background: silver;
             color: #333;
         }
-        
-        .logo-boss {
-            background-color: var(--boss);
-            color: white;
+
+        .badge-icon.boss {
+            background: #cd7f32;
+            color: #fff;
         }
-        
-        .logo-lord {
-            background-color: var(--lord);
-            color: #0066CC;
+
+        .badge-icon.lord {
+            background: #b9f2ff;
+            color: #333;
         }
-        
-        .logo-platinum {
-            background-color: var(--platinum);
-            color: #000;
-            box-shadow: 0 0 5px gold;
+
+        .badge-icon.platinum {
+            background: #e5e4e2;
+            color: #333;
         }
-        
-        /* User Guide Button */
-        .user-guide-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: #121212;
-            border: none;
-            border-radius: 50px;
-            padding: 10px 20px;
-            font-weight: 600;
-            cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            animation: pulse 2s infinite;
+
+        .user-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
         }
-        
-        /* User Guide Modal */
-        .guide-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            overflow-y: auto;
-        }
-        
-        .guide-content {
-            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 30px;
+
+        .info-card {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 10px;
-            border: 1px solid var(--primary);
-            position: relative;
         }
-        
-        .close-guide {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            color: var(--text-dim);
+
+        .info-card h3 {
+            margin-bottom: 15px;
+            color: var(--accent-gold);
+            font-size: 18px;
+        }
+
+        .info-value {
             font-size: 24px;
-            cursor: pointer;
+            font-weight: 700;
+            color: var(--text-light);
         }
-        
-        .guide-section {
-            margin-bottom: 25px;
+
+        .transaction-history {
+            width: 100%;
+            border-collapse: collapse;
         }
-        
-        .guide-section h3 {
-            color: var(--primary);
-            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
-            padding-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+
+        .transaction-history th {
+            text-align: left;
+            padding: 12px 15px;
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--accent-gold);
+            font-weight: 600;
         }
-        
-        /* Tier Upgrade Animation */
-        .tier-upgrade-effect {
+
+        .transaction-history td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .transaction-history tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .splash-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            display: none;
+            background: var(--primary-bg);
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            z-index: 1000;
+            animation: fadeOut 1s ease-in-out 3s forwards;
         }
-        
-        .tier-upgrade-content {
-            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
-            padding: 30px;
-            border-radius: 10px;
+
+        .splash-content {
             text-align: center;
-            border: 2px solid var(--primary);
-            max-width: 400px;
-            animation: zoomIn 0.5s;
+            animation: pulse 2s infinite;
         }
-        
-        /* Sound Notification */
-        .sound-notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(30,30,30,0.9);
-            padding: 10px 15px;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 100;
-            transform: translateY(100px);
-            transition: transform 0.3s ease;
+
+        .splash-content h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--accent-gold);
+            font-size: 48px;
+            margin-bottom: 20px;
         }
-        
-        .sound-notification.show {
-            transform: translateY(0);
+
+        .splash-content p {
+            font-size: 24px;
+            color: var(--light-gold);
         }
-        
-        /* Transaction Notification */
-        .transaction-notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(30,30,30,0.95);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 500;
-            z-index: 100;
-            transition: transform 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        
-        .transaction-notification.show {
-            transform: translateX(-50%) translateY(0);
-        }
-        
-        .transaction-notification.buy {
-            border-left: 4px solid var(--success);
-        }
-        
-        .transaction-notification.sell {
-            border-left: 4px solid var(--danger);
-        }
-        
-        .referral-notification {
-            border-left: 4px solid var(--primary);
-        }
-        
-        /* Endorsement Footer */
-        .endorsement-footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            border-top: 1px solid rgba(255, 215, 0, 0.2);
-            font-style: italic;
-            color: var(--primary);
-            font-size: 14px;
-        }
-        
-        /* Animations */
+
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
-        
-        @keyframes glow {
-            from { box-shadow: 0 0 5px rgba(212, 175, 55, 0.5); }
-            to { box-shadow: 0 0 15px rgba(212, 175, 55, 0.8); }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
         }
-        
-        @keyframes zoomIn {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+
+        .hidden {
+            display: none;
         }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .trading-actions {
-                grid-template-columns: 1fr;
-            }
-            
-            .user-stats {
-                grid-template-columns: 1fr;
-            }
-            
-            .user-actions {
-                grid-template-columns: 1fr;
-            }
-            
-            .referral-stats {
-                grid-template-columns: 1fr;
-            }
-            
-            .price-display {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            .chart-container {
-                height: 300px;
-            }
-            
-            .guide-content {
-                margin: 20px;
-                padding: 20px;
-            }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--secondary-bg);
+            border-left: 4px solid var(--accent-gold);
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
         }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-logo">
-            <i class="fas fa-gem"></i>
-        </div>
-        <div class="loading-text">Elsa Trading Platform</div>
-    </div>
-
-    <!-- Auth Screens -->
-    <div class="auth-container" id="authContainer">
-        <div class="auth-box" id="registerContainer">
-            <div class="auth-header">
-                <h1>Create Account</h1>
-                <p>Join the Elsa community today</p>
-            </div>
-            
-            <form id="registerForm">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Password (12+ characters)</label>
-                    <input type="password" id="password" minlength="12" required>
-                    <small>Must include letters, numbers, and special characters</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="language">Preferred Language</label>
-                    <select id="language" required>
-                        <option value="en">English</option>
-                        <option value="fr">Français</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="referral">Referral Code (Required)</label>
-                    <input type="text" id="referral" required value="Elsaadmin1">
-                    <small id="referralError" style="color: #F44336; display: none;">Invalid referral code</small>
-                </div>
-                
-                <button type="submit" class="btn-primary">Register</button>
-            </form>
-            
-            <div class="auth-footer">
-                Already have an account? <a href="#" id="showLogin">Login</a>
-            </div>
-        </div>
-        
-        <div class="auth-box" id="loginContainer" style="display: none;">
-            <div class="auth-header">
-                <h1>Welcome Back</h1>
-                <p>Login to your Elsa account</p>
-            </div>
-            
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="loginEmail">Email</label>
-                    <input type="email" id="loginEmail" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" required>
-                </div>
-                
-                <button type="submit" class="btn-primary">Login</button>
-            </form>
-            
-            <div class="auth-footer">
-                Don't have an account? <a href="#" id="showRegister">Register</a>
-            </div>
+    <!-- Splash Screen -->
+    <div class="splash-screen">
+        <div class="splash-content">
+            <h1>ELSA</h1>
+            <p>$50M Digital Asset Trading</p>
         </div>
     </div>
 
-    <!-- Main App -->
-    <div class="app-container" id="appContainer">
-        <!-- User Guide Button -->
-        <button class="user-guide-btn" id="userGuideBtn">
-            <i class="fas fa-book"></i> User Guide
-        </button>
-
-        <!-- App Header -->
-        <div class="app-header">
-            <div class="app-logo">
-                <i class="fas fa-gem"></i>
-                ELSA
-            </div>
-            <div class="user-profile">
-                <div class="user-avatar" id="userAvatar">
-                    <span id="avatarInitials">U</span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Navigation -->
-        <div class="app-nav">
-            <div class="nav-item active" data-page="home">
-                <i class="fas fa-home"></i> Home
-            </div>
-            <div class="nav-item" data-page="user">
-                <i class="fas fa-user"></i> Profile
-            </div>
-            <div class="nav-item" data-page="leaderboard">
-                <i class="fas fa-trophy"></i> Leaderboard
-            </div>
-            <div class="nav-item" data-page="transactions">
-                <i class="fas fa-exchange-alt"></i> Transactions
-            </div>
-            <div class="nav-item" data-page="support">
-                <i class="fas fa-headset"></i> Support
-            </div>
-        </div>
-        
-        <!-- Pages -->
-        <div class="page active" id="homePage">
-            <!-- Price Display -->
-            <div class="price-display">
-                <div class="price-value" id="currentPrice">$2,000.00</div>
-                <div class="price-change positive" id="priceChange">
-                    <span>+0.00%</span>
-                    <span>($0.00)</span>
-                </div>
-            </div>
-            
-            <!-- Chart Controls -->
-            <div class="chart-controls">
-                <button class="timeframe-btn active" data-timeframe="1h">1H</button>
-                <button class="timeframe-btn" data-timeframe="4h">4H</button>
-                <button class="timeframe-btn" data-timeframe="1d">1D</button>
-                <button class="timeframe-btn" data-timeframe="1w">1W</button>
-            </div>
-            
-            <!-- Trading Chart -->
-            <div class="chart-container">
-                <canvas id="tradingChart"></canvas>
-            </div>
-            
-            <!-- Trading Actions -->
-            <div class="trading-actions">
-                <div class="action-card">
-                    <h3><i class="fas fa-coins"></i> Buy Elsa</h3>
-                    <div class="action-input">
-                        <label for="buyAmount">Amount (Elsa)</label>
-                        <input type="number" id="buyAmount" min="0.01" step="0.01" value="1.00">
-                    </div>
-                    <div class="action-input">
-                        <label for="buyTotal">Total Cost</label>
-                        <input type="text" id="buyTotal" value="$2,000.00" readonly>
-                    </div>
-                    <button class="action-btn buy-btn" id="buyBtn">Buy Now</button>
-                </div>
-                
-                <div class="action-card">
-                    <h3><i class="fas fa-money-bill-wave"></i> Sell Elsa</h3>
-                    <div class="action-input">
-                        <label for="sellAmount">Amount (Elsa)</label>
-                        <input type="number" id="sellAmount" min="0.01" step="0.01" value="1.00">
-                    </div>
-                    <div class="action-input">
-                        <label for="sellTotal">Total Return</label>
-                        <input type="text" id="sellTotal" value="$2,000.00" readonly>
-                    </div>
-                    <button class="action-btn sell-btn" id="sellBtn">Sell Now</button>
-                </div>
-            </div>
-            
-            <!-- Comments Section -->
-            <div class="comments-section">
-                <h3><i class="fas fa-comments"></i> Community Discussion</h3>
-                <div class="comment-input-container">
-                    <input type="text" class="comment-input" id="newComment" placeholder="Share your thoughts...">
-                    <button class="comment-submit" id="submitComment">Post</button>
-                </div>
-                
-                <div id="commentsList">
-                    <!-- Comments will be loaded here -->
-                </div>
-            </div>
-        </div>
-        
-        <!-- User Profile Page -->
-        <div class="page" id="userPage">
-            <div class="user-info">
-                <div class="user-header">
-                    <div class="user-avatar-large" id="userAvatarLarge">
-                        <span id="avatarInitialsLarge">U</span>
-                    </div>
-                    <div class="user-details">
-                        <h2 id="profileUsername">Username</h2>
-                        <div class="user-id" id="profileUserId">ID: 1234567890</div>
-                        <div class="tier-badge platinum" id="profileTier">
-                            <i class="fas fa-crown"></i> Platinum
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="user-stats">
-                    <div class="stat-card">
-                        <div class="stat-value" id="statElsa">5.25</div>
-                        <div class="stat-label">Elsa Holdings</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="statBalance">$1,250.00</div>
-                        <div class="stat-label">Wallet Balance</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="statReferrals">8</div>
-                        <div class="stat-label">Referrals</div>
-                    </div>
-                </div>
-                
-                <div class="user-actions">
-                    <button class="user-action-btn primary" id="depositBtn">
-                        <i class="fas fa-plus-circle"></i> Deposit
-                    </button>
-                    <button class="user-action-btn" id="withdrawBtn">
-                        <i class="fas fa-minus-circle"></i> Withdraw
-                    </button>
-                </div>
-            </div>
-            
-            <div class="referral-section">
-                <h3><i class="fas fa-user-friends"></i> Your Referral Program</h3>
-                <div class="referral-stats">
-                    <div class="referral-stat-card">
-                        <div class="referral-stat-value" id="activeReferrals">5</div>
-                        <div class="referral-stat-label">Active Referrals</div>
-                    </div>
-                    <div class="referral-stat-card">
-                        <div class="referral-stat-value" id="referralEarnings">$250.00</div>
-                        <div class="referral-stat-label">Total Earnings</div>
-                    </div>
-                </div>
-                
-                <div class="referral-progress">
-                    <p>Progress to Platinum Tier</p>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="tierProgress" style="width: 25%"></div>
-                    </div>
-                    <div class="progress-labels">
-                        <span>Bird (8)</span>
-                        <span>Boss (20)</span>
-                        <span>Lord (500)</span>
-                        <span>Platinum (1000)</span>
-                    </div>
-                </div>
-                
-                <div class="referral-code" id="referralCode">ELSA123456</div>
-                <button class="copy-btn" id="copyReferral">
-                    <i class="fas fa-copy"></i> Copy Referral Code
-                </button>
-                
-                <div class="referral-share" style="margin-top: 15px; display: flex; gap: 10px;">
-                    <button class="copy-btn" style="flex: 1;">
-                        <i class="fab fa-whatsapp"></i> Share via WhatsApp
-                    </button>
-                    <button class="copy-btn" style="flex: 1;">
-                        <i class="fas fa-envelope"></i> Share via Email
-                    </button>
-                </div>
-            </div>
-            
-            <div class="tier-upgrade">
-                <h3><i class="fas fa-trophy"></i> Upgrade Your Tier</h3>
-                
-                <div class="tier-card bird">
-                    <div class="tier-header">
-                        <div class="tier-name">
-                            <i class="fas fa-dove"></i> Bird
-                        </div>
-                        <div class="tier-price">$1</div>
-                    </div>
-                    <div class="tier-requirements">Requires 8 referrals</div>
-                    <ul class="tier-benefits">
-                        <li>Can resell after buying</li>
-                        <li>$0.10 maintenance fee per trade</li>
-                        <li>Cannot buy when price is -20%</li>
-                    </ul>
-                    <button class="upgrade-btn">Upgrade Now</button>
-                </div>
-                
-                <div class="tier-card boss">
-                    <div class="tier-header">
-                        <div class="tier-name">
-                            <i class="fas fa-chess-king"></i> Boss
-                        </div>
-                        <div class="tier-price">$6</div>
-                    </div>
-                    <div class="tier-requirements">Requires 20 referrals</div>
-                    <ul class="tier-benefits">
-                        <li>Get $2.25 when reselling</li>
-                        <li>$0.5 maintenance fee per trade</li>
-                        <li>Cannot buy when price is -20%</li>
-                    </ul>
-                    <button class="upgrade-btn">Upgrade Now</button>
-                </div>
-                
-                <div class="tier-card lord">
-                    <div class="tier-header">
-                        <div class="tier-name">
-                            <i class="fas fa-crown"></i> Lord
-                        </div>
-                        <div class="tier-price">$50</div>
-                    </div>
-                    <div class="tier-requirements">Requires 500 referrals</div>
-                    <ul class="tier-benefits">
-                        <li>Can buy when price is down</li>
-                        <li>Get $2.28 when reselling</li>
-                        <li>Only $0.2 maintenance fee</li>
-                    </ul>
-                    <button class="upgrade-btn">Upgrade Now</button>
-                </div>
-                
-                <div class="tier-card platinum">
-                    <div class="tier-header">
-                        <div class="tier-name">
-                            <i class="fas fa-gem"></i> Platinum
-                        </div>
-                        <div class="tier-price">$350</div>
-                    </div>
-                    <div class="tier-requirements">Requires 1000 referrals</div>
-                    <ul class="tier-benefits">
-                        <li>Buy at any time</li>
-                        <li>Get full money when reselling</li>
-                        <li>No maintenance fees</li>
-                        <li>All features unlocked</li>
-                    </ul>
-                    <button class="upgrade-btn">Upgrade Now</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Leaderboard Page -->
-        <div class="page" id="leaderboardPage">
-            <div class="leaderboard-tabs">
-                <div class="leaderboard-tab active" data-tab="traders">
-                    <i class="fas fa-chart-line"></i> Top Traders
-                </div>
-                <div class="leaderboard-tab" data-tab="referrals">
-                    <i class="fas fa-user-friends"></i> Top Referrals
-                </div>
-            </div>
-            
-            <div class="leaderboard-content" id="tradersTab">
-                <table class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>User</th>
-                            <th>Tier</th>
-                            <th>Profit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>
-                                <div class="leaderboard-user">
-                                    <div class="leaderboard-avatar">CK</div>
-                                    <span>CryptoKing</span>
-                                    <div class="tier-badge platinum">Platinum</div>
-                                </div>
-                            </td>
-                            <td>Platinum</td>
-                            <td>$12,450.00</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>
-                                <div class="leaderboard-user">
-                                    <div class="leaderboard-avatar">IP</div>
-                                    <span>InvestorPro</span>
-                                    <div class="tier-badge lord">Lord</div>
-                                </div>
-                            </td>
-                            <td>Lord</td>
-                            <td>$8,720.00</td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>
-                                <div class="leaderboard-user">
-                                    <div class="leaderboard-avatar">BT</div>
-                                    <span>BigTrader</span>
-                                    <div class="tier-badge boss">Boss</div>
-                                </div>
-                            </td>
-                            <td>Boss</td>
-                            <td>$5,310.00</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="leaderboard-content" id="referralsTab" style="display: none;">
-                <table class="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>User</th>
-                            <th>Tier</th>
-                            <th>Referrals</th>
-                            <th>Earnings</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>
-                                <div class="leaderboard-user">
-                                    <div class="leaderboard-avatar">RM</div>
-                                    <span>ReferralMaster</span>
-                                    <div class="tier-badge platinum">Platinum</div>
-                                </div>
-                            </td>
-                            <td>Platinum</td>
-                            <td>1,250</td>
-                            <td>$12,500.00</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>
-                                <div class="leaderboard-user">
-                                    <div class="leaderboard-avatar">NL</div>
-                                    <span>NetworkLord</span>
-                                    <div class="tier-badge lord">Lord</div>
-                                </div>
-                            </td>
-                            <td>Lord</td>
-                            <td>876</td>
-                            <td>$8,760.00</td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>
-                                <div class="leaderboard-user">
-                                    <div class="leaderboard-avatar">AB</div>
-                                    <span>AlphaBuilder</span>
-                                    <div class="tier-badge boss">Boss</div>
-                                </div>
-                            </td>
-                            <td>Boss</td>
-                            <td>543</td>
-                            <td>$5,430.00</td>
-                        </tr>
-                        <tr>
-                            <td>4</td>
-                            <td>
-                                <div class="leaderboard-user">
-                                    <div class="leaderboard-avatar">EA</div>
-                                    <span>ElsaAdmin</span>
-                                    <div class="tier-badge platinum">Platinum</div>
-                                </div>
-                            </td>
-                            <td>Platinum</td>
-                            <td>420</td>
-                            <td>$4,200.00</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Transactions Page -->
-        <div class="page" id="transactionsPage">
-            <div class="transactions-list">
-                <div class="transaction">
-                    <div class="transaction-info">
-                        <div class="transaction-type buy">Buy</div>
-                        <div class="transaction-date">Today, 10:45 AM</div>
-                    </div>
-                    <div class="transaction-amount">+2.5 Elsa ($5,000.00)</div>
-                </div>
-                
-                <div class="transaction">
-                    <div class="transaction-info">
-                        <div class="transaction-type referral">Referral Bonus</div>
-                        <div class="transaction-date">Today, 09:30 AM</div>
-                    </div>
-                    <div class="transaction-amount">+$50.00</div>
-                </div>
-                
-                <div class="transaction">
-                    <div class="transaction-info">
-                        <div class="transaction-type sell">Sell</div>
-                        <div class="transaction-date">Yesterday, 3:22 PM</div>
-                    </div>
-                    <div class="transaction-amount">-1.0 Elsa ($2,060.00)</div>
-                </div>
-                
-                <div class="transaction">
-                    <div class="transaction-info">
-                        <div class="transaction-type buy">Buy</div>
-                        <div class="transaction-date">Yesterday, 11:15 AM</div>
-                    </div>
-                    <div class="transaction-amount">+1.0 Elsa ($2,000.00)</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Support Page -->
-        <div class="page" id="supportPage">
-            <div class="customer-service">
-                <h3><i class="fas fa-headset"></i> Customer Support</h3>
-                <p>Contact us at: <a href="mailto:eluxxes@gmail.com">eluxxes@gmail.com</a></p>
-                
-                <div class="chat-container" id="chatContainer">
-                    <div class="chat-message support-message">
-                        <div class="message-bubble support-bubble">
-                            Hello! How can we help you today?
-                        </div>
-                        <div class="message-time">Support - Today, 10:00 AM</div>
-                    </div>
-                </div>
-                
-                <div class="chat-input">
-                    <input type="text" id="supportMessage" placeholder="Type your message...">
-                    <button id="sendMessage">Send</button>
-                </div>
-            </div>
-        </div>
+    <!-- Notification System -->
+    <div class="notification hidden">
+        <div class="notification-content"></div>
     </div>
 
-    <!-- Tier Upgrade Effect -->
-    <div class="tier-upgrade-effect" id="tierUpgradeEffect">
-        <div class="tier-upgrade-content">
-            <div class="tier-logo logo-platinum" style="width: 80px; height: 80px; font-size: 40px; margin: 0 auto 20px;">
-                <i class="fas fa-gem"></i>
+    <!-- Main App Container -->
+    <div class="app-container hidden">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>ELSA</h1>
             </div>
-            <h2 style="color: var(--primary);">Congratulations!</h2>
-            <p>You've reached <strong>Platinum Tier</strong></p>
-            <p>All premium features are now unlocked!</p>
-            <button id="closeUpgrade" style="margin-top: 20px;">Continue</button>
+            <ul class="nav-links">
+                <li><a href="#" class="active" data-page="home"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="#" data-page="profile"><i class="fas fa-user"></i> Profile</a></li>
+                <li><a href="#" data-page="leaderboard"><i class="fas fa-trophy"></i> Leaderboard</a></li>
+                <li><a href="#" data-page="transactions"><i class="fas fa-exchange-alt"></i> Transactions</a></li>
+                <li><a href="#" data-page="support"><i class="fas fa-headset"></i> Support</a></li>
+                <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
         </div>
-    </div>
 
-    <!-- Sound Notification -->
-    <div class="sound-notification" id="soundNotification">
-        <i class="fas fa-bell" style="color: var(--primary);"></i>
-        <span>New achievement unlocked!</span>
-    </div>
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Home Page -->
+            <div class="page active" id="home-page">
+                <div class="page-header">
+                    <h2>Elsa Trading Dashboard</h2>
+                    <div>
+                        <span class="tier-badge badge-platinum">Platinum Tier</span>
+                        <span id="user-balance">Balance: $25,400.00</span>
+                    </div>
+                </div>
 
-    <!-- Endorsement Footer -->
-    <div class="endorsement-footer">
-        <p>Endorsed by Reverend</p>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Elsa Token (ELSA) - Live Market</div>
+                        <div class="timeframe-selector">
+                            <select class="form-control">
+                                <option>1H</option>
+                                <option>4H</option>
+                                <option selected>1D</option>
+                                <option>1W</option>
+                                <option>1M</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="price-display">
+                            <div class="price-value">$2,048.72</div>
+                            <div class="price-change positive">+2.44% ($48.72) Today</div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="elsa-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trading-panel">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Buy Elsa Tokens</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="trading-card">
+                                <div class="form-group">
+                                    <label>Amount to Buy</label>
+                                    <input type="number" class="form-control" placeholder="Enter ELSA amount" min="0.1" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Total Cost</label>
+                                    <input type="text" class="form-control" value="$2,048.72" readonly>
+                                </div>
+                                <button class="btn btn-block">Buy ELSA</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Sell Elsa Tokens</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="trading-card">
+                                <div class="form-group">
+                                    <label>Amount to Sell</label>
+                                    <input type="number" class="form-control" placeholder="Enter ELSA amount" min="0.1" step="0.1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Estimated Proceeds</label>
+                                    <input type="text" class="form-control" value="$2,048.72" readonly>
+                                </div>
+                                <button class="btn btn-block">Sell ELSA</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div class="page" id="profile-page">
+                <div class="page-header">
+                    <h2>User Profile</h2>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Account Information</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="user-avatar">
+                            <span>JD</span>
+                            <div class="badge-icon platinum">
+                                <i class="fas fa-crown"></i>
+                            </div>
+                        </div>
+
+                        <div class="user-info-grid">
+                            <div class="info-card">
+                                <h3>User ID</h3>
+                                <div class="info-value">8401935726</div>
+                            </div>
+                            <div class="info-card">
+                                <h3>Tier Status</h3>
+                                <div class="info-value">Platinum</div>
+                            </div>
+                            <div class="info-card">
+                                <h3>Referral Code</h3>
+                                <div class="info-value">ELS-8D4F2G</div>
+                            </div>
+                            <div class="info-card">
+                                <h3>Referred Users</h3>
+                                <div class="info-value">1,248</div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">Wallet Information</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="user-info-grid">
+                                    <div class="info-card">
+                                        <h3>Total Balance</h3>
+                                        <div class="info-value">$25,400.00</div>
+                                    </div>
+                                    <div class="info-card">
+                                        <h3>ELSA Tokens</h3>
+                                        <div class="info-value">12.4 ELSA</div>
+                                    </div>
+                                    <div class="info-card">
+                                        <h3>Monthly Fees</h3>
+                                        <div class="info-value">$0.00</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="trading-panel">
+                                    <button class="btn">Deposit Funds</button>
+                                    <button class="btn">Withdraw Funds</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leaderboard Page -->
+            <div class="page" id="leaderboard-page">
+                <div class="page-header">
+                    <h2>Leaderboard</h2>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Top Traders</div>
+                    </div>
+                    <div class="card-body">
+                        <table class="transaction-history">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>User</th>
+                                    <th>Tier</th>
+                                    <th>ELSA Holdings</th>
+                                    <th>Total Profit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td>JohnDoe (8401935726)</td>
+                                    <td><span class="tier-badge badge-platinum">Platinum</span></td>
+                                    <td>124.80 ELSA</td>
+                                    <td class="positive">+$28,400.00</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>SarahSmith (5729401836)</td>
+                                    <td><span class="tier-badge badge-lord">Lord</span></td>
+                                    <td>89.50 ELSA</td>
+                                    <td class="positive">+$18,750.00</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>MikeJohnson (1938574620)</td>
+                                    <td><span class="tier-badge badge-lord">Lord</span></td>
+                                    <td>76.20 ELSA</td>
+                                    <td class="positive">+$15,200.00</td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td>EmilyWilson (6482019375)</td>
+                                    <td><span class="tier-badge badge-boss">Boss</span></td>
+                                    <td>45.60 ELSA</td>
+                                    <td class="positive">+$8,400.00</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td>DavidBrown (3759201846)</td>
+                                    <td><span class="tier-badge badge-bird">Bird</span></td>
+                                    <td>32.80 ELSA</td>
+                                    <td class="positive">+$5,200.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // DOM Elements
-        const loadingScreen = document.getElementById('loadingScreen');
-        const authContainer = document.getElementById('authContainer');
-        const appContainer = document.getElementById('appContainer');
-        const userGuideBtn = document.getElementById('userGuideBtn');
-        const guideModal = document.getElementById('guideModal');
-        const closeGuide = document.getElementById('closeGuide');
-        const tierUpgradeEffect = document.getElementById('tierUpgradeEffect');
-        const soundNotification = document.getElementById('soundNotification');
-        
-        // Initialize Chart.js
-        const ctx = document.getElementById('tradingChart').getContext('2d');
-        let tradingChart;
-        
-        // Generate mock trading data
-        function generateMockData() {
-            const now = luxon.DateTime.now();
-            const data = [];
-            let currentPrice = 2000;
+        // Simulate splash screen
+        setTimeout(() => {
+            document.querySelector('.splash-screen').style.display = 'none';
+            document.querySelector('.app-container').classList.remove('hidden');
+            initApp();
+        }, 3000);
+
+        // Initialize the application
+        function initApp() {
+            // Initialize chart
+            initChart();
             
-            for (let i = 100; i >= 0; i--) {
-                const time = now.minus({hours: i});
-                const open = currentPrice;
-                const change = (Math.random() * 2 - 1) * 20;
-                currentPrice += change;
-                const high = Math.max(open, currentPrice) + Math.random() * 10;
-                const low = Math.min(open, currentPrice) - Math.random() * 10;
-                const close = currentPrice;
-                const volume = Math.floor(Math.random() * 1000) + 500;
+            // Setup page navigation
+            setupNavigation();
+            
+            // Setup logout button
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                showNotification('You have been successfully logged out');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            });
+        }
+
+        // Initialize the price chart
+        function initChart() {
+            const ctx = document.getElementById('elsa-chart').getContext('2d');
+            
+            // Generate sample data
+            const data = [];
+            let currentValue = 2000;
+            const now = Date.now();
+            
+            for (let i = -30; i <= 0; i++) {
+                const fluctuation = (Math.random() - 0.5) * 100;
+                currentValue += fluctuation;
+                if (currentValue < 1900) currentValue = 1900 + Math.random() * 100;
+                if (currentValue > 2100) currentValue = 2100 - Math.random() * 100;
                 
                 data.push({
-                    time: time.toISO(),
-                    open,
-                    high,
-                    low,
-                    close,
-                    volume
+                    x: now + i * 24 * 60 * 60 * 1000,
+                    y: currentValue
                 });
             }
             
-            return data;
-        }
-
-        // Initialize Trading Chart
-        function initTradingChart() {
-            const chartData = generateMockData();
-            
-            tradingChart = new Chart(ctx, {
-                type: 'candlestick',
+            // Create chart
+            new Chart(ctx, {
+                type: 'line',
                 data: {
                     datasets: [{
-                        label: 'Elsa Price',
-                        data: chartData.map(d => ({
-                            x: luxon.DateTime.fromISO(d.time).toJSDate(),
-                            o: d.open,
-                            h: d.high,
-                            l: d.low,
-                            c: d.close
-                        })),
-                        color: {
-                            up: '#4CAF50',
-                            down: '#F44336',
-                            unchanged: '#999',
-                        },
+                        label: 'ELSA Price',
+                        data: data,
+                        borderColor: '#d4af37',
+                        backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 0
                     }]
                 },
                 options: {
@@ -1888,10 +756,11 @@
                         x: {
                             type: 'time',
                             time: {
-                                unit: 'hour'
+                                unit: 'day'
                             }
                         },
                         y: {
+                            beginAtZero: false,
                             ticks: {
                                 callback: function(value) {
                                     return '$' + value.toFixed(2);
@@ -1904,15 +773,11 @@
                             display: false
                         },
                         tooltip: {
+                            mode: 'index',
+                            intersect: false,
                             callbacks: {
                                 label: function(context) {
-                                    const point = context.raw;
-                                    return [
-                                        `Open: $${point.o}`,
-                                        `High: $${point.h}`,
-                                        `Low: $${point.l}`,
-                                        `Close: $${point.c}`
-                                    ];
+                                    return `ELSA: $${context.parsed.y.toFixed(2)}`;
                                 }
                             }
                         }
@@ -1921,600 +786,58 @@
             });
         }
 
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyA5cFrl0mUxtHWqQLV23B6QESLB6nTgqgk",
-            authDomain: "elsa-d4c59.firebaseapp.com",
-            projectId: "elsa-d4c59",
-            storageBucket: "elsa-d4c59.appspot.com",
-            messagingSenderId: "79274673223",
-            appId: "1:79274673223:web:54b10acd9812eebe309d62",
-            measurementId: "G-QEGB3JGDYF"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth();
-
-        // Referral System Data
-        const referralSystem = {
-            currentUser: {
-                id: 'EA12345678',
-                name: 'ElsaAdmin',
-                referrals: 420,
-                tier: 'platinum',
-                referralCode: 'Elsaadmin1',
-                referralEarnings: 4200
-            },
-            referralBonus: 10, // $10 per referral
-            tierRequirements: {
-                bird: 8,
-                boss: 20,
-                lord: 500,
-                platinum: 1000
-            }
-        };
-
-        // Auth State Listener
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                // User is signed in
-                authContainer.style.display = 'none';
-                appContainer.style.display = 'block';
-                initializeUserData(user.uid);
-            } else {
-                // User is signed out
-                authContainer.style.display = 'flex';
-                appContainer.style.display = 'none';
-            }
-        });
-
-        // Initialize User Data
-        function initializeUserData(userId) {
-            // Set user data
-            document.getElementById('avatarInitials').textContent = referralSystem.currentUser.name.charAt(0).toUpperCase();
-            document.getElementById('avatarInitialsLarge').textContent = referralSystem.currentUser.name.charAt(0).toUpperCase();
-            document.getElementById('profileUsername').textContent = referralSystem.currentUser.name;
-            document.getElementById('profileUserId').textContent = `ID: ${referralSystem.currentUser.id}`;
-            document.getElementById('statReferrals').textContent = referralSystem.currentUser.referrals;
-            document.getElementById('referralCode').textContent = referralSystem.currentUser.referralCode;
-            document.getElementById('activeReferrals').textContent = referralSystem.currentUser.referrals;
-            document.getElementById('referralEarnings').textContent = `$${referralSystem.currentUser.referralEarnings.toFixed(2)}`;
+        // Setup page navigation
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-links a');
+            const pages = document.querySelectorAll('.page');
             
-            // Calculate tier progress
-            const progressPercentage = Math.min(100, (referralSystem.currentUser.referrals / referralSystem.tierRequirements.platinum) * 100);
-            document.getElementById('tierProgress').style.width = `${progressPercentage}%`;
-            
-            // Simulate loading user data
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-            }, 1500);
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Remove active class from all links
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    
+                    // Add active class to clicked link
+                    this.classList.add('active');
+                    
+                    // Hide all pages
+                    pages.forEach(page => page.classList.remove('active'));
+                    
+                    // Show the target page
+                    const targetPage = this.getAttribute('data-page');
+                    if (targetPage) {
+                        document.getElementById(`${targetPage}-page`).classList.add('active');
+                    }
+                });
+            });
         }
 
-        // Register Form Submission
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const username = document.getElementById('username').value;
-            const referralCode = document.getElementById('referral').value;
+        // Show notification
+        function showNotification(message) {
+            const notification = document.querySelector('.notification');
+            const content = document.querySelector('.notification-content');
             
-            // Validate referral code
-            if (referralCode !== referralSystem.currentUser.referralCode) {
-                document.getElementById('referralError').style.display = 'block';
-                return;
-            }
-            
-            try {
-                // Create user
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                
-                // Show success message
-                showReferralNotification(`New referral registered: ${username}`);
-                
-                // Update referral stats
-                referralSystem.currentUser.referrals++;
-                referralSystem.currentUser.referralEarnings += referralSystem.referralBonus;
-                
-                // Update UI
-                document.getElementById('statReferrals').textContent = referralSystem.currentUser.referrals;
-                document.getElementById('activeReferrals').textContent = referralSystem.currentUser.referrals;
-                document.getElementById('referralEarnings').textContent = `$${referralSystem.currentUser.referralEarnings.toFixed(2)}`;
-                
-                // Update tier progress
-                const progressPercentage = Math.min(100, (referralSystem.currentUser.referrals / referralSystem.tierRequirements.platinum) * 100);
-                document.getElementById('tierProgress').style.width = `${progressPercentage}%`;
-                
-                // Check for tier upgrade
-                checkTierUpgrade();
-                
-                // Show login form
-                document.getElementById('registerContainer').style.display = 'none';
-                document.getElementById('loginContainer').style.display = 'block';
-                document.getElementById('referralError').style.display = 'none';
-            } catch (error) {
-                console.error('Registration error:', error);
-                alert(error.message);
-            }
-        });
-
-        // Check for tier upgrade
-        function checkTierUpgrade() {
-            const referrals = referralSystem.currentUser.referrals;
-            const currentTier = referralSystem.currentUser.tier;
-            
-            if (referrals >= referralSystem.tierRequirements.platinum && currentTier !== 'platinum') {
-                referralSystem.currentUser.tier = 'platinum';
-                showTierUpgrade('Platinum');
-                document.getElementById('profileTier').innerHTML = '<i class="fas fa-crown"></i> Platinum';
-            } 
-            else if (referrals >= referralSystem.tierRequirements.lord && currentTier !== 'lord') {
-                referralSystem.currentUser.tier = 'lord';
-                showTierUpgrade('Lord');
-                document.getElementById('profileTier').innerHTML = '<i class="fas fa-crown"></i> Lord';
-            }
-            else if (referrals >= referralSystem.tierRequirements.boss && currentTier !== 'boss') {
-                referralSystem.currentUser.tier = 'boss';
-                showTierUpgrade('Boss');
-                document.getElementById('profileTier').innerHTML = '<i class="fas fa-chess-king"></i> Boss';
-            }
-            else if (referrals >= referralSystem.tierRequirements.bird && currentTier !== 'bird') {
-                referralSystem.currentUser.tier = 'bird';
-                showTierUpgrade('Bird');
-                document.getElementById('profileTier').innerHTML = '<i class="fas fa-dove"></i> Bird';
-            }
-        }
-
-        // Show referral notification
-        function showReferralNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'transaction-notification referral-notification show';
-            notification.innerHTML = `
-                <i class="fas fa-user-plus" style="color: var(--primary);"></i>
-                ${message}
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 10);
+            content.textContent = message;
+            notification.classList.remove('hidden');
+            notification.classList.add('show');
             
             setTimeout(() => {
                 notification.classList.remove('show');
                 setTimeout(() => {
-                    document.body.removeChild(notification);
+                    notification.classList.add('hidden');
                 }, 300);
             }, 3000);
         }
 
-        // Login Form Submission
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-            } catch (error) {
-                console.error('Login error:', error);
-                alert(error.message);
-            }
-        });
-
-        // Toggle Auth Forms
-        document.getElementById('showLogin').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('registerContainer').style.display = 'none';
-            document.getElementById('loginContainer').style.display = 'block';
-        });
-        
-        document.getElementById('showRegister').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('registerContainer').style.display = 'block';
-        });
-
-        // Navigation
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() {
-                // Remove active class from all nav items
-                document.querySelectorAll('.nav-item').forEach(nav => {
-                    nav.classList.remove('active');
+        // Simulate trade execution
+        document.querySelectorAll('.btn').forEach(button => {
+            if (button.textContent === 'Buy ELSA' || button.textContent === 'Sell ELSA') {
+                button.addEventListener('click', function() {
+                    const action = this.textContent.split(' ')[0];
+                    showNotification(`${action} order placed successfully!`);
                 });
-                
-                // Add active class to clicked nav item
-                this.classList.add('active');
-                
-                // Hide all pages
-                document.querySelectorAll('.page').forEach(page => {
-                    page.classList.remove('active');
-                });
-                
-                // Show selected page
-                const pageId = this.getAttribute('data-page') + 'Page';
-                document.getElementById(pageId).classList.add('active');
-            });
-        });
-
-        // Leaderboard Tabs
-        document.querySelectorAll('.leaderboard-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Remove active class from all tabs
-                document.querySelectorAll('.leaderboard-tab').forEach(t => {
-                    t.classList.remove('active');
-                });
-                
-                // Add active class to clicked tab
-                this.classList.add('active');
-                
-                // Hide all content
-                document.querySelectorAll('.leaderboard-content').forEach(content => {
-                    content.style.display = 'none';
-                });
-                
-                // Show selected content
-                const tabId = this.getAttribute('data-tab') + 'Tab';
-                document.getElementById(tabId).style.display = 'block';
-            });
-        });
-
-        // Timeframe Buttons
-        document.querySelectorAll('.timeframe-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                
-                // In a real app, this would fetch new data for the selected timeframe
-                console.log('Timeframe changed to:', this.dataset.timeframe);
-            });
-        });
-
-        // Buy/Sell Calculations
-        document.getElementById('buyAmount').addEventListener('input', function() {
-            const currentPrice = parseFloat(document.getElementById('currentPrice').textContent.replace('$', ''));
-            document.getElementById('buyTotal').value = `$${(this.value * currentPrice).toFixed(2)}`;
-        });
-        
-        document.getElementById('sellAmount').addEventListener('input', function() {
-            const currentPrice = parseFloat(document.getElementById('currentPrice').textContent.replace('$', ''));
-            document.getElementById('sellTotal').value = `$${(this.value * currentPrice).toFixed(2)}`;
-        });
-
-        // Copy Referral Code
-        document.getElementById('copyReferral').addEventListener('click', function() {
-            const referralCode = document.getElementById('referralCode').textContent;
-            navigator.clipboard.writeText(referralCode).then(() => {
-                alert('Referral code copied to clipboard!');
-            });
-        });
-
-        // User Guide
-        userGuideBtn.addEventListener('click', function() {
-            guideModal.style.display = 'block';
-        });
-        
-        closeGuide.addEventListener('click', function() {
-            guideModal.style.display = 'none';
-        });
-        
-        window.addEventListener('click', function(event) {
-            if (event.target == guideModal) {
-                guideModal.style.display = 'none';
             }
-        });
-
-        // Tier Upgrade Animation
-        function showTierUpgrade(tier) {
-            const content = tierUpgradeEffect.querySelector('.tier-upgrade-content');
-            
-            // Update content based on tier
-            content.querySelector('h2').textContent = `Congratulations!`;
-            content.querySelector('p:nth-of-type(1)').innerHTML = `You've reached <strong>${tier} Tier</strong>`;
-            
-            // Play sound
-            playTierUpgradeSound(tier);
-            
-            // Show notification
-            soundNotification.classList.add('show');
-            setTimeout(() => soundNotification.classList.remove('show'), 3000);
-            
-            // Show effect
-            tierUpgradeEffect.style.display = 'flex';
-            
-            // Close button
-            document.getElementById('closeUpgrade').onclick = function() {
-                tierUpgradeEffect.style.display = 'none';
-            };
-        }
-
-        function playTierUpgradeSound(tier) {
-            // In a real app, you would play different sounds for each tier
-            const sound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
-            sound.volume = 0.3;
-            sound.play();
-        }
-
-        // Comments Functionality
-        document.getElementById('submitComment').addEventListener('click', postComment);
-        document.getElementById('newComment').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') postComment();
-        });
-
-        function postComment() {
-            const commentInput = document.getElementById('newComment');
-            const commentText = commentInput.value.trim();
-            
-            if (commentText !== '') {
-                const newComment = {
-                    id: Date.now(),
-                    user: "CurrentUser",
-                    content: commentText,
-                    timestamp: new Date().toLocaleTimeString(),
-                    likes: 0,
-                    replies: [],
-                    tier: referralSystem.currentUser.tier
-                };
-                
-                addCommentToDOM(newComment);
-                commentInput.value = '';
-            }
-        }
-
-        function addCommentToDOM(comment) {
-            const commentsList = document.getElementById('commentsList');
-            const commentElement = document.createElement('div');
-            commentElement.className = 'comment';
-            
-            // Get tier badge HTML
-            const tierBadge = getTierBadge(comment.tier);
-            
-            commentElement.innerHTML = `
-                <div class="comment-header">
-                    <div class="comment-user">
-                        ${tierBadge}
-                        <span>${comment.user}</span>
-                    </div>
-                    <span class="comment-time">${comment.timestamp}</span>
-                </div>
-                <div class="comment-content">
-                    ${comment.content}
-                </div>
-                <div class="comment-actions">
-                    <div class="comment-action like-btn" data-comment-id="${comment.id}">
-                        <span class="like-icon">👍</span>
-                        <span class="like-count">0</span>
-                    </div>
-                    <div class="comment-action reply-btn" data-comment-id="${comment.id}">
-                        <span class="reply-icon">💬</span>
-                        <span>Reply</span>
-                    </div>
-                </div>
-                <div class="replies">
-                    <div class="reply-form" style="display: none;">
-                        <input type="text" class="reply-input" placeholder="Write a reply...">
-                        <button class="reply-submit">Reply</button>
-                    </div>
-                </div>
-            `;
-            
-            commentsList.prepend(commentElement);
-        }
-
-        // Get tier badge HTML
-        function getTierBadge(tier) {
-            const tiers = {
-                bird: {
-                    name: "Bird",
-                    icon: "fas fa-dove",
-                    class: "bird",
-                    badgeClass: "badge-bird"
-                },
-                boss: {
-                    name: "Boss",
-                    icon: "fas fa-chess-king",
-                    class: "boss",
-                    badgeClass: "badge-boss"
-                },
-                lord: {
-                    name: "Lord",
-                    icon: "fas fa-crown",
-                    class: "lord",
-                    badgeClass: "badge-lord"
-                },
-                platinum: {
-                    name: "Platinum",
-                    icon: "fas fa-gem",
-                    class: "platinum",
-                    badgeClass: "badge-platinum"
-                }
-            };
-            
-            const tierData = tiers[tier] || tiers.bird;
-            
-            return `
-                <span class="user-badge ${tierData.badgeClass}">
-                    <i class="${tierData.icon}"></i>
-                </span>
-                <span class="tier-badge ${tierData.class}">
-                    <i class="${tierData.icon}"></i> ${tierData.name}
-                </span>
-            `;
-        }
-
-        // Handle comment actions (like, reply)
-        document.addEventListener('click', function(e) {
-            // Like button
-            if (e.target.closest('.like-btn')) {
-                const likeBtn = e.target.closest('.like-btn');
-                const likeCount = likeBtn.querySelector('.like-count');
-                likeCount.textContent = parseInt(likeCount.textContent) + 1;
-                likeBtn.style.opacity = '0.7';
-            }
-            
-            // Reply button
-            if (e.target.closest('.reply-btn')) {
-                const commentId = e.target.closest('.reply-btn').dataset.commentId;
-                const replyForm = e.target.closest('.comment').querySelector('.reply-form');
-                replyForm.style.display = 'flex';
-                
-                // Focus on reply input
-                replyForm.querySelector('.reply-input').focus();
-            }
-            
-            // Reply submit button
-            if (e.target.classList.contains('reply-submit')) {
-                const replyForm = e.target.closest('.reply-form');
-                const replyInput = replyForm.querySelector('.reply-input');
-                const replyText = replyInput.value.trim();
-                
-                if (replyText) {
-                    const commentElement = e.target.closest('.comment');
-                    const repliesContainer = commentElement.querySelector('.replies');
-                    
-                    const newReply = {
-                        user: "CurrentUser",
-                        content: replyText,
-                        timestamp: new Date().toLocaleTimeString(),
-                        tier: referralSystem.currentUser.tier
-                    };
-                    
-                    const replyElement = document.createElement('div');
-                    replyElement.className = 'comment';
-                    replyElement.style.marginTop = '10px';
-                    replyElement.style.padding = '10px';
-                    replyElement.style.backgroundColor = '#252525';
-                    
-                    replyElement.innerHTML = `
-                        <div class="comment-header">
-                            <div class="comment-user">
-                                ${getTierBadge(newReply.tier)}
-                                <span>${newReply.user}</span>
-                            </div>
-                            <span class="comment-time">${newReply.timestamp}</span>
-                        </div>
-                        <div class="comment-content">
-                            ${newReply.content}
-                        </div>
-                    `;
-                    
-                    repliesContainer.insertBefore(replyElement, replyForm);
-                    replyInput.value = '';
-                }
-            }
-        });
-
-        // Buy/Sell Actions
-        document.getElementById('buyBtn').addEventListener('click', function() {
-            const amount = parseFloat(document.getElementById('buyAmount').value);
-            if (isNaN(amount) || amount <= 0) {
-                alert("Please enter a valid amount");
-                return;
-            }
-            
-            const currentPrice = parseFloat(document.getElementById('currentPrice').textContent.replace(/[^0-9.]/g, ''));
-            const total = amount * currentPrice;
-            
-            // Simulate transaction
-            showTransactionNotification(`Bought ${amount.toFixed(2)} Elsa for $${total.toFixed(2)}`, 'buy');
-        });
-
-        document.getElementById('sellBtn').addEventListener('click', function() {
-            const amount = parseFloat(document.getElementById('sellAmount').value);
-            if (isNaN(amount) || amount <= 0) {
-                alert("Please enter a valid amount");
-                return;
-            }
-            
-            const currentPrice = parseFloat(document.getElementById('currentPrice').textContent.replace(/[^0-9.]/g, ''));
-            const total = amount * currentPrice;
-            
-            // Simulate transaction
-            showTransactionNotification(`Sold ${amount.toFixed(2)} Elsa for $${total.toFixed(2)}`, 'sell');
-        });
-
-        // Show transaction notification
-        function showTransactionNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `transaction-notification ${type}`;
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'buy' ? 'plus-circle' : 'minus-circle'}"></i>
-                ${message}
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 10);
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, 3000);
-        }
-
-        // Simulate price updates
-        function simulatePriceChanges() {
-            const priceElement = document.getElementById('currentPrice');
-            const changeElement = document.getElementById('priceChange');
-            
-            let currentPrice = 2000;
-            let lastPrice = 2000;
-            
-            setInterval(() => {
-                // Generate random price change (-1% to +1%)
-                const changePercent = (Math.random() * 2 - 1) / 100;
-                currentPrice = lastPrice * (1 + changePercent);
-                
-                // Update UI
-                priceElement.textContent = `$${currentPrice.toFixed(2)}`;
-                
-                const changeValue = currentPrice - lastPrice;
-                const changePercentage = (changeValue / lastPrice) * 100;
-                
-                changeElement.innerHTML = `
-                    <span class="${changeValue >= 0 ? 'positive' : 'negative'}">
-                        ${changeValue >= 0 ? '+' : ''}${changePercentage.toFixed(2)}%
-                    </span>
-                    <span>($${changeValue >= 0 ? '+' : ''}${changeValue.toFixed(2)})</span>
-                `;
-                
-                // Update buy/sell totals
-                document.getElementById('buyTotal').value = `$${(document.getElementById('buyAmount').value * currentPrice).toFixed(2)}`;
-                document.getElementById('sellTotal').value = `$${(document.getElementById('sellAmount').value * currentPrice).toFixed(2)}`;
-                
-                lastPrice = currentPrice;
-            }, 5000); // Update every 5 seconds
-        }
-
-        // Deposit/Withdrawal Actions
-        document.getElementById('depositBtn').addEventListener('click', function() {
-            // In a real app, this would open a Paystack payment modal
-            alert("Redirecting to Paystack for deposit processing...");
-        });
-        
-        document.getElementById('withdrawBtn').addEventListener('click', function() {
-            // In a real app, this would open a withdrawal form
-            alert("Processing withdrawal request...");
-        });
-
-        // Initialize app
-        window.addEventListener('DOMContentLoaded', function() {
-            // Hide loading screen after 3 seconds
-            setTimeout(() => {
-                loadingScreen.style.display = 'none';
-                authContainer.style.display = 'flex';
-            }, 3000);
-            
-            // Initialize trading chart
-            initTradingChart();
-            
-            // Start price simulation
-            simulatePriceChanges();
         });
     </script>
 </body>
