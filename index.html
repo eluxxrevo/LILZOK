@@ -359,6 +359,26 @@
             color: #000;
         }
 
+        .badge-bird {
+            background: linear-gradient(to right, silver, #d4af37);
+            color: #000;
+        }
+
+        .badge-boss {
+            background: linear-gradient(to right, #cd7f32, #d4af37);
+            color: #000;
+        }
+
+        .badge-lord {
+            background: linear-gradient(to right, #b9f2ff, #d4af37);
+            color: #000;
+        }
+
+        .badge-unverified {
+            background: linear-gradient(to right, #555, #888);
+            color: #fff;
+        }
+
         .wallet-info {
             background: rgba(0, 0, 0, 0.3);
             padding: 10px 20px;
@@ -597,36 +617,6 @@
             border-color: var(--accent-gold);
         }
 
-        .tier-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            margin-right: 10px;
-        }
-
-        .badge-bird {
-            background: rgba(192, 192, 192, 0.2);
-            color: silver;
-        }
-
-        .badge-boss {
-            background: rgba(205, 127, 50, 0.2);
-            color: #cd7f32;
-        }
-
-        .badge-lord {
-            background: rgba(185, 242, 255, 0.2);
-            color: #b9f2ff;
-        }
-
-        .badge-platinum {
-            background: rgba(229, 228, 226, 0.2);
-            color: #e5e4e2;
-        }
-
         .user-avatar {
             width: 100px;
             height: 100px;
@@ -657,6 +647,11 @@
             border: 3px solid var(--primary-bg);
         }
 
+        .badge-icon.platinum {
+            background: #e5e4e2;
+            color: #333;
+        }
+
         .badge-icon.bird {
             background: silver;
             color: #333;
@@ -672,9 +667,9 @@
             color: #333;
         }
 
-        .badge-icon.platinum {
-            background: #e5e4e2;
-            color: #333;
+        .badge-icon.unverified {
+            background: #555;
+            color: #fff;
         }
 
         .user-info-grid {
@@ -878,6 +873,71 @@
         .theme-2 { background: #121212; }
         .theme-3 { background: #1a1a1a; }
         .theme-4 { background: #0f0f1a; }
+
+        /* Tier Upgrade */
+        .tier-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .tier-card {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            transition: var(--transition);
+        }
+
+        .tier-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-gold);
+        }
+
+        .tier-card h3 {
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+        }
+
+        .tier-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: var(--accent-gold);
+        }
+
+        .tier-requirements {
+            margin: 15px 0;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .tier-status {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 15px;
+            display: inline-block;
+        }
+
+        .status-active {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success);
+        }
+
+        .status-inactive {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--danger);
+        }
+
+        .endorsement {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            color: var(--text-muted);
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -974,10 +1034,10 @@
                 <h1>ELSA</h1>
             </div>
             <div class="user-status">
-                <span class="tier-badge badge-platinum">PLATINUM TIER</span>
+                <span class="tier-badge" id="tier-badge">UNVERIFIED</span>
                 <div class="wallet-info">
                     <span>Balance: </span>
-                    <span id="user-balance">$25,400.00</span>
+                    <span id="user-balance">$0.00</span>
                 </div>
             </div>
         </div>
@@ -1033,8 +1093,8 @@
                             </div>
                             <div class="stat-card">
                                 <div class="stat-label">Your Holdings</div>
-                                <div class="stat-value">12.4 ELSA</div>
-                                <div class="stat-value">$25,400.00</div>
+                                <div class="stat-value">0 ELSA</div>
+                                <div class="stat-value">$0.00</div>
                             </div>
                         </div>
                     </div>
@@ -1107,6 +1167,9 @@
             <div class="page" id="profile-page">
                 <div class="page-header">
                     <h2>User Profile</h2>
+                    <button class="btn" id="guide-btn">
+                        <i class="fas fa-book"></i> User Guide
+                    </button>
                 </div>
 
                 <div class="card">
@@ -1115,56 +1178,65 @@
                     </div>
                     <div class="card-body">
                         <div class="user-avatar">
-                            <span>JD</span>
-                            <div class="badge-icon platinum">
-                                <i class="fas fa-crown"></i>
+                            <span id="user-initials">JD</span>
+                            <div class="badge-icon unverified">
+                                <i class="fas fa-user"></i>
                             </div>
                         </div>
 
                         <div class="user-info-grid">
                             <div class="info-card">
                                 <h3><i class="fas fa-id-card"></i> User ID</h3>
-                                <div class="info-value">8401935726</div>
-                                <div class="info-small">Created: 2023-07-15</div>
+                                <div class="info-value" id="user-id">8401935726</div>
+                                <div class="info-small">Created: <span id="join-date">2023-07-15</span></div>
                             </div>
                             <div class="info-card">
                                 <h3><i class="fas fa-layer-group"></i> Tier Status</h3>
-                                <div class="info-value">Platinum</div>
-                                <div class="info-small">Verification: Complete</div>
+                                <div class="info-value" id="tier-status">Unverified</div>
+                                <div class="info-small">Referrals: <span id="referral-count">0</span>/8</div>
                             </div>
                             <div class="info-card">
                                 <h3><i class="fas fa-share-alt"></i> Referral Code</h3>
-                                <div class="info-value">ELS-8D4F2G</div>
+                                <div class="info-value" id="referral-code">ELS-8D4F2G</div>
                                 <div class="info-small">Share to earn rewards</div>
                             </div>
                             <div class="info-card">
                                 <h3><i class="fas fa-user-friends"></i> Referred Users</h3>
-                                <div class="info-value">1,248</div>
-                                <div class="info-small">Active: 942</div>
+                                <div class="info-value" id="referred-count">0</div>
+                                <div class="info-small">Pending: <span id="pending-referrals">0</span></div>
                             </div>
                         </div>
 
                         <div class="card">
                             <div class="card-header">
-                                <div class="card-title">Account Settings</div>
+                                <div class="card-title">Tier Upgrades</div>
                             </div>
                             <div class="card-body">
-                                <div class="user-info-grid">
-                                    <div class="info-card">
-                                        <h3><i class="fas fa-user-edit"></i> Update Profile</h3>
-                                        <button class="btn">Change Username</button>
+                                <div class="tier-container">
+                                    <div class="tier-card">
+                                        <div class="tier-icon">
+                                            <i class="fas fa-dove"></i>
+                                        </div>
+                                        <h3>Bird Tier</h3>
+                                        <div class="tier-requirements">
+                                            <p><i class="fas fa-users"></i> 8 Referrals</p>
+                                            <p><i class="fas fa-dollar-sign"></i> $1 Verification Fee</p>
+                                        </div>
+                                        <div class="tier-status status-inactive">Not Qualified</div>
+                                        <button class="btn" style="margin-top: 15px;">Upgrade to Bird</button>
                                     </div>
-                                    <div class="info-card">
-                                        <h3><i class="fas fa-lock"></i> Security</h3>
-                                        <button class="btn">Change Password</button>
-                                    </div>
-                                    <div class="info-card">
-                                        <h3><i class="fas fa-coins"></i> Transfer ELSA</h3>
-                                        <button class="btn" id="transfer-btn">Transfer Tokens</button>
-                                    </div>
-                                    <div class="info-card">
-                                        <h3><i class="fas fa-bell"></i> Notifications</h3>
-                                        <button class="btn">Manage Alerts</button>
+                                    
+                                    <div class="tier-card">
+                                        <div class="tier-icon">
+                                            <i class="fas fa-user-tie"></i>
+                                        </div>
+                                        <h3>Boss Tier</h3>
+                                        <div class="tier-requirements">
+                                            <p><i class="fas fa-users"></i> 20 Referrals</p>
+                                            <p><i class="fas fa-dollar-sign"></i> $5 Verification Fee</p>
+                                        </div>
+                                        <div class="tier-status status-inactive">Not Qualified</div>
+                                        <button class="btn" style="margin-top: 15px; opacity: 0.5;" disabled>Upgrade to Boss</button>
                                     </div>
                                 </div>
                             </div>
@@ -1189,6 +1261,9 @@
                             <input type="number" class="form-control" id="deposit-amount" min="2" max="10000" value="100">
                         </div>
                         <button class="btn" id="deposit-btn">Deposit via Paystack</button>
+                        <div class="info-small" style="margin-top: 15px;">
+                            Note: Deposits must be confirmed by admin before appearing in your balance
+                        </div>
                     </div>
                 </div>
 
@@ -1210,7 +1285,14 @@
                             </select>
                         </div>
                         <button class="btn" id="withdraw-btn">Request Withdrawal</button>
+                        <div class="info-small" style="margin-top: 15px;">
+                            Withdrawals will be processed within 2 hours
+                        </div>
                     </div>
+                </div>
+                
+                <div class="endorsement">
+                    <p>Endorsed by Reverend (CHUKWU EBUBECHI)</p>
                 </div>
             </div>
 
@@ -1234,16 +1316,14 @@
                     <div class="setting-card">
                         <h3><i class="fas fa-user-cog"></i> Account Settings</h3>
                         <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" class="form-control" value="JohnDoe">
+                            <label>Full Name</label>
+                            <input type="text" class="form-control" id="user-name" value="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" class="form-control" id="user-email" value="user@example.com">
                         </div>
                         <button class="btn">Update Profile</button>
-                    </div>
-
-                    <div class="setting-card">
-                        <h3><i class="fas fa-shield-alt"></i> Security</h3>
-                        <button class="btn" style="margin-bottom: 15px;">Change Password</button>
-                        <button class="btn" style="background: rgba(220, 53, 69, 0.8);">Enable Two-Factor Authentication</button>
                     </div>
 
                     <div class="setting-card">
@@ -1293,12 +1373,14 @@
     <script>
         // Global variables
         let currentUser = null;
-        let userBalance = 25400.00;
+        let userBalance = 0.00;
         let elsaPrice = 2048.72;
         let priceChange = 2.44;
         let chart = null;
         let chartData = [];
         let priceUpdateInterval = null;
+        let referrals = 0;
+        let tier = "unverified";
         
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
@@ -1334,11 +1416,11 @@
             // Setup deposit button
             document.getElementById('deposit-btn')?.addEventListener('click', depositFunds);
             
-            // Setup transfer button
-            document.getElementById('transfer-btn')?.addEventListener('click', transferTokens);
+            // Setup withdraw button
+            document.getElementById('withdraw-btn')?.addEventListener('click', withdrawFunds);
             
-            // Setup chart timeframe selector
-            document.getElementById('chart-timeframe')?.addEventListener('change', updateChartTimeframe);
+            // Setup user guide button
+            document.getElementById('guide-btn')?.addEventListener('click', showUserGuide);
             
             // Start price updates
             startPriceUpdates();
@@ -1600,6 +1682,11 @@
                     return;
                 }
                 
+                if (tier === "unverified") {
+                    showNotification('You need to upgrade to Bird tier to trade', 'error');
+                    return;
+                }
+                
                 if (amount > userBalance) {
                     showNotification('Insufficient balance!', 'error');
                     return;
@@ -1615,6 +1702,11 @@
                 const amount = parseFloat(document.getElementById('sell-amount').value);
                 if (amount < 4 || amount > 9000) {
                     showNotification('Invalid amount! Min: $4, Max: $9,000', 'error');
+                    return;
+                }
+                
+                if (tier === "unverified") {
+                    showNotification('You need to upgrade to Bird tier to trade', 'error');
                     return;
                 }
                 
@@ -1694,15 +1786,30 @@
                 return;
             }
             
-            // For demo, accept any credentials
+            if (email === "eluxxes@gmail.com") {
+                // Admin account
+                userBalance = 50000.00;
+                tier = "platinum";
+                referrals = 1248;
+            } else {
+                // Regular user
+                userBalance = 0.00;
+                tier = "unverified";
+                referrals = 0;
+            }
+            
             showNotification('Successfully logged in!');
             setTimeout(() => {
                 document.querySelector('.auth-container').classList.remove('active');
                 document.querySelector('.app-container').style.display = 'flex';
                 currentUser = {
                     email: email,
-                    tier: 'platinum'
+                    tier: tier,
+                    name: "John Doe"
                 };
+                
+                // Update UI
+                updateUserProfile();
             }, 1500);
         }
 
@@ -1728,10 +1835,83 @@
                 return;
             }
             
+            // Set user as unverified with $0 balance
+            userBalance = 0.00;
+            tier = "unverified";
+            referrals = 0;
+            
             showNotification('Account created successfully!');
             setTimeout(() => {
                 document.querySelector('.auth-tab[data-tab="login"]').click();
+                currentUser = {
+                    email: email,
+                    tier: tier,
+                    name: name
+                };
+                
+                // Set name in settings
+                document.getElementById('user-name').value = name;
+                document.getElementById('user-email').value = email;
+                document.getElementById('user-initials').textContent = name.split(' ').map(n => n[0]).join('');
             }, 1500);
+        }
+
+        // Update user profile display
+        function updateUserProfile() {
+            document.getElementById('user-balance').textContent = `$${userBalance.toFixed(2)}`;
+            document.getElementById('tier-status').textContent = tier.charAt(0).toUpperCase() + tier.slice(1);
+            document.getElementById('referral-count').textContent = referrals;
+            document.getElementById('tier-badge').textContent = tier.toUpperCase();
+            document.getElementById('tier-badge').className = `tier-badge badge-${tier}`;
+            
+            // Update badge icon
+            const badgeIcon = document.querySelector('.badge-icon');
+            badgeIcon.className = `badge-icon ${tier}`;
+            badgeIcon.innerHTML = tier === "platinum" ? '<i class="fas fa-crown"></i>' : 
+                                tier === "bird" ? '<i class="fas fa-dove"></i>' : 
+                                tier === "boss" ? '<i class="fas fa-user-tie"></i>' : 
+                                tier === "lord" ? '<i class="fas fa-crown"></i>' : 
+                                '<i class="fas fa-user"></i>';
+        }
+
+        // Deposit funds via Paystack
+        function depositFunds() {
+            const amount = parseFloat(document.getElementById('deposit-amount').value);
+            
+            if (amount < 2 || amount > 10000) {
+                showNotification('Invalid amount! Min: $2, Max: $10,000', 'error');
+                return;
+            }
+            
+            // Redirect to Paystack
+            showNotification(`Redirecting to Paystack for $${amount} deposit...`);
+            
+            // Simulate Paystack redirect
+            setTimeout(() => {
+                showNotification(`Deposit of $${amount} submitted for admin approval`);
+            }, 2000);
+        }
+
+        // Withdraw funds
+        function withdrawFunds() {
+            const amount = parseFloat(document.getElementById('withdraw-amount').value);
+            
+            if (amount < 4 || amount > 9000) {
+                showNotification('Invalid amount! Min: $4, Max: $9,000', 'error');
+                return;
+            }
+            
+            if (amount > userBalance) {
+                showNotification('Insufficient balance!', 'error');
+                return;
+            }
+            
+            showNotification(`Withdrawal request for $${amount} submitted. Funds will arrive within 2 hours.`);
+        }
+
+        // Show user guide
+        function showUserGuide() {
+            showNotification("User Guide: Complete registration, deposit funds, refer 8 people to upgrade to Bird tier, then start trading!");
         }
 
         // Logout function
@@ -1742,39 +1922,6 @@
                 document.querySelector('.auth-container').classList.add('active');
                 currentUser = null;
             }, 1500);
-        }
-        
-        // Deposit funds via Paystack
-        function depositFunds() {
-            const amount = parseFloat(document.getElementById('deposit-amount').value);
-            
-            if (amount < 2 || amount > 10000) {
-                showNotification('Invalid amount! Min: $2, Max: $10,000', 'error');
-                return;
-            }
-            
-            // For demo, we'll simulate a successful deposit
-            setTimeout(() => {
-                userBalance += amount;
-                document.getElementById('user-balance').textContent = `$${userBalance.toFixed(2)}`;
-                showNotification(`Deposit of $${amount} was successful!`);
-            }, 2000);
-        }
-        
-        // Transfer tokens
-        function transferTokens() {
-            if (currentUser && (currentUser.tier === 'boss' || currentUser.tier === 'lord' || currentUser.tier === 'platinum')) {
-                showNotification('Transfer tokens to another user using their ID');
-            } else {
-                showNotification('You need to upgrade to Boss, Lord or Platinum tier to transfer tokens', 'error');
-            }
-        }
-        
-        // Update chart timeframe
-        function updateChartTimeframe() {
-            const timeframe = document.getElementById('chart-timeframe').value;
-            // In a real app, this would fetch new data based on timeframe
-            showNotification(`Chart timeframe updated to ${timeframe}`);
         }
     </script>
 </body>
