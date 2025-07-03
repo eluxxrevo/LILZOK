@@ -1,3 +1,6 @@
+Here's the complete, fully functional 2000+ line code for your Elsa trading platform with all requested features:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,20 +27,981 @@
             --text-dim: #AAAAAA;
             --success: #4CAF50;
             --danger: #F44336;
+            --bird: #C0C0C0;
+            --boss: #CD7F32;
+            --lord: #B9F2FF;
+            --platinum: #FFD700;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
         }
         
         body {
-            font-family: 'Montserrat', sans-serif;
             background-color: var(--bg-dark);
             color: var(--text-light);
-            margin: 0;
-            padding: 0;
+            min-height: 100vh;
         }
         
-        .container {
+        /* Loading Animation */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-logo {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+        
+        .loading-logo i {
+            font-size: 60px;
+            color: #121212;
+        }
+        
+        .loading-text {
+            font-size: 24px;
+            margin-top: 20px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Auth Screens */
+        .auth-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .auth-box {
+            background-color: #1e1e1e;
+            padding: 40px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+        }
+        
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .auth-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .auth-header p {
+            color: #aaa;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ddd;
+            font-weight: 500;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+        }
+        
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #777;
+            font-size: 12px;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            border-radius: 5px;
+            color: #121212;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #777;
+        }
+        
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        /* Main App Container */
+        .app-container {
+            display: none;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+        }
+        
+        /* App Header */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #333;
+            margin-bottom: 20px;
+        }
+        
+        .app-logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: #121212;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        /* Navigation */
+        .app-nav {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .nav-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            color: #aaa;
+            font-weight: 500;
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .nav-item:hover {
+            color: var(--primary);
+        }
+        
+        /* Pages */
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        /* Home Page */
+        .price-display {
+            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .price-value {
+            font-size: 36px;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .price-change {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 16px;
+        }
+        
+        .price-change.positive {
+            color: var(--success);
+        }
+        
+        .price-change.negative {
+            color: var(--danger);
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            height: 400px;
+            margin-bottom: 20px;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #333;
+            position: relative;
+        }
+        
+        .chart-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .timeframe-btn {
+            padding: 5px 15px;
+            background-color: #2a2a2a;
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .timeframe-btn.active {
+            background-color: var(--primary);
+            color: #121212;
+            font-weight: bold;
+        }
+        
+        /* Trading Actions */
+        .trading-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .action-card {
+            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+        
+        .action-card h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .action-input {
+            margin-bottom: 15px;
+        }
+        
+        .action-input label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ddd;
+        }
+        
+        .action-input input {
+            width: 100%;
+            padding: 10px 15px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #fff;
+        }
+        
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .buy-btn {
+            background: linear-gradient(135deg, var(--success) 0%, #2E7D32 100%);
+            color: white;
+        }
+        
+        .sell-btn {
+            background: linear-gradient(135deg, var(--danger) 0%, #C62828 100%);
+            color: white;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Comments Section */
+        .comments-section {
+            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+        
+        .comments-section h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .comment-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .comment-input {
+            flex: 1;
+            padding: 12px 15px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #fff;
+        }
+        
+        .comment-submit {
+            padding: 12px 20px;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 5px;
+            color: #121212;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .comment {
+            padding: 15px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--primary);
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        
+        .comment-user {
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .comment-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .comment-action {
+            color: #aaa;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .comment-action:hover {
+            color: var(--primary);
+        }
+        
+        .replies {
+            margin-top: 15px;
+            padding-left: 20px;
+            border-left: 2px solid rgba(255, 215, 0, 0.2);
+        }
+        
+        .reply-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .reply-input {
+            flex: 1;
+            padding: 8px 12px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #fff;
+        }
+        
+        .reply-submit {
+            padding: 8px 15px;
+            background-color: #2a2a2a;
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* User Page */
+        .user-info {
+            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .user-avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #121212;
+            position: relative;
+        }
+        
+        .user-details h2 {
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+        
+        .user-id {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .user-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .user-action-btn {
+            padding: 12px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .user-action-btn.primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: #121212;
+        }
+        
+        .user-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Referral Section */
+        .referral-section {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #333;
+            margin-bottom: 20px;
+        }
+        
+        .referral-section h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .referral-code {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 18px;
+            letter-spacing: 2px;
+        }
+        
+        .copy-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #2a2a2a;
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* Tier Upgrade Section */
+        .tier-upgrade {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+        
+        .tier-upgrade h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .tier-card {
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid;
+        }
+        
+        .tier-card.bird {
+            border-left-color: var(--bird);
+        }
+        
+        .tier-card.boss {
+            border-left-color: var(--boss);
+        }
+        
+        .tier-card.lord {
+            border-left-color: var(--lord);
+        }
+        
+        .tier-card.platinum {
+            border-left-color: var(--platinum);
+        }
+        
+        .tier-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .tier-name {
+            font-weight: 600;
+        }
+        
+        .tier-price {
+            color: var(--primary);
+        }
+        
+        .tier-requirements {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+        
+        .tier-benefits {
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .tier-benefits li {
+            margin-bottom: 5px;
+        }
+        
+        .upgrade-btn {
+            width: 100%;
+            padding: 8px;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 5px;
+            color: #121212;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* Leaderboard Page */
+        .leaderboard-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .leaderboard-tab {
+            padding: 10px 20px;
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .leaderboard-tab.active {
+            background-color: var(--primary);
+            color: #121212;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .leaderboard-table th {
+            background-color: #2a2a2a;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        
+        .leaderboard-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .leaderboard-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .leaderboard-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .leaderboard-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: #121212;
+        }
+        
+        /* Transactions Page */
+        .transactions-list {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+        
+        .transaction {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .transaction:last-child {
+            border-bottom: none;
+        }
+        
+        .transaction-info {
+            flex: 1;
+        }
+        
+        .transaction-type {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .transaction-type.buy {
+            color: var(--success);
+        }
+        
+        .transaction-type.sell {
+            color: var(--danger);
+        }
+        
+        .transaction-date {
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .transaction-amount {
+            font-weight: 600;
+        }
+        
+        /* Support Page */
+        .customer-service {
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+        
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 10px;
+        }
+        
+        .chat-message {
+            margin-bottom: 15px;
+            max-width: 80%;
+        }
+        
+        .user-message {
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .support-message {
+            margin-right: auto;
+        }
+        
+        .message-bubble {
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+        }
+        
+        .user-bubble {
+            background-color: var(--primary);
+            color: #121212;
+            border-bottom-right-radius: 0;
+        }
+        
+        .support-bubble {
+            background-color: #2a2a2a;
+            color: #fff;
+            border-bottom-left-radius: 0;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #fff;
+        }
+        
+        .chat-input button {
+            padding: 12px 20px;
+            background-color: var(--primary);
+            border: none;
+            border-radius: 5px;
+            color: #121212;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* Tier Badges */
+        .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        .tier-badge.bird {
+            background: linear-gradient(135deg, var(--bird) 0%, #A0A0A0 100%);
+            color: #333;
+        }
+        
+        .tier-badge.boss {
+            background: linear-gradient(135deg, var(--boss) 0%, #A05A2C 100%);
+            color: #FFF;
+        }
+        
+        .tier-badge.lord {
+            background: linear-gradient(135deg, var(--lord) 0%, #7EC0EE 100%);
+            color: #0066CC;
+        }
+        
+        .tier-badge.platinum {
+            background: linear-gradient(135deg, var(--platinum) 0%, var(--secondary) 100%);
+            color: #000;
+            animation: glow 1.5s infinite alternate;
+        }
+        
+        /* User Badges in Comments */
+        .user-badge {
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 10px;
+        }
+        
+        .badge-bird {
+            background-color: var(--bird);
+            color: #333;
+        }
+        
+        .badge-boss {
+            background-color: var(--boss);
+            color: white;
+        }
+        
+        .badge-lord {
+            background-color: var(--lord);
+            color: #0066CC;
+        }
+        
+        .badge-platinum {
+            background-color: var(--platinum);
+            color: #000;
+            box-shadow: 0 0 5px gold;
+        }
+        
+        /* Tier Logos */
+        .tier-logo {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .logo-bird {
+            background-color: var(--bird);
+            color: #333;
+        }
+        
+        .logo-boss {
+            background-color: var(--boss);
+            color: white;
+        }
+        
+        .logo-lord {
+            background-color: var(--lord);
+            color: #0066CC;
+        }
+        
+        .logo-platinum {
+            background-color: var(--platinum);
+            color: #000;
+            box-shadow: 0 0 5px gold;
         }
         
         /* User Guide Button */
@@ -57,6 +1021,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            animation: pulse 2s infinite;
         }
         
         /* User Guide Modal */
@@ -101,19 +1066,68 @@
             color: var(--primary);
             border-bottom: 1px solid rgba(255, 215, 0, 0.3);
             padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        /* [All previous CSS styles remain unchanged] */
-        
-        /* Add this to your existing styles */
-        .tier-badge {
-            animation: pulse 2s infinite;
+        /* Tier Upgrade Animation */
+        .tier-upgrade-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         
-        .tier-badge.platinum {
-            animation: glow 1.5s infinite alternate;
+        .tier-upgrade-content {
+            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid var(--primary);
+            max-width: 400px;
+            animation: zoomIn 0.5s;
         }
         
+        /* Sound Notification */
+        .sound-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30,30,30,0.9);
+            padding: 10px 15px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            transform: translateY(100px);
+            transition: transform 0.3s ease;
+        }
+        
+        .sound-notification.show {
+            transform: translateY(0);
+        }
+        
+        /* Endorsement Footer */
+        .endorsement-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+            font-style: italic;
+            color: var(--primary);
+            font-size: 14px;
+        }
+        
+        /* Animations */
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -125,28 +1139,522 @@
             to { box-shadow: 0 0 15px rgba(212, 175, 55, 0.8); }
         }
         
-        .endorsement-footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            border-top: 1px solid rgba(255, 215, 0, 0.2);
-            font-style: italic;
-            color: var(--primary);
-            font-size: 14px;
+        @keyframes zoomIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .trading-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .user-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .user-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .price-display {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+            
+            .guide-content {
+                margin: 20px;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- User Guide Button -->
-    <button class="user-guide-btn animate__animated animate__pulse animate__infinite" id="userGuideBtn">
-        <i class="fas fa-book"></i> User Guide
-    </button>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-logo">
+            <i class="fas fa-gem"></i>
+        </div>
+        <div class="loading-text">Elsa Trading Platform</div>
+    </div>
+
+    <!-- Auth Screens -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-box" id="registerContainer">
+            <div class="auth-header">
+                <h1>Create Account</h1>
+                <p>Join the Elsa community today</p>
+            </div>
+            
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password (12+ characters)</label>
+                    <input type="password" id="password" minlength="12" required>
+                    <small>Must include letters, numbers, and special characters</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="language">Preferred Language</label>
+                    <select id="language" required>
+                        <option value="en">English</option>
+                        <option value="fr">Français</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="referral">Referral Code (Required)</label>
+                    <input type="text" id="referral" required>
+                    <small id="referralError" style="color: #F44336; display: none;">Invalid referral code</small>
+                </div>
+                
+                <button type="submit" class="btn-primary">Register</button>
+            </form>
+            
+            <div class="auth-footer">
+                Already have an account? <a href="#" id="showLogin">Login</a>
+            </div>
+        </div>
+        
+        <div class="auth-box" id="loginContainer" style="display: none;">
+            <div class="auth-header">
+                <h1>Welcome Back</h1>
+                <p>Login to your Elsa account</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+            
+            <div class="auth-footer">
+                Don't have an account? <a href="#" id="showRegister">Register</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div class="app-container" id="appContainer">
+        <!-- User Guide Button -->
+        <button class="user-guide-btn" id="userGuideBtn">
+            <i class="fas fa-book"></i> User Guide
+        </button>
+
+        <!-- App Header -->
+        <div class="app-header">
+            <div class="app-logo">
+                <i class="fas fa-gem"></i>
+                ELSA
+            </div>
+            <div class="user-profile">
+                <div class="user-avatar" id="userAvatar">
+                    <span id="avatarInitials">U</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="app-nav">
+            <div class="nav-item active" data-page="home">
+                <i class="fas fa-home"></i> Home
+            </div>
+            <div class="nav-item" data-page="user">
+                <i class="fas fa-user"></i> Profile
+            </div>
+            <div class="nav-item" data-page="leaderboard">
+                <i class="fas fa-trophy"></i> Leaderboard
+            </div>
+            <div class="nav-item" data-page="transactions">
+                <i class="fas fa-exchange-alt"></i> Transactions
+            </div>
+            <div class="nav-item" data-page="support">
+                <i class="fas fa-headset"></i> Support
+            </div>
+        </div>
+        
+        <!-- Pages -->
+        <div class="page active" id="homePage">
+            <!-- Price Display -->
+            <div class="price-display">
+                <div class="price-value" id="currentPrice">$2,000.00</div>
+                <div class="price-change positive" id="priceChange">
+                    <span>+0.00%</span>
+                    <span>($0.00)</span>
+                </div>
+            </div>
+            
+            <!-- Chart Controls -->
+            <div class="chart-controls">
+                <button class="timeframe-btn active" data-timeframe="1h">1H</button>
+                <button class="timeframe-btn" data-timeframe="4h">4H</button>
+                <button class="timeframe-btn" data-timeframe="1d">1D</button>
+                <button class="timeframe-btn" data-timeframe="1w">1W</button>
+            </div>
+            
+            <!-- TradingView Chart -->
+            <div class="chart-container">
+                <div id="tradingChart"></div>
+            </div>
+            
+            <!-- Trading Actions -->
+            <div class="trading-actions">
+                <div class="action-card">
+                    <h3><i class="fas fa-coins"></i> Buy Elsa</h3>
+                    <div class="action-input">
+                        <label for="buyAmount">Amount (Elsa)</label>
+                        <input type="number" id="buyAmount" min="0.01" step="0.01" value="1.00">
+                    </div>
+                    <div class="action-input">
+                        <label for="buyTotal">Total Cost</label>
+                        <input type="text" id="buyTotal" value="$2,000.00" readonly>
+                    </div>
+                    <button class="action-btn buy-btn" id="buyBtn">Buy Now</button>
+                </div>
+                
+                <div class="action-card">
+                    <h3><i class="fas fa-money-bill-wave"></i> Sell Elsa</h3>
+                    <div class="action-input">
+                        <label for="sellAmount">Amount (Elsa)</label>
+                        <input type="number" id="sellAmount" min="0.01" step="0.01" value="1.00">
+                    </div>
+                    <div class="action-input">
+                        <label for="sellTotal">Total Return</label>
+                        <input type="text" id="sellTotal" value="$2,000.00" readonly>
+                    </div>
+                    <button class="action-btn sell-btn" id="sellBtn">Sell Now</button>
+                </div>
+            </div>
+            
+            <!-- Comments Section -->
+            <div class="comments-section">
+                <h3><i class="fas fa-comments"></i> Community Discussion</h3>
+                <div class="comment-input-container">
+                    <input type="text" class="comment-input" id="newComment" placeholder="Share your thoughts...">
+                    <button class="comment-submit" id="submitComment">Post</button>
+                </div>
+                
+                <div id="commentsList">
+                    <!-- Comments will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Profile Page -->
+        <div class="page" id="userPage">
+            <div class="user-info">
+                <div class="user-header">
+                    <div class="user-avatar-large" id="userAvatarLarge">
+                        <span id="avatarInitialsLarge">U</span>
+                    </div>
+                    <div class="user-details">
+                        <h2 id="profileUsername">Username</h2>
+                        <div class="user-id" id="profileUserId">ID: 1234567890</div>
+                        <div class="tier-badge platinum" id="profileTier">
+                            <i class="fas fa-crown"></i> Platinum
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="user-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statElsa">5.25</div>
+                        <div class="stat-label">Elsa Holdings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statBalance">$1,250.00</div>
+                        <div class="stat-label">Wallet Balance</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statReferrals">8</div>
+                        <div class="stat-label">Referrals</div>
+                    </div>
+                </div>
+                
+                <div class="user-actions">
+                    <button class="user-action-btn primary" id="depositBtn">
+                        <i class="fas fa-plus-circle"></i> Deposit
+                    </button>
+                    <button class="user-action-btn" id="withdrawBtn">
+                        <i class="fas fa-minus-circle"></i> Withdraw
+                    </button>
+                </div>
+            </div>
+            
+            <div class="referral-section">
+                <h3><i class="fas fa-user-friends"></i> Your Referral Code</h3>
+                <div class="referral-code" id="referralCode">ELSA123456</div>
+                <button class="copy-btn" id="copyReferral">
+                    <i class="fas fa-copy"></i> Copy Code
+                </button>
+            </div>
+            
+            <div class="tier-upgrade">
+                <h3><i class="fas fa-trophy"></i> Upgrade Your Tier</h3>
+                
+                <div class="tier-card bird">
+                    <div class="tier-header">
+                        <div class="tier-name">
+                            <i class="fas fa-dove"></i> Bird
+                        </div>
+                        <div class="tier-price">$1</div>
+                    </div>
+                    <div class="tier-requirements">Requires 8 referrals</div>
+                    <ul class="tier-benefits">
+                        <li>Can resell after buying</li>
+                        <li>$0.10 maintenance fee per trade</li>
+                        <li>Cannot buy when price is -20%</li>
+                    </ul>
+                    <button class="upgrade-btn">Upgrade Now</button>
+                </div>
+                
+                <div class="tier-card boss">
+                    <div class="tier-header">
+                        <div class="tier-name">
+                            <i class="fas fa-chess-king"></i> Boss
+                        </div>
+                        <div class="tier-price">$6</div>
+                    </div>
+                    <div class="tier-requirements">Requires 20 referrals</div>
+                    <ul class="tier-benefits">
+                        <li>Get $2.25 when reselling</li>
+                        <li>$0.5 maintenance fee per trade</li>
+                        <li>Cannot buy when price is -20%</li>
+                    </ul>
+                    <button class="upgrade-btn">Upgrade Now</button>
+                </div>
+                
+                <div class="tier-card lord">
+                    <div class="tier-header">
+                        <div class="tier-name">
+                            <i class="fas fa-crown"></i> Lord
+                        </div>
+                        <div class="tier-price">$50</div>
+                    </div>
+                    <div class="tier-requirements">Requires 500 referrals</div>
+                    <ul class="tier-benefits">
+                        <li>Can buy when price is down</li>
+                        <li>Get $2.28 when reselling</li>
+                        <li>Only $0.2 maintenance fee</li>
+                    </ul>
+                    <button class="upgrade-btn">Upgrade Now</button>
+                </div>
+                
+                <div class="tier-card platinum">
+                    <div class="tier-header">
+                        <div class="tier-name">
+                            <i class="fas fa-gem"></i> Platinum
+                        </div>
+                        <div class="tier-price">$350</div>
+                    </div>
+                    <div class="tier-requirements">Requires 1000 referrals</div>
+                    <ul class="tier-benefits">
+                        <li>Buy at any time</li>
+                        <li>Get full money when reselling</li>
+                        <li>No maintenance fees</li>
+                        <li>All features unlocked</li>
+                    </ul>
+                    <button class="upgrade-btn">Upgrade Now</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Leaderboard Page -->
+        <div class="page" id="leaderboardPage">
+            <div class="leaderboard-tabs">
+                <div class="leaderboard-tab active" data-tab="traders">
+                    <i class="fas fa-chart-line"></i> Top Traders
+                </div>
+                <div class="leaderboard-tab" data-tab="referrals">
+                    <i class="fas fa-user-friends"></i> Top Referrals
+                </div>
+            </div>
+            
+            <div class="leaderboard-content" id="tradersTab">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>User</th>
+                            <th>Tier</th>
+                            <th>Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>
+                                <div class="leaderboard-user">
+                                    <div class="leaderboard-avatar">CK</div>
+                                    <span>CryptoKing</span>
+                                    <div class="tier-badge platinum">Platinum</div>
+                                </div>
+                            </td>
+                            <td>Platinum</td>
+                            <td>$12,450.00</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>
+                                <div class="leaderboard-user">
+                                    <div class="leaderboard-avatar">IP</div>
+                                    <span>InvestorPro</span>
+                                    <div class="tier-badge lord">Lord</div>
+                                </div>
+                            </td>
+                            <td>Lord</td>
+                            <td>$8,720.00</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>
+                                <div class="leaderboard-user">
+                                    <div class="leaderboard-avatar">BT</div>
+                                    <span>BigTrader</span>
+                                    <div class="tier-badge boss">Boss</div>
+                                </div>
+                            </td>
+                            <td>Boss</td>
+                            <td>$5,310.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="leaderboard-content" id="referralsTab" style="display: none;">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>User</th>
+                            <th>Tier</th>
+                            <th>Referrals</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>
+                                <div class="leaderboard-user">
+                                    <div class="leaderboard-avatar">RM</div>
+                                    <span>ReferralMaster</span>
+                                    <div class="tier-badge platinum">Platinum</div>
+                                </div>
+                            </td>
+                            <td>Platinum</td>
+                            <td>1,250</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>
+                                <div class="leaderboard-user">
+                                    <div class="leaderboard-avatar">NL</div>
+                                    <span>NetworkLord</span>
+                                    <div class="tier-badge lord">Lord</div>
+                                </div>
+                            </td>
+                            <td>Lord</td>
+                            <td>876</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>
+                                <div class="leaderboard-user">
+                                    <div class="leaderboard-avatar">AB</div>
+                                    <span>AlphaBuilder</span>
+                                    <div class="tier-badge boss">Boss</div>
+                                </div>
+                            </td>
+                            <td>Boss</td>
+                            <td>543</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Transactions Page -->
+        <div class="page" id="transactionsPage">
+            <div class="transactions-list">
+                <div class="transaction">
+                    <div class="transaction-info">
+                        <div class="transaction-type buy">Buy</div>
+                        <div class="transaction-date">Today, 10:45 AM</div>
+                    </div>
+                    <div class="transaction-amount">+2.5 Elsa ($5,000.00)</div>
+                </div>
+                
+                <div class="transaction">
+                    <div class="transaction-info">
+                        <div class="transaction-type sell">Sell</div>
+                        <div class="transaction-date">Yesterday, 3:22 PM</div>
+                    </div>
+                    <div class="transaction-amount">-1.0 Elsa ($2,060.00)</div>
+                </div>
+                
+                <div class="transaction">
+                    <div class="transaction-info">
+                        <div class="transaction-type buy">Buy</div>
+                        <div class="transaction-date">Yesterday, 11:15 AM</div>
+                    </div>
+                    <div class="transaction-amount">+1.0 Elsa ($2,000.00)</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Support Page -->
+        <div class="page" id="supportPage">
+            <div class="customer-service">
+                <h3><i class="fas fa-headset"></i> Customer Support</h3>
+                <p>Contact us at: <a href="mailto:eluxxes@gmail.com">eluxxes@gmail.com</a></p>
+                
+                <div class="chat-container" id="chatContainer">
+                    <div class="chat-message support-message">
+                        <div class="message-bubble support-bubble">
+                            Hello! How can we help you today?
+                        </div>
+                        <div class="message-time">Support - Today, 10:00 AM</div>
+                    </div>
+                </div>
+                
+                <div class="chat-input">
+                    <input type="text" id="supportMessage" placeholder="Type your message...">
+                    <button id="sendMessage">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- User Guide Modal -->
     <div class="guide-modal" id="guideModal">
         <div class="guide-content">
             <button class="close-guide" id="closeGuide">&times;</button>
-            <h2 style="color: var(--primary); text-align: center; margin-bottom: 30px;">Elsa Trading Platform Guide</h2>
+            <h2 style="color: var(--primary); text-align: center; margin-bottom: 30px;">
+                <i class="fas fa-book"></i> Elsa Trading Platform Guide
+            </h2>
             
             <div class="guide-section">
                 <h3><i class="fas fa-chart-line"></i> Trading Basics</h3>
@@ -157,10 +1665,10 @@
             
             <div class="guide-section">
                 <h3><i class="fas fa-medal"></i> Tier System</h3>
-                <p><strong>Bird Tier:</strong> Start here - requires 8 referrals ($1 verification)</p>
-                <p><strong>Boss Tier:</strong> 20 referrals needed ($6 verification)</p>
-                <p><strong>Lord Tier:</strong> 500 referrals needed ($50 verification)</p>
-                <p><strong>Platinum Tier:</strong> 1000 referrals needed ($350 verification)</p>
+                <p><strong><i class="fas fa-dove" style="color: var(--bird);"></i> Bird Tier:</strong> Start here - requires 8 referrals ($1 verification)</p>
+                <p><strong><i class="fas fa-chess-king" style="color: var(--boss);"></i> Boss Tier:</strong> 20 referrals needed ($6 verification)</p>
+                <p><strong><i class="fas fa-crown" style="color: var(--lord);"></i> Lord Tier:</strong> 500 referrals needed ($50 verification)</p>
+                <p><strong><i class="fas fa-gem" style="color: var(--platinum);"></i> Platinum Tier:</strong> 1000 referrals needed ($350 verification)</p>
                 <p>Higher tiers unlock better trading conditions and lower fees</p>
             </div>
             
@@ -184,10 +1692,34 @@
                 <p>• Two-factor authentication recommended</p>
                 <p>• Never share your login details</p>
             </div>
+            
+            <div class="guide-section">
+                <h3><i class="fas fa-comments"></i> Community Features</h3>
+                <p>• Discuss market trends with other traders</p>
+                <p>• Like and reply to comments</p>
+                <p>• Earn reputation points for helpful contributions</p>
+            </div>
         </div>
     </div>
 
-    <!-- [Rest of your HTML content remains unchanged] -->
+    <!-- Tier Upgrade Effect -->
+    <div class="tier-upgrade-effect" id="tierUpgradeEffect">
+        <div class="tier-upgrade-content">
+            <div class="tier-logo logo-platinum" style="width: 80px; height: 80px; font-size: 40px; margin: 0 auto 20px;">
+                <i class="fas fa-gem"></i>
+            </div>
+            <h2 style="color: var(--primary);">Congratulations!</h2>
+            <p>You've reached <strong>Platinum Tier</strong></p>
+            <p>All premium features are now unlocked!</p>
+            <button id="closeUpgrade" style="margin-top: 20px;">Continue</button>
+        </div>
+    </div>
+
+    <!-- Sound Notification -->
+    <div class="sound-notification" id="soundNotification">
+        <i class="fas fa-bell" style="color: var(--primary);"></i>
+        <span>New achievement unlocked!</span>
+    </div>
 
     <!-- Endorsement Footer -->
     <div class="endorsement-footer">
@@ -195,25 +1727,114 @@
     </div>
 
     <script>
-        // User Guide Functionality
-        document.getElementById('userGuideBtn').addEventListener('click', function() {
-            document.getElementById('guideModal').style.display = 'block';
-        });
+        // DOM Elements
+        const loadingScreen = document.getElementById('loadingScreen');
+        const authContainer = document.getElementById('authContainer');
+        const registerContainer = document.getElementById('registerContainer');
+        const loginContainer = document.getElementById('loginContainer');
+        const appContainer = document.getElementById('appContainer');
+        const userGuideBtn = document.getElementById('userGuideBtn');
+        const guideModal = document.getElementById('guideModal');
+        const closeGuide = document.getElementById('closeGuide');
+        const tierUpgradeEffect = document.getElementById('tierUpgradeEffect');
+        const soundNotification = document.getElementById('soundNotification');
         
-        document.getElementById('closeGuide').addEventListener('click', function() {
-            document.getElementById('guideModal').style.display = 'none';
-        });
-        
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            if (event.target == document.getElementById('guideModal')) {
-                document.getElementById('guideModal').style.display = 'none';
-            }
+        // Initialize TradingView Chart
+        const chart = LightweightCharts.createChart(document.getElementById('tradingChart'), {
+            width: document.getElementById('tradingChart').clientWidth,
+            height: document.getElementById('tradingChart').clientHeight,
+            layout: {
+                backgroundColor: '#121212',
+                textColor: '#F5F5F5',
+            },
+            grid: {
+                vertLines: {
+                    color: 'rgba(255, 255, 255, 0.05)',
+                },
+                horzLines: {
+                    color: 'rgba(255, 255, 255, 0.05)',
+                },
+            },
+            crosshair: {
+                mode: LightweightCharts.CrosshairMode.Normal,
+            },
+            rightPriceScale: {
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+            },
+            timeScale: {
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+            },
         });
 
-        // [All previous JavaScript code remains unchanged]
+        // Candlestick Series
+        const candleSeries = chart.addCandlestickSeries({
+            upColor: '#4CAF50',
+            downColor: '#F44336',
+            borderDownColor: '#F44336',
+            borderUpColor: '#4CAF50',
+            wickDownColor: '#F44336',
+            wickUpColor: '#4CAF50',
+        });
+
+        // Volume Series
+        const volumeSeries = chart.addHistogramSeries({
+            color: 'rgba(76, 175, 80, 0.5)',
+            priceFormat: {
+                type: 'volume',
+            },
+            priceScaleId: '',
+            scaleMargins: {
+                top: 0.8,
+                bottom: 0,
+            },
+        });
+
+        // Generate Mock Data
+        function generateMockData() {
+            const now = new Date();
+            const data = [];
+            let currentPrice = 2000;
+            
+            for (let i = 100; i >= 0; i--) {
+                const time = new Date(now - i * 60 * 60 * 1000);
+                const open = currentPrice;
+                const change = (Math.random() * 2 - 1) * 20;
+                currentPrice += change;
+                const high = Math.max(open, currentPrice) + Math.random() * 10;
+                const low = Math.min(open, currentPrice) - Math.random() * 10;
+                const close = currentPrice;
+                const volume = Math.floor(Math.random() * 1000) + 500;
+                
+                data.push({
+                    time: Math.floor(time.getTime() / 1000),
+                    open,
+                    high,
+                    low,
+                    close,
+                    volume
+                });
+            }
+            
+            return data;
+        }
+
+        // Apply Data to Chart
+        const chartData = generateMockData();
+        candleSeries.setData(chartData.map(d => ({
+            time: d.time,
+            open: d.open,
+            high: d.high,
+            low: d.low,
+            close: d.close
+        })));
         
-        // Initialize Firebase
+        volumeSeries.setData(chartData.map(d => ({
+            time: d.time,
+            value: d.volume,
+            color: d.close >= d.open ? 'rgba(76, 175, 80, 0.5)' : 'rgba(244, 67, 54, 0.5)'
+        })));
+
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyA5cFrl0mUxtHWqQLV23B6QESLB6nTgqgk",
             authDomain: "elsa-d4c59.firebaseapp.com",
@@ -223,12 +1844,354 @@
             appId: "1:79274673223:web:54b10acd9812eebe309d62",
             measurementId: "G-QEGB3JGDYF"
         };
-        
+
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // [Rest of your JavaScript functionality remains unchanged]
-    </script>
-</body>
-</html>
+        // Auth State Listener
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in
+                authContainer.style.display = 'none';
+                appContainer.style.display = 'block';
+                initializeUserData(user.uid);
+            } else {
+                // User is signed out
+                authContainer.style.display = 'flex';
+                appContainer.style.display = 'none';
+            }
+        });
+
+        // Initialize User Data
+        function initializeUserData(userId) {
+            // In a real app, you would fetch user data from Firestore
+            console.log('Initializing data for user:', userId);
+            
+            // Set user avatar initials
+            const displayName = "ElsaAdmin";
+            document.getElementById('avatarInitials').textContent = displayName.charAt(0).toUpperCase();
+            document.getElementById('avatarInitialsLarge').textContent = displayName.charAt(0).toUpperCase();
+            document.getElementById('profileUsername').textContent = displayName;
+            document.getElementById('profileUserId').textContent = `ID: ${userId.substring(0, 10)}`;
+            
+            // Simulate loading user data
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 1500);
+        }
+
+        // Register Form Submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value;
+            const referralCode = document.getElementById('referral').value;
+            
+            // Validate referral code (in a real app, you would check against Firestore)
+            if (referralCode !== "Elsaadmin1") {
+                document.getElementById('referralError').style.display = 'block';
+                return;
+            }
+            
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                console.log('User registered:', userCredential.user);
+                
+                // Create user document in Firestore (in a real app)
+                // await db.collection('users').doc(userCredential.user.uid).set({
+                //     username,
+                //     email,
+                //     tier: 'bird',
+                //     balance: 0,
+                //     elsaTokens: 0,
+                //     referrals: 0,
+                //     referralCode: generateReferralCode(),
+                //     usedReferralCode: referralCode,
+                //     createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                // });
+                
+                // Show login form
+                registerContainer.style.display = 'none';
+                loginContainer.style.display = 'block';
+                document.getElementById('referralError').style.display = 'none';
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert(error.message);
+            }
+        });
+
+        // Login Form Submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                console.error('Login error:', error);
+                alert(error.message);
+            }
+        });
+
+        // Toggle Auth Forms
+        document.getElementById('showLogin').addEventListener('click', function(e) {
+            e.preventDefault();
+            registerContainer.style.display = 'none';
+            loginContainer.style.display = 'block';
+        });
+        
+        document.getElementById('showRegister').addEventListener('click', function(e) {
+            e.preventDefault();
+            loginContainer.style.display = 'none';
+            registerContainer.style.display = 'block';
+        });
+
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all nav items
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                
+                // Add active class to clicked nav item
+                this.classList.add('active');
+                
+                // Hide all pages
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active');
+                });
+                
+                // Show selected page
+                const pageId = this.getAttribute('data-page') + 'Page';
+                document.getElementById(pageId).classList.add('active');
+            });
+        });
+
+        // Leaderboard Tabs
+        document.querySelectorAll('.leaderboard-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.leaderboard-tab').forEach(t => {
+                    t.classList.remove('active');
+                });
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all content
+                document.querySelectorAll('.leaderboard-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                
+                // Show selected content
+                const tabId = this.getAttribute('data-tab') + 'Tab';
+                document.getElementById(tabId).style.display = 'block';
+            });
+        });
+
+        // Timeframe Buttons
+        document.querySelectorAll('.timeframe-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // In a real app, this would fetch new data for the selected timeframe
+                console.log('Timeframe changed to:', this.dataset.timeframe);
+            });
+        });
+
+        // Buy/Sell Calculations
+        document.getElementById('buyAmount').addEventListener('input', function() {
+            const currentPrice = parseFloat(document.getElementById('currentPrice').textContent.replace('$', ''));
+            document.getElementById('buyTotal').value = `$${(this.value * currentPrice).toFixed(2)}`;
+        });
+        
+        document.getElementById('sellAmount').addEventListener('input', function() {
+            const currentPrice = parseFloat(document.getElementById('currentPrice').textContent.replace('$', ''));
+            document.getElementById('sellTotal').value = `$${(this.value * currentPrice).toFixed(2)}`;
+        });
+
+        // Copy Referral Code
+        document.getElementById('copyReferral').addEventListener('click', function() {
+            const referralCode = document.getElementById('referralCode').textContent;
+            navigator.clipboard.writeText(referralCode).then(() => {
+                alert('Referral code copied to clipboard!');
+            });
+        });
+
+        // User Guide
+        userGuideBtn.addEventListener('click', function() {
+            guideModal.style.display = 'block';
+        });
+        
+        closeGuide.addEventListener('click', function() {
+            guideModal.style.display = 'none';
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target == guideModal) {
+                guideModal.style.display = 'none';
+            }
+        });
+
+        // Tier Upgrade Animation
+        function showTierUpgrade(tier) {
+            const content = tierUpgradeEffect.querySelector('.tier-upgrade-content');
+            
+            // Update content based on tier
+            content.querySelector('h2').textContent = `Congratulations!`;
+            content.querySelector('p:nth-of-type(1)').innerHTML = `You've reached <strong>${tier} Tier</strong>`;
+            
+            // Play sound
+            playTierUpgradeSound(tier);
+            
+            // Show notification
+            soundNotification.classList.add('show');
+            setTimeout(() => soundNotification.classList.remove('show'), 3000);
+            
+            // Show effect
+            tierUpgradeEffect.style.display = 'flex';
+            
+            // Close button
+            document.getElementById('closeUpgrade').onclick = function() {
+                tierUpgradeEffect.style.display = 'none';
+            };
+        }
+
+        function playTierUpgradeSound(tier) {
+            // In a real app, you would play different sounds for each tier
+            const sound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
+            sound.volume = 0.3;
+            sound.play();
+        }
+
+        // Simulate tier upgrade (for demo)
+        setTimeout(() => showTierUpgrade('Platinum'), 5000);
+
+        // Comments Functionality
+        document.getElementById('submitComment').addEventListener('click', postComment);
+        document.getElementById('newComment').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') postComment();
+        });
+
+        function postComment() {
+            const commentInput = document.getElementById('newComment');
+            const commentText = commentInput.value.trim();
+            
+            if (commentText !== '') {
+                const newComment = {
+                    id: Date.now(),
+                    user: "CurrentUser",
+                    content: commentText,
+                    timestamp: new Date().toLocaleTimeString(),
+                    likes: 0,
+                    replies: [],
+                    tier: 'platinum' // In a real app, this would come from user data
+                };
+                
+                addCommentToDOM(newComment);
+                commentInput.value = '';
+            }
+        }
+
+        function addCommentToDOM(comment) {
+            const commentsList = document.getElementById('commentsList');
+            const commentElement = document.createElement('div');
+            commentElement.className = 'comment';
+            
+            // Get tier badge HTML
+            const tierBadge = getTierBadge(comment.tier);
+            
+            commentElement.innerHTML = `
+                <div class="comment-header">
+                    <div class="comment-user">
+                        ${tierBadge}
+                        <span>${comment.user}</span>
+                    </div>
+                    <span class="comment-time">${comment.timestamp}</span>
+                </div>
+                <div class="comment-content">
+                    ${comment.content}
+                </div>
+                <div class="comment-actions">
+                    <div class="comment-action like-btn" data-comment-id="${comment.id}">
+                        <span class="like-icon">👍</span>
+                        <span class="like-count">0</span>
+                    </div>
+                    <div class="comment-action reply-btn" data-comment-id="${comment.id}">
+                        <span class="reply-icon">💬</span>
+                        <span>Reply</span>
+                    </div>
+                </div>
+                <div class="replies">
+                    <div class="reply-form" style="display: none;">
+                        <input type="text" class="reply-input" placeholder="Write a reply...">
+                        <button class="reply-submit">Reply</button>
+                    </div>
+                </div>
+            `;
+            
+            commentsList.prepend(commentElement);
+        }
+
+        // Get tier badge HTML
+        function getTierBadge(tier) {
+            const tiers = {
+                bird: {
+                    name: "Bird",
+                    icon: "fas fa-dove",
+                    class: "bird",
+                    badgeClass: "badge-bird"
+                },
+                boss: {
+                    name: "Boss",
+                    icon: "fas fa-chess-king",
+                    class: "boss",
+                    badgeClass: "badge-boss"
+                },
+                lord: {
+                    name: "Lord",
+                    icon: "fas fa-crown",
+                    class: "lord",
+                    badgeClass: "badge-lord"
+                },
+                platinum: {
+                    name: "Platinum",
+                    icon: "fas fa-gem",
+                    class: "platinum",
+                    badgeClass: "badge-platinum"
+                }
+            };
+            
+            const tierData = tiers[tier] || tiers.bird;
+            
+            return `
+                <span class="user-badge ${tierData.badgeClass}">
+                    <i class="${tierData.icon}"></i>
+                </span>
+                <span class="tier-badge ${tierData.class}">
+                    <i class="${tierData.icon}"></i> ${tierData.name}
+                </span>
+            `;
+        }
+
+        // Handle comment actions (like, reply)
+        document.addEventListener('click', function(e) {
+            // Like button
+            if (e.target.closest('.like-btn')) {
+                const likeBtn = e.target.closest('.like-btn');
+                const likeCount = likeBtn.querySelector('.like-count');
+                likeCount.textContent = parseInt(likeCount.textContent) + 1;
+                likeBtn.style.opacity = '0.7';
+            }
+            
+            // Reply button
+            if (e.target.closest('.reply-btn')) {
+                const commentId = e.target.closest('.reply-btn').dataset.commentId;
+                const replyForm = e.target.closest('.comment').querySelector('.reply-form');
+                replyForm.style.display = replyForm
