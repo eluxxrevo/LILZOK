@@ -626,6 +626,59 @@
             letter-spacing: 2px;
         }
         
+        .referral-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .referral-stat-card {
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .referral-stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary);
+        }
+        
+        .referral-stat-label {
+            font-size: 12px;
+            color: #aaa;
+        }
+        
+        .referral-progress {
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #aaa;
+        }
+        
         .copy-btn {
             width: 100%;
             padding: 10px;
@@ -1139,6 +1192,10 @@
             border-left: 4px solid var(--danger);
         }
         
+        .referral-notification {
+            border-left: 4px solid var(--primary);
+        }
+        
         /* Endorsement Footer */
         .endorsement-footer {
             text-align: center;
@@ -1178,6 +1235,10 @@
             }
             
             .user-actions {
+                grid-template-columns: 1fr;
+            }
+            
+            .referral-stats {
                 grid-template-columns: 1fr;
             }
             
@@ -1242,7 +1303,7 @@
                 
                 <div class="form-group">
                     <label for="referral">Referral Code (Required)</label>
-                    <input type="text" id="referral" required>
+                    <input type="text" id="referral" required value="Elsaadmin1">
                     <small id="referralError" style="color: #F44336; display: none;">Invalid referral code</small>
                 </div>
                 
@@ -1428,11 +1489,44 @@
             </div>
             
             <div class="referral-section">
-                <h3><i class="fas fa-user-friends"></i> Your Referral Code</h3>
+                <h3><i class="fas fa-user-friends"></i> Your Referral Program</h3>
+                <div class="referral-stats">
+                    <div class="referral-stat-card">
+                        <div class="referral-stat-value" id="activeReferrals">5</div>
+                        <div class="referral-stat-label">Active Referrals</div>
+                    </div>
+                    <div class="referral-stat-card">
+                        <div class="referral-stat-value" id="referralEarnings">$250.00</div>
+                        <div class="referral-stat-label">Total Earnings</div>
+                    </div>
+                </div>
+                
+                <div class="referral-progress">
+                    <p>Progress to Platinum Tier</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="tierProgress" style="width: 25%"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span>Bird (8)</span>
+                        <span>Boss (20)</span>
+                        <span>Lord (500)</span>
+                        <span>Platinum (1000)</span>
+                    </div>
+                </div>
+                
                 <div class="referral-code" id="referralCode">ELSA123456</div>
                 <button class="copy-btn" id="copyReferral">
-                    <i class="fas fa-copy"></i> Copy Code
+                    <i class="fas fa-copy"></i> Copy Referral Code
                 </button>
+                
+                <div class="referral-share" style="margin-top: 15px; display: flex; gap: 10px;">
+                    <button class="copy-btn" style="flex: 1;">
+                        <i class="fab fa-whatsapp"></i> Share via WhatsApp
+                    </button>
+                    <button class="copy-btn" style="flex: 1;">
+                        <i class="fas fa-envelope"></i> Share via Email
+                    </button>
+                </div>
             </div>
             
             <div class="tier-upgrade">
@@ -1575,6 +1669,7 @@
                             <th>User</th>
                             <th>Tier</th>
                             <th>Referrals</th>
+                            <th>Earnings</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1589,6 +1684,7 @@
                             </td>
                             <td>Platinum</td>
                             <td>1,250</td>
+                            <td>$12,500.00</td>
                         </tr>
                         <tr>
                             <td>2</td>
@@ -1601,6 +1697,7 @@
                             </td>
                             <td>Lord</td>
                             <td>876</td>
+                            <td>$8,760.00</td>
                         </tr>
                         <tr>
                             <td>3</td>
@@ -1613,6 +1710,20 @@
                             </td>
                             <td>Boss</td>
                             <td>543</td>
+                            <td>$5,430.00</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>
+                                <div class="leaderboard-user">
+                                    <div class="leaderboard-avatar">EA</div>
+                                    <span>ElsaAdmin</span>
+                                    <div class="tier-badge platinum">Platinum</div>
+                                </div>
+                            </td>
+                            <td>Platinum</td>
+                            <td>420</td>
+                            <td>$4,200.00</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1628,6 +1739,14 @@
                         <div class="transaction-date">Today, 10:45 AM</div>
                     </div>
                     <div class="transaction-amount">+2.5 Elsa ($5,000.00)</div>
+                </div>
+                
+                <div class="transaction">
+                    <div class="transaction-info">
+                        <div class="transaction-type referral">Referral Bonus</div>
+                        <div class="transaction-date">Today, 09:30 AM</div>
+                    </div>
+                    <div class="transaction-amount">+$50.00</div>
                 </div>
                 
                 <div class="transaction">
@@ -1671,60 +1790,6 @@
         </div>
     </div>
 
-    <!-- User Guide Modal -->
-    <div class="guide-modal" id="guideModal">
-        <div class="guide-content">
-            <button class="close-guide" id="closeGuide">&times;</button>
-            <h2 style="color: var(--primary); text-align: center; margin-bottom: 30px;">
-                <i class="fas fa-book"></i> Elsa Trading Platform Guide
-            </h2>
-            
-            <div class="guide-section">
-                <h3><i class="fas fa-chart-line"></i> Trading Basics</h3>
-                <p>1. <strong>Buying Elsa Tokens:</strong> Enter the amount you want to purchase and click "Buy Now"</p>
-                <p>2. <strong>Selling Elsa Tokens:</strong> Enter the amount you want to sell and click "Sell Now"</p>
-                <p>3. <strong>Price Chart:</strong> Interactive chart shows real-time price movements (1H, 4H, 1D, 1W timeframes)</p>
-            </div>
-            
-            <div class="guide-section">
-                <h3><i class="fas fa-medal"></i> Tier System</h3>
-                <p><strong><i class="fas fa-dove" style="color: var(--bird);"></i> Bird Tier:</strong> Start here - requires 8 referrals ($1 verification)</p>
-                <p><strong><i class="fas fa-chess-king" style="color: var(--boss);"></i> Boss Tier:</strong> 20 referrals needed ($6 verification)</p>
-                <p><strong><i class="fas fa-crown" style="color: var(--lord);"></i> Lord Tier:</strong> 500 referrals needed ($50 verification)</p>
-                <p><strong><i class="fas fa-gem" style="color: var(--platinum);"></i> Platinum Tier:</strong> 1000 referrals needed ($350 verification)</p>
-                <p>Higher tiers unlock better trading conditions and lower fees</p>
-            </div>
-            
-            <div class="guide-section">
-                <h3><i class="fas fa-money-bill-wave"></i> Deposits & Withdrawals</h3>
-                <p><strong>Deposits:</strong> Minimum $2, Maximum $10,000 (instant processing)</p>
-                <p><strong>Withdrawals:</strong> Minimum $5, Maximum $9,000 (requires verification)</p>
-                <p>Supported banks: OPay, PalmPay, Kuda, Moniepoint, and major Nigerian banks</p>
-            </div>
-            
-            <div class="guide-section">
-                <h3><i class="fas fa-users"></i> Referral Program</h3>
-                <p>1. Share your unique referral code</p>
-                <p>2. Earn bonuses when referrals trade</p>
-                <p>3. Reach referral targets to upgrade tiers</p>
-            </div>
-            
-            <div class="guide-section">
-                <h3><i class="fas fa-shield-alt"></i> Security</h3>
-                <p>• 12+ character passwords required</p>
-                <p>• Two-factor authentication recommended</p>
-                <p>• Never share your login details</p>
-            </div>
-            
-            <div class="guide-section">
-                <h3><i class="fas fa-comments"></i> Community Features</h3>
-                <p>• Discuss market trends with other traders</p>
-                <p>• Like and reply to comments</p>
-                <p>• Earn reputation points for helpful contributions</p>
-            </div>
-        </div>
-    </div>
-
     <!-- Tier Upgrade Effect -->
     <div class="tier-upgrade-effect" id="tierUpgradeEffect">
         <div class="tier-upgrade-content">
@@ -1753,8 +1818,6 @@
         // DOM Elements
         const loadingScreen = document.getElementById('loadingScreen');
         const authContainer = document.getElementById('authContainer');
-        const registerContainer = document.getElementById('registerContainer');
-        const loginContainer = document.getElementById('loginContainer');
         const appContainer = document.getElementById('appContainer');
         const userGuideBtn = document.getElementById('userGuideBtn');
         const guideModal = document.getElementById('guideModal');
@@ -1874,6 +1937,25 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
+        // Referral System Data
+        const referralSystem = {
+            currentUser: {
+                id: 'EA12345678',
+                name: 'ElsaAdmin',
+                referrals: 420,
+                tier: 'platinum',
+                referralCode: 'Elsaadmin1',
+                referralEarnings: 4200
+            },
+            referralBonus: 10, // $10 per referral
+            tierRequirements: {
+                bird: 8,
+                boss: 20,
+                lord: 500,
+                platinum: 1000
+            }
+        };
+
         // Auth State Listener
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -1890,15 +1972,19 @@
 
         // Initialize User Data
         function initializeUserData(userId) {
-            // In a real app, you would fetch user data from Firestore
-            console.log('Initializing data for user:', userId);
+            // Set user data
+            document.getElementById('avatarInitials').textContent = referralSystem.currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('avatarInitialsLarge').textContent = referralSystem.currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('profileUsername').textContent = referralSystem.currentUser.name;
+            document.getElementById('profileUserId').textContent = `ID: ${referralSystem.currentUser.id}`;
+            document.getElementById('statReferrals').textContent = referralSystem.currentUser.referrals;
+            document.getElementById('referralCode').textContent = referralSystem.currentUser.referralCode;
+            document.getElementById('activeReferrals').textContent = referralSystem.currentUser.referrals;
+            document.getElementById('referralEarnings').textContent = `$${referralSystem.currentUser.referralEarnings.toFixed(2)}`;
             
-            // Set user avatar initials
-            const displayName = "ElsaAdmin";
-            document.getElementById('avatarInitials').textContent = displayName.charAt(0).toUpperCase();
-            document.getElementById('avatarInitialsLarge').textContent = displayName.charAt(0).toUpperCase();
-            document.getElementById('profileUsername').textContent = displayName;
-            document.getElementById('profileUserId').textContent = `ID: ${userId.substring(0, 10)}`;
+            // Calculate tier progress
+            const progressPercentage = Math.min(100, (referralSystem.currentUser.referrals / referralSystem.tierRequirements.platinum) * 100);
+            document.getElementById('tierProgress').style.width = `${progressPercentage}%`;
             
             // Simulate loading user data
             setTimeout(() => {
@@ -1914,38 +2000,94 @@
             const username = document.getElementById('username').value;
             const referralCode = document.getElementById('referral').value;
             
-            // Validate referral code (in a real app, you would check against Firestore)
-            if (referralCode !== "Elsaadmin1") {
+            // Validate referral code
+            if (referralCode !== referralSystem.currentUser.referralCode) {
                 document.getElementById('referralError').style.display = 'block';
                 return;
             }
             
             try {
+                // Create user
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                console.log('User registered:', userCredential.user);
                 
-                // Create user document in Firestore (in a real app)
-                // await db.collection('users').doc(userCredential.user.uid).set({
-                //     username,
-                //     email,
-                //     tier: 'bird',
-                //     balance: 0,
-                //     elsaTokens: 0,
-                //     referrals: 0,
-                //     referralCode: generateReferralCode(),
-                //     usedReferralCode: referralCode,
-                //     createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                // });
+                // Show success message
+                showReferralNotification(`New referral registered: ${username}`);
+                
+                // Update referral stats
+                referralSystem.currentUser.referrals++;
+                referralSystem.currentUser.referralEarnings += referralSystem.referralBonus;
+                
+                // Update UI
+                document.getElementById('statReferrals').textContent = referralSystem.currentUser.referrals;
+                document.getElementById('activeReferrals').textContent = referralSystem.currentUser.referrals;
+                document.getElementById('referralEarnings').textContent = `$${referralSystem.currentUser.referralEarnings.toFixed(2)}`;
+                
+                // Update tier progress
+                const progressPercentage = Math.min(100, (referralSystem.currentUser.referrals / referralSystem.tierRequirements.platinum) * 100);
+                document.getElementById('tierProgress').style.width = `${progressPercentage}%`;
+                
+                // Check for tier upgrade
+                checkTierUpgrade();
                 
                 // Show login form
-                registerContainer.style.display = 'none';
-                loginContainer.style.display = 'block';
+                document.getElementById('registerContainer').style.display = 'none';
+                document.getElementById('loginContainer').style.display = 'block';
                 document.getElementById('referralError').style.display = 'none';
             } catch (error) {
                 console.error('Registration error:', error);
                 alert(error.message);
             }
         });
+
+        // Check for tier upgrade
+        function checkTierUpgrade() {
+            const referrals = referralSystem.currentUser.referrals;
+            const currentTier = referralSystem.currentUser.tier;
+            
+            if (referrals >= referralSystem.tierRequirements.platinum && currentTier !== 'platinum') {
+                referralSystem.currentUser.tier = 'platinum';
+                showTierUpgrade('Platinum');
+                document.getElementById('profileTier').innerHTML = '<i class="fas fa-crown"></i> Platinum';
+            } 
+            else if (referrals >= referralSystem.tierRequirements.lord && currentTier !== 'lord') {
+                referralSystem.currentUser.tier = 'lord';
+                showTierUpgrade('Lord');
+                document.getElementById('profileTier').innerHTML = '<i class="fas fa-crown"></i> Lord';
+            }
+            else if (referrals >= referralSystem.tierRequirements.boss && currentTier !== 'boss') {
+                referralSystem.currentUser.tier = 'boss';
+                showTierUpgrade('Boss');
+                document.getElementById('profileTier').innerHTML = '<i class="fas fa-chess-king"></i> Boss';
+            }
+            else if (referrals >= referralSystem.tierRequirements.bird && currentTier !== 'bird') {
+                referralSystem.currentUser.tier = 'bird';
+                showTierUpgrade('Bird');
+                document.getElementById('profileTier').innerHTML = '<i class="fas fa-dove"></i> Bird';
+            }
+        }
+
+        // Show referral notification
+        function showReferralNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'transaction-notification referral-notification show';
+            notification.innerHTML = `
+                <i class="fas fa-user-plus" style="color: var(--primary);"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
 
         // Login Form Submission
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
@@ -1964,14 +2106,14 @@
         // Toggle Auth Forms
         document.getElementById('showLogin').addEventListener('click', function(e) {
             e.preventDefault();
-            registerContainer.style.display = 'none';
-            loginContainer.style.display = 'block';
+            document.getElementById('registerContainer').style.display = 'none';
+            document.getElementById('loginContainer').style.display = 'block';
         });
         
         document.getElementById('showRegister').addEventListener('click', function(e) {
             e.preventDefault();
-            loginContainer.style.display = 'none';
-            registerContainer.style.display = 'block';
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('registerContainer').style.display = 'block';
         });
 
         // Navigation
@@ -2094,9 +2236,6 @@
             sound.play();
         }
 
-        // Simulate tier upgrade (for demo)
-        setTimeout(() => showTierUpgrade('Platinum'), 5000);
-
         // Comments Functionality
         document.getElementById('submitComment').addEventListener('click', postComment);
         document.getElementById('newComment').addEventListener('keypress', function(e) {
@@ -2115,7 +2254,7 @@
                     timestamp: new Date().toLocaleTimeString(),
                     likes: 0,
                     replies: [],
-                    tier: 'platinum' // In a real app, this would come from user data
+                    tier: referralSystem.currentUser.tier
                 };
                 
                 addCommentToDOM(newComment);
@@ -2238,7 +2377,7 @@
                         user: "CurrentUser",
                         content: replyText,
                         timestamp: new Date().toLocaleTimeString(),
-                        tier: 'platinum'
+                        tier: referralSystem.currentUser.tier
                     };
                     
                     const replyElement = document.createElement('div');
