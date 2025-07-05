@@ -48,7 +48,7 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            transition: opacity 0.5s ease;
+            animation: fadeOut 0.5s ease 3s forwards;
         }
         
         .logo-animation {
@@ -56,7 +56,7 @@
             font-weight: 800;
             color: var(--secondary);
             text-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            animation: pulse 2s infinite;
+            animation: pulse 1.5s infinite;
         }
         
         .splash-subtitle {
@@ -64,9 +64,25 @@
             font-size: 1.5rem;
             margin-top: 1rem;
             opacity: 0.9;
-            animation: fadeIn 2s ease;
+            animation: fadeIn 1s ease;
         }
         
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; visibility: hidden; }
+        }
+
         /* Auth Container */
         #auth-container {
             display: none;
@@ -554,23 +570,6 @@
             font-size: 0.9rem;
         }
         
-        /* Animations */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        
         /* Loading Spinner */
         .spinner {
             width: 40px;
@@ -608,7 +607,7 @@
     </style>
 </head>
 <body>
-    <!-- Splash Screen -->
+    <!-- Splash Screen (3 seconds only) -->
     <div id="splash-screen">
         <div class="logo-animation">
             DIGIMART
@@ -913,41 +912,30 @@
             balanceAmount: document.getElementById('balance-amount')
         };
         
-        // Initialize the app
-        function initApp() {
-            // Check for existing session
-            const session = localStorage.getItem('digimartSession');
-            if (session) {
-                try {
-                    const { user, token } = JSON.parse(session);
-                    currentUser = user;
-                    authToken = token;
-                    loadAppData();
-                } catch (e) {
-                    console.error("Session parse error:", e);
-                    localStorage.removeItem('digimartSession');
-                    showAuth();
+        // Initialize the app when splash screen ends
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const session = localStorage.getItem('digimartSession');
+                if (session) {
+                    try {
+                        const { user, token } = JSON.parse(session);
+                        currentUser = user;
+                        authToken = token;
+                        loadAppData();
+                        elements.appContainer.style.display = 'block';
+                    } catch (e) {
+                        console.error("Session parse error:", e);
+                        localStorage.removeItem('digimartSession');
+                        elements.authContainer.style.display = 'block';
+                    }
+                } else {
+                    elements.authContainer.style.display = 'block';
                 }
-            } else {
-                showAuth();
-            }
+            }, 3000); // 3 seconds splash screen
             
             // Set up event listeners
             setupEventListeners();
-        }
-        
-        function showAuth() {
-            elements.splashScreen.style.display = 'none';
-            elements.authContainer.style.display = 'block';
-            elements.appContainer.style.display = 'none';
-        }
-        
-        function showApp() {
-            elements.splashScreen.style.display = 'none';
-            elements.authContainer.style.display = 'none';
-            elements.appContainer.style.display = 'block';
-            updateUI();
-        }
+        });
         
         function setupEventListeners() {
             // Auth tab switching
@@ -984,92 +972,6 @@
             
             // Publish book
             document.getElementById('publish-btn').addEventListener('click', publishBook);
-        }
-        
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            
-            if (!email || !password) {
-                showNotification("Please enter both email and password");
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    // Save session
-                    currentUser = data.user;
-                    authToken = data.token;
-                    localStorage.setItem('digimartSession', JSON.stringify({ user: currentUser, token: authToken }));
-                    
-                    // Load app data
-                    loadAppData();
-                    showApp();
-                } else {
-                    showNotification(data.message || "Login failed");
-                }
-            } catch (error) {
-                console.error("Login error:", error);
-                showNotification("Network error. Please try again.");
-            }
-        }
-        
-        async function handleRegister() {
-            const name = document.getElementById('register-name').value;
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
-            const confirm = document.getElementById('register-confirm').value;
-            const phone = document.getElementById('minipay-phone').value;
-            const country = document.getElementById('register-country').value;
-            
-            // Basic validation
-            if (!name || !email || !password || !confirm || !phone || !country) {
-                showNotification("Please fill all fields");
-                return;
-            }
-            
-            if (password !== confirm) {
-                showNotification("Passwords don't match");
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/auth/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name,
-                        email,
-                        password,
-                        minipayNumber: phone,
-                        country
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    showNotification("Registration successful! Please login.");
-                    document.querySelector('.auth-tab[data-tab="login"]').click();
-                } else {
-                    showNotification(data.message || "Registration failed");
-                }
-            } catch (error) {
-                console.error("Registration error:", error);
-                showNotification("Network error. Please try again.");
-            }
         }
         
         async function loadAppData() {
@@ -1109,8 +1011,6 @@
                     transactions = await transactionsResponse.json();
                     renderTransactions();
                 }
-                
-                showApp();
             } catch (error) {
                 console.error("Data loading error:", error);
                 showNotification("Error loading data. Please refresh.");
@@ -1200,6 +1100,95 @@
                     </div>
                 </div>
             `).join('');
+        }
+        
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                showNotification("Please enter both email and password");
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Save session
+                    currentUser = data.user;
+                    authToken = data.token;
+                    localStorage.setItem('digimartSession', JSON.stringify({ user: currentUser, token: authToken }));
+                    
+                    // Hide auth, show app
+                    elements.authContainer.style.display = 'none';
+                    elements.appContainer.style.display = 'block';
+                    
+                    // Load app data
+                    loadAppData();
+                } else {
+                    showNotification(data.message || "Login failed");
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+                showNotification("Network error. Please try again.");
+            }
+        }
+        
+        async function handleRegister() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirm = document.getElementById('register-confirm').value;
+            const phone = document.getElementById('minipay-phone').value;
+            const country = document.getElementById('register-country').value;
+            
+            // Basic validation
+            if (!name || !email || !password || !confirm || !phone || !country) {
+                showNotification("Please fill all fields");
+                return;
+            }
+            
+            if (password !== confirm) {
+                showNotification("Passwords don't match");
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password,
+                        minipayNumber: phone,
+                        country
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showNotification("Registration successful! Please login.");
+                    document.querySelector('.auth-tab[data-tab="login"]').click();
+                } else {
+                    showNotification(data.message || "Registration failed");
+                }
+            } catch (error) {
+                console.error("Registration error:", error);
+                showNotification("Network error. Please try again.");
+            }
         }
         
         async function verifySeller() {
@@ -1355,7 +1344,7 @@
             
             const amount = parseFloat(prompt(`Enter amount to withdraw (minimum $${CONFIG.MIN_WITHDRAWAL}):`, CONFIG.MIN_WITHDRAWAL.toString()));
             
-            if (isNaN(amount) return;
+            if (isNaN(amount)) return;
             
             if (amount < CONFIG.MIN_WITHDRAWAL) {
                 showNotification(`Minimum withdrawal is $${CONFIG.MIN_WITHDRAWAL}`);
@@ -1427,9 +1416,6 @@
                 }, 300);
             }, 3000);
         }
-        
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
