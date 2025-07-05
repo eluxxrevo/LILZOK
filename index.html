@@ -3,1926 +3,1433 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elsa Trading Platform | $50M Digital Asset</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <title>DIGIMART - Buy & Sell Digital Books</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/luxon@2.4.0/build/global/luxon.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.2.0"></script>
-    <script src="https://js.paystack.co/v1/inline.js"></script>
     <style>
         :root {
-            --primary-bg: #0a0a0a;
-            --secondary-bg: #1a1a1a;
-            --accent-gold: #d4af37;
-            --light-gold: #f0e6d2;
-            --text-light: #ffffff;
-            --text-muted: #aaaaaa;
+            --primary: #e0115f; /* Royal pink */
+            --secondary: #ffffff; /* Royal white */
+            --accent: #ff4d88;
+            --dark: #1a1a2e;
+            --light: #f8f9fa;
             --success: #28a745;
-            --danger: #dc3545;
-            --info: #17a2b8;
             --warning: #ffc107;
-            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --danger: #dc3545;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border: #dee2e6;
         }
-
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        
         body {
-            font-family: 'Montserrat', sans-serif;
-            background: var(--primary-bg);
-            color: var(--text-light);
-            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark);
+            line-height: 1.6;
             overflow-x: hidden;
-            position: relative;
+            min-height: 100vh;
         }
-
+        
         /* Splash Screen */
-        .splash-screen {
+        #splash-screen {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, #a50e4b 100%);
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             z-index: 1000;
-            animation: fadeOut 1s ease-in-out 3s forwards;
+            transition: opacity 0.5s ease;
         }
-
-        .splash-content {
-            text-align: center;
+        
+        .logo-animation {
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            text-shadow: 0 5px 15px rgba(0,0,0,0.2);
             animation: pulse 2s infinite;
         }
-
-        .splash-logo {
-            width: 180px;
-            height: 180px;
-            background: radial-gradient(circle, #d4af37 0%, #a88c3a 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 30px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 0 50px rgba(212, 175, 55, 0.6);
+        
+        .splash-subtitle {
+            color: var(--secondary);
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            opacity: 0.9;
+            animation: fadeIn 2s ease;
         }
-
-        .splash-logo:before {
-            content: "";
-            position: absolute;
-            width: 150%;
-            height: 150%;
-            background: conic-gradient(transparent, #d4af37, transparent 30%);
-            animation: rotate 3s linear infinite;
-        }
-
-        .splash-logo-inner {
-            width: 170px;
-            height: 170px;
-            background: var(--primary-bg);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2;
-        }
-
-        .splash-logo-inner h1 {
-            font-family: 'Playfair Display', serif;
-            color: var(--accent-gold);
-            font-size: 42px;
-            letter-spacing: 4px;
-        }
-
-        .splash-content h2 {
-            font-family: 'Playfair Display', serif;
-            color: var(--light-gold);
-            font-size: 36px;
-            margin: 20px 0;
-            letter-spacing: 2px;
-        }
-
-        .splash-content p {
-            font-size: 20px;
-            color: var(--text-muted);
-            max-width: 600px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-
-        .progress-bar {
-            width: 300px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            margin: 30px auto 0;
-            overflow: hidden;
-        }
-
-        .progress {
-            height: 100%;
-            width: 0%;
-            background: var(--accent-gold);
-            border-radius: 3px;
-            animation: progress 3s linear forwards;
-        }
-
-        @keyframes rotate {
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
-        }
-
-        @keyframes progress {
-            0% { width: 0%; }
-            100% { width: 100%; }
-        }
-
-        /* Auth Screens */
-        .auth-container {
+        
+        /* Auth Container */
+        #auth-container {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%230a0a0a"/><path d="M0 0L200 200M200 0L0 200" stroke="%231a1a1a" stroke-width="0.5"/></svg>');
-            z-index: 900;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.8s ease;
+            max-width: 500px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--secondary);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-
-        .auth-container.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        .auth-card {
-            width: 100%;
-            max-width: 450px;
-            background: var(--secondary-bg);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-        }
-
+        
         .auth-header {
-            padding: 30px;
             text-align: center;
-            background: linear-gradient(to right, #0a0a0a, #1a1a1a);
-            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            margin-bottom: 2rem;
         }
-
-        .auth-header h2 {
-            font-family: 'Playfair Display', serif;
-            color: var(--accent-gold);
-            font-size: 32px;
-            margin-bottom: 10px;
+        
+        .auth-title {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
         }
-
-        .auth-header p {
-            color: var(--text-muted);
+        
+        .auth-subtitle {
+            color: var(--gray);
         }
-
-        .auth-body {
-            padding: 30px;
-        }
-
+        
         .auth-tabs {
             display: flex;
-            margin-bottom: 25px;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--light-gray);
         }
-
+        
         .auth-tab {
             flex: 1;
             text-align: center;
-            padding: 15px;
+            padding: 1rem;
             cursor: pointer;
-            color: var(--text-muted);
             font-weight: 600;
-            transition: var(--transition);
+            color: var(--gray);
+            transition: all 0.3s ease;
         }
-
+        
         .auth-tab.active {
-            color: var(--accent-gold);
-            border-bottom: 3px solid var(--accent-gold);
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            margin-bottom: -2px;
         }
-
-        .form-group {
-            margin-bottom: 20px;
+        
+        .auth-form {
+            display: none;
         }
-
-        .form-group label {
+        
+        .auth-form.active {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-light);
         }
-
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
         .form-control {
             width: 100%;
-            padding: 14px 18px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border);
             border-radius: 10px;
-            color: var(--text-light);
-            font-size: 16px;
-            transition: var(--transition);
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
-
+        
         .form-control:focus {
+            border-color: var(--primary);
             outline: none;
-            border-color: var(--accent-gold);
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 0 3px rgba(224, 17, 95, 0.1);
         }
-
-        .password-strength {
-            height: 5px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            margin-top: 8px;
-            overflow: hidden;
-        }
-
-        .password-strength-meter {
-            height: 100%;
-            width: 0%;
-            border-radius: 3px;
-            transition: var(--transition);
-        }
-
+        
         .btn {
             display: inline-block;
-            padding: 14px 28px;
-            background: var(--accent-gold);
-            color: #000;
+            padding: 0.8rem 1.5rem;
+            background: var(--primary);
+            color: white;
             border: none;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: var(--transition);
-            text-align: center;
+            transition: all 0.3s ease;
             width: 100%;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            text-align: center;
         }
-
+        
         .btn:hover {
-            background: #c19d2e;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-
-        .auth-footer {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .auth-footer a {
-            color: var(--accent-gold);
-            text-decoration: none;
-        }
-
-        /* Main App */
-        .app-container {
-            display: none;
-            min-height: 100vh;
-            flex-direction: column;
-        }
-
-        .top-nav {
-            background: linear-gradient(to right, #0a0a0a, #1a1a1a);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo h1 {
-            font-family: 'Playfair Display', serif;
-            color: var(--accent-gold);
-            font-size: 24px;
-            letter-spacing: 2px;
-        }
-
-        .user-status {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .tier-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .badge-platinum {
-            background: linear-gradient(to right, #e5e4e2, #d4af37);
-            color: #000;
-        }
-
-        .badge-bird {
-            background: linear-gradient(to right, silver, #d4af37);
-            color: #000;
-        }
-
-        .badge-boss {
-            background: linear-gradient(to right, #cd7f32, #d4af37);
-            color: #000;
-        }
-
-        .badge-lord {
-            background: linear-gradient(to right, #b9f2ff, #d4af37);
-            color: #000;
-        }
-
-        .badge-unverified {
-            background: linear-gradient(to right, #555, #888);
-            color: #fff;
-        }
-
-        .wallet-info {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: 600;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 30px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%230a0a0a"/><path d="M0 0L100 100M100 0L0 100" stroke="%231a1a1a" stroke-width="0.5"/></svg>');
-            overflow-y: auto;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-        }
-
-        .page-header h2 {
-            font-family: 'Playfair Display', serif;
-            color: var(--accent-gold);
-            font-size: 32px;
-        }
-
-        .card {
-            background: var(--secondary-bg);
-            border-radius: 16px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-            margin-bottom: 30px;
-            border: 1px solid rgba(212, 175, 55, 0.1);
-            overflow: hidden;
-            transition: var(--transition);
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
-        }
-
-        .card-header {
-            padding: 20px 30px;
-            background: rgba(212, 175, 55, 0.05);
-            border-bottom: 1px solid rgba(212, 175, 55, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--accent-gold);
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .card-body {
-            padding: 30px;
-        }
-
-        .chart-container {
-            height: 450px;
-            position: relative;
-        }
-
-        .price-display {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            margin-bottom: 25px;
-        }
-
-        .price-info {
-            text-align: center;
-        }
-
-        .price-label {
-            font-size: 16px;
-            color: var(--text-muted);
-            margin-bottom: 5px;
-        }
-
-        .price-value {
-            font-size: 40px;
-            font-weight: 700;
-            color: var(--accent-gold);
-        }
-
-        .price-change {
-            font-size: 20px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .positive {
-            color: var(--success);
-        }
-
-        .negative {
-            color: var(--danger);
-        }
-
-        .market-stats {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .stat-card {
-            flex: 1;
-            min-width: 200px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 10px 0;
-            color: var(--accent-gold);
-        }
-
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        .trading-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 30px;
-        }
-
-        @media (max-width: 900px) {
-            .trading-panel {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .trading-card {
-            padding: 25px;
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        .trading-card h3 {
-            margin-bottom: 20px;
-            color: var(--accent-gold);
-            font-size: 22px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .trading-card h3 i {
-            font-size: 24px;
-        }
-
-        .amount-control {
-            display: flex;
-            margin-bottom: 20px;
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .amount-btn {
-            width: 50px;
-            background: rgba(212, 175, 55, 0.1);
-            border: none;
-            color: var(--accent-gold);
-            font-size: 20px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .amount-btn:hover {
-            background: rgba(212, 175, 55, 0.2);
-        }
-
-        .amount-input {
-            flex: 1;
-            border: none;
+        
+        .btn-outline {
             background: transparent;
-            padding: 15px;
-            font-size: 18px;
-            color: var(--text-light);
-            text-align: center;
+            border: 2px solid var(--primary);
+            color: var(--primary);
         }
-
-        .amount-input:focus {
-            outline: none;
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
         }
-
-        .amount-options {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 500px) {
-            .amount-options {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        .amount-option {
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .amount-option:hover, .amount-option.active {
-            background: rgba(212, 175, 55, 0.1);
-            border-color: var(--accent-gold);
-        }
-
-        .user-avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #0a0a0a, #d4af37);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 42px;
-            font-weight: 700;
-            color: var(--accent-gold);
-            margin: 0 auto 25px;
-            position: relative;
-            border: 3px solid var(--accent-gold);
-        }
-
-        .badge-icon {
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            border: 3px solid var(--primary-bg);
-        }
-
-        .badge-icon.platinum {
-            background: #e5e4e2;
-            color: #333;
-        }
-
-        .badge-icon.bird {
-            background: silver;
-            color: #333;
-        }
-
-        .badge-icon.boss {
-            background: #cd7f32;
-            color: #fff;
-        }
-
-        .badge-icon.lord {
-            background: #b9f2ff;
-            color: #333;
-        }
-
-        .badge-icon.unverified {
-            background: #555;
-            color: #fff;
-        }
-
-        .user-info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 35px;
-        }
-
-        .info-card {
-            padding: 25px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-        }
-
-        .info-card h3 {
-            margin-bottom: 18px;
-            color: var(--accent-gold);
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .info-card h3 i {
-            font-size: 20px;
-        }
-
-        .info-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--text-light);
-        }
-
-        .info-small {
-            font-size: 16px;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
-
-        .transaction-history {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .transaction-history th {
-            text-align: left;
-            padding: 15px 20px;
-            background: rgba(212, 175, 55, 0.1);
-            color: var(--accent-gold);
-            font-weight: 600;
-        }
-
-        .transaction-history td {
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .transaction-history tr {
-            transition: var(--transition);
-        }
-
-        .transaction-history tr:hover {
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .page {
+        
+        /* App Container */
+        #app-container {
             display: none;
-            animation: fadeIn 0.5s ease;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
         }
-
-        .page.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Bottom Navigation */
-        .bottom-nav {
+        
+        /* Header */
+        .app-header {
             display: flex;
-            justify-content: space-around;
-            background: linear-gradient(to right, #0a0a0a, #1a1a1a);
-            padding: 15px 0;
-            border-top: 1px solid rgba(212, 175, 55, 0.2);
-            position: sticky;
-            bottom: 0;
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
-            color: var(--text-muted);
+            padding: 1.5rem 0;
+            margin-bottom: 1rem;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
             text-decoration: none;
-            font-size: 12px;
-            transition: var(--transition);
-            padding: 5px 10px;
-            border-radius: 10px;
         }
-
-        .nav-item.active, .nav-item:hover {
-            color: var(--accent-gold);
-            background: rgba(212, 175, 55, 0.1);
+        
+        .app-logo i {
+            margin-right: 10px;
         }
-
-        .nav-item i {
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-
-        /* Notifications */
-        .notification {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            padding: 20px 30px;
-            background: var(--secondary-bg);
-            border-left: 4px solid var(--accent-gold);
-            border-radius: 8px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
-            transform: translateX(120%);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 1000;
-            min-width: 300px;
+        
+        .user-info {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 1rem;
         }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification i {
-            font-size: 24px;
-            color: var(--accent-gold);
-        }
-
-        .notification-content {
-            flex: 1;
-        }
-
-        .notification h4 {
-            font-size: 18px;
-            margin-bottom: 5px;
-            color: var(--text-light);
-        }
-
-        .notification p {
-            font-size: 15px;
-            color: var(--text-muted);
-        }
-
-        /* Settings Page */
-        .settings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-
-        .setting-card {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            padding: 25px;
-        }
-
-        .setting-card h3 {
-            color: var(--accent-gold);
-            margin-bottom: 20px;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .color-picker {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .color-option {
+        
+        .user-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            cursor: pointer;
-            transition: var(--transition);
-            border: 2px solid transparent;
-        }
-
-        .color-option.active {
-            border-color: var(--accent-gold);
-            transform: scale(1.1);
-        }
-
-        .theme-1 { background: #0a0a0a; }
-        .theme-2 { background: #121212; }
-        .theme-3 { background: #1a1a1a; }
-        .theme-4 { background: #0f0f1a; }
-
-        /* Tier Upgrade */
-        .tier-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .tier-card {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            padding: 25px;
-            text-align: center;
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            transition: var(--transition);
-        }
-
-        .tier-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--accent-gold);
-        }
-
-        .tier-card h3 {
-            color: var(--accent-gold);
-            margin-bottom: 15px;
-        }
-
-        .tier-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-            color: var(--accent-gold);
-        }
-
-        .tier-requirements {
-            margin: 15px 0;
-            font-size: 14px;
-            color: var(--text-muted);
-        }
-
-        .tier-status {
-            padding: 8px 15px;
-            border-radius: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
             font-weight: 600;
-            margin-top: 15px;
-            display: inline-block;
         }
-
-        .status-active {
-            background: rgba(40, 167, 69, 0.2);
-            color: var(--success);
+        
+        .wallet-balance {
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            font-weight: 600;
         }
-
-        .status-inactive {
-            background: rgba(220, 53, 69, 0.2);
-            color: var(--danger);
+        
+        .wallet-balance span {
+            color: var(--primary);
         }
-
-        .endorsement {
+        
+        /* Navigation */
+        .app-nav {
+            display: flex;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .nav-item {
+            flex: 1;
             text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            border-top: 1px solid rgba(212, 175, 55, 0.2);
-            color: var(--text-muted);
-            font-style: italic;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: var(--gray);
+        }
+        
+        .nav-item.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .nav-item i {
+            margin-right: 8px;
+        }
+        
+        /* Page Content */
+        .page-content {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+        
+        .page-content.active {
+            display: block;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Book Store */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .book-card {
+            background: var(--light);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .book-image {
+            height: 200px;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+        
+        .book-info {
+            padding: 1.5rem;
+        }
+        
+        .book-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .book-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        .book-price {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .book-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        /* User Profile with MiniPay Integration */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .profile-info h2 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .seller-badge {
+            display: inline-block;
+            background: var(--success);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* MiniPay Wallet Section Styles */
+        .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .btn-copy {
+            background: rgba(224, 17, 95, 0.1);
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-copy:hover {
+            background: rgba(224, 17, 95, 0.2);
+        }
+
+        .wallet-address {
+            background: var(--light);
+            padding: 1rem;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .wallet-address span {
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .instruction-steps {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border);
+        }
+
+        .instruction-steps h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .instruction-steps ol {
+            padding-left: 1.5rem;
+        }
+
+        .instruction-steps li {
+            margin-bottom: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .instruction-steps strong {
+            color: var(--primary);
+            font-weight: 700;
+        }
+        
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .stat-card {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .transaction-history {
+            margin-top: 2rem;
+        }
+        
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        
+        .transaction-amount.positive {
+            color: var(--success);
+            font-weight: 700;
+        }
+        
+        .transaction-amount.negative {
+            color: var(--danger);
+            font-weight: 700;
+        }
+        
+        /* Deposit Instructions */
+        .deposit-instructions {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            border: 1px solid var(--border);
+        }
+        
+        .deposit-instructions h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .deposit-instructions ol {
+            padding-left: 1.5rem;
+        }
+        
+        .deposit-instructions li {
+            margin-bottom: 0.8rem;
+        }
+        
+        .highlight-box {
+            background: rgba(224, 17, 95, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        /* Footer */
+        .app-footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-nav {
+                flex-direction: column;
+            }
+            
+            .books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-animation {
+                font-size: 3.5rem;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Splash Screen -->
-    <div class="splash-screen">
-        <div class="splash-content">
-            <div class="splash-logo">
-                <div class="splash-logo-inner">
-                    <h1>ELSA</h1>
-                </div>
-            </div>
-            <h2>Digital Asset Trading Platform</h2>
-            <p>Experience the future of token trading with Elsa - where innovation meets opportunity</p>
-            <div class="progress-bar">
-                <div class="progress"></div>
-            </div>
+    <div id="splash-screen">
+        <div class="logo-animation">
+            DIGIMART
+        </div>
+        <div class="splash-subtitle">
+            Your Digital Book Marketplace
         </div>
     </div>
-
+    
     <!-- Auth Container -->
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <h2>Elsa Trading</h2>
-                <p>Access your $50M digital asset portfolio</p>
+    <div id="auth-container">
+        <div class="auth-header">
+            <h1 class="auth-title">DIGIMART</h1>
+            <p class="auth-subtitle">Buy and sell books with ease</p>
+        </div>
+        
+        <div class="auth-tabs">
+            <div class="auth-tab active" data-tab="login">Login</div>
+            <div class="auth-tab" data-tab="register">Register</div>
+        </div>
+        
+        <div id="login-form" class="auth-form active">
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" id="login-email" placeholder="Enter your email">
             </div>
-            <div class="auth-body">
-                <div class="auth-tabs">
-                    <div class="auth-tab active" data-tab="login">Login</div>
-                    <div class="auth-tab" data-tab="register">Register</div>
-                </div>
-                
-                <!-- Login Form -->
-                <div class="auth-form" id="login-form">
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" class="form-control" id="login-email" placeholder="Enter your email">
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" class="form-control" id="login-password" placeholder="Enter your password">
-                    </div>
-                    <button class="btn" id="login-btn">Login to Account</button>
-                </div>
-                
-                <!-- Register Form -->
-                <div class="auth-form" id="register-form" style="display: none;">
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" class="form-control" id="reg-name" placeholder="Enter your full name">
-                    </div>
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" class="form-control" id="reg-email" placeholder="Enter your email">
-                    </div>
-                    <div class="form-group">
-                        <label>Password (12+ characters)</label>
-                        <input type="password" class="form-control" id="reg-password" placeholder="Create a strong password">
-                        <div class="password-strength">
-                            <div class="password-strength-meter" id="password-meter"></div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Confirm Password</label>
-                        <input type="password" class="form-control" id="reg-confirm" placeholder="Confirm your password">
-                    </div>
-                    <div class="form-group">
-                        <label>Referral Code (Optional)</label>
-                        <input type="text" class="form-control" id="reg-referral" placeholder="Enter referral code">
-                    </div>
-                    <button class="btn" id="register-btn">Create Account</button>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" id="login-password" placeholder="Enter your password">
             </div>
-            <div class="auth-footer">
-                <p>By accessing this platform, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
+            <button class="btn" id="login-btn">Login</button>
+            <p style="text-align: center; margin-top: 1rem; color: var(--gray);">
+                Forgot password? <a href="#" style="color: var(--primary);">Reset here</a>
+            </p>
+        </div>
+        
+        <div id="register-form" class="auth-form">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="register-name" placeholder="Enter your full name">
             </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" id="register-email" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" id="register-password" placeholder="Create a password">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="register-confirm" placeholder="Confirm your password">
+            </div>
+            <div class="form-group">
+                <label class="form-label">MiniPay Phone Number</label>
+                <input type="tel" class="form-control" id="minipay-phone" placeholder="Enter phone number linked to your MiniPay wallet">
+                <small class="form-text" style="color: var(--gray);">This will be used to receive payments</small>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Country</label>
+                <select class="form-control" id="register-country">
+                    <option value="">Select your country</option>
+                    <option value="NG">Nigeria</option>
+                    <option value="US">United States</option>
+                    <option value="UK">United Kingdom</option>
+                    <option value="EU">European Union</option>
+                </select>
+            </div>
+            <button class="btn" id="register-btn">Create Account</button>
         </div>
     </div>
-
-    <!-- Notification System -->
-    <div class="notification">
-        <i class="fas fa-check-circle"></i>
-        <div class="notification-content">
-            <h4>Success!</h4>
-            <p>Your transaction was completed successfully</p>
+    
+    <!-- App Container -->
+    <div id="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <a href="#" class="app-logo">
+                <i class="fas fa-book"></i>
+                DIGIMART
+            </a>
+            <div class="user-info">
+                <div class="wallet-balance">
+                    Balance: <span id="balance-amount">$0.00</span>
+                </div>
+                <div class="user-avatar" id="user-avatar">
+                    DM
+                </div>
+            </div>
+        </header>
+        
+        <!-- Navigation -->
+        <nav class="app-nav">
+            <div class="nav-item active" data-page="store">
+                <i class="fas fa-store"></i> Book Store
+            </div>
+            <div class="nav-item" data-page="upload">
+                <i class="fas fa-cloud-upload-alt"></i> Upload
+            </div>
+            <div class="nav-item" data-page="profile">
+                <i class="fas fa-user"></i> Profile
+            </div>
+        </nav>
+        
+        <!-- Book Store Page -->
+        <div id="store-page" class="page-content active">
+            <h2 class="page-title">
+                <i class="fas fa-book-open"></i> Book Marketplace
+            </h2>
+            
+            <div class="books-grid" id="books-grid">
+                <!-- Books will be loaded dynamically -->
+                <div class="spinner"></div>
+            </div>
         </div>
-    </div>
-
-    <!-- Main App Container -->
-    <div class="app-container">
-        <!-- Top Navigation -->
-        <div class="top-nav">
-            <div class="logo">
-                <h1>ELSA</h1>
+        
+        <!-- Upload Page -->
+        <div id="upload-page" class="page-content">
+            <h2 class="page-title">
+                <i class="fas fa-cloud-upload-alt"></i> Upload Your Book
+            </h2>
+            
+            <div class="form-group">
+                <label class="form-label">Book Title</label>
+                <input type="text" class="form-control" id="book-title" placeholder="Enter book title">
             </div>
-            <div class="user-status">
-                <span class="tier-badge" id="tier-badge">UNVERIFIED</span>
-                <div class="wallet-info">
-                    <span>Balance: </span>
-                    <span id="user-balance">$0.00</span>
+            
+            <div class="form-group">
+                <label class="form-label">Book Description</label>
+                <textarea class="form-control" id="book-description" rows="4" placeholder="Describe your book"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Book Category</label>
+                <select class="form-control" id="book-category">
+                    <option value="">Select category</option>
+                    <option value="technology">Technology</option>
+                    <option value="fiction">Fiction</option>
+                    <option value="business">Business</option>
+                    <option value="education">Education</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Upload PDF File</label>
+                <div style="border: 2px dashed var(--border); border-radius: 10px; padding: 2rem; text-align: center;">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--gray); margin-bottom: 1rem;"></i>
+                    <p>Drag & drop your PDF file here</p>
+                    <p style="color: var(--gray); font-size: 0.9rem; margin-top: 0.5rem;">or</p>
+                    <input type="file" id="book-file" accept=".pdf" style="display: none;">
+                    <button class="btn btn-outline" style="margin-top: 1rem; width: auto;" onclick="document.getElementById('book-file').click()">
+                        Browse Files
+                    </button>
+                    <div id="file-name" style="margin-top: 1rem; font-size: 0.9rem;"></div>
                 </div>
             </div>
+            
+            <div class="form-group">
+                <label class="form-label">Set Price (min $1)</label>
+                <input type="number" class="form-control" id="book-price" value="1.99" min="1" step="0.01">
+            </div>
+            
+            <button class="btn" id="publish-btn">Publish Book</button>
         </div>
-
-        <!-- Main Content Area -->
-        <div class="main-content">
-            <!-- Home Page -->
-            <div class="page active" id="home-page">
-                <div class="page-header">
-                    <h2>Elsa Trading Dashboard</h2>
+        
+        <!-- Profile Page -->
+        <div id="profile-page" class="page-content">
+            <div class="profile-header">
+                <div class="profile-avatar" id="profile-avatar">
+                    DM
                 </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Elsa Token (ELSA) - Live Market</div>
-                        <div class="card-actions">
-                            <select class="form-control" id="chart-timeframe">
-                                <option>1H</option>
-                                <option>4H</option>
-                                <option selected>1D</option>
-                                <option>1W</option>
-                                <option>1M</option>
-                            </select>
-                        </div>
+                <div class="profile-info">
+                    <h2 id="profile-name">DIGIMART</h2>
+                    <p id="profile-email">admin@digimart.com</p>
+                    <div class="wallet-info">
+                        <i class="fas fa-mobile-alt"></i> 
+                        <span id="minipay-number">08038684515</span>
+                        <button class="btn-copy" onclick="copyMiniPayNumber()">
+                            <i class="far fa-copy"></i>
+                        </button>
                     </div>
-                    <div class="card-body">
-                        <div class="price-display">
-                            <div class="price-info">
-                                <div class="price-label">Current Price</div>
-                                <div class="price-value">$<span id="current-price">2,048.72</span></div>
-                            </div>
-                            <div class="price-info">
-                                <div class="price-label">24h Change</div>
-                                <div class="price-change positive" id="price-change">+2.44% <i class="fas fa-arrow-up"></i></div>
-                            </div>
-                            <div class="price-info">
-                                <div class="price-label">24h Volume</div>
-                                <div class="price-value">$4.2M</div>
-                            </div>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="elsa-chart"></canvas>
-                        </div>
-                        <div class="market-stats">
-                            <div class="stat-card">
-                                <div class="stat-label">Market Cap</div>
-                                <div class="stat-value">$41.0B</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Circulating Supply</div>
-                                <div class="stat-value">20.0M</div>
-                                <div class="stat-label">Total Supply: 20.0M</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Your Holdings</div>
-                                <div class="stat-value">0 ELSA</div>
-                                <div class="stat-value">$0.00</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="trading-panel">
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Buy Elsa Tokens</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="trading-card">
-                                <h3><i class="fas fa-arrow-circle-down"></i> Buy ELSA</h3>
-                                <div class="form-group">
-                                    <label>Amount to Buy (Min: $2, Max: $10,000)</label>
-                                    <div class="amount-control">
-                                        <button class="amount-btn" id="buy-decrease">-</button>
-                                        <input type="number" class="amount-input" id="buy-amount" value="100" min="2" max="10000">
-                                        <button class="amount-btn" id="buy-increase">+</button>
-                                    </div>
-                                    <div class="amount-options">
-                                        <div class="amount-option" data-amount="50">$50</div>
-                                        <div class="amount-option" data-amount="100">$100</div>
-                                        <div class="amount-option active" data-amount="500">$500</div>
-                                        <div class="amount-option" data-amount="1000">$1,000</div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Estimated Tokens</label>
-                                    <input type="text" class="form-control" id="buy-tokens" value="0.244 ELSA" readonly>
-                                </div>
-                                <button class="btn" id="buy-btn">Buy ELSA Tokens</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <div class="card-title">Sell Elsa Tokens</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="trading-card">
-                                <h3><i class="fas fa-arrow-circle-up"></i> Sell ELSA</h3>
-                                <div class="form-group">
-                                    <label>Amount to Sell (Min: $4, Max: $9,000)</label>
-                                    <div class="amount-control">
-                                        <button class="amount-btn" id="sell-decrease">-</button>
-                                        <input type="number" class="amount-input" id="sell-amount" value="100" min="4" max="9000">
-                                        <button class="amount-btn" id="sell-increase">+</button>
-                                    </div>
-                                    <div class="amount-options">
-                                        <div class="amount-option" data-amount="100">$100</div>
-                                        <div class="amount-option active" data-amount="500">$500</div>
-                                        <div class="amount-option" data-amount="1000">$1,000</div>
-                                        <div class="amount-option" data-amount="5000">$5,000</div>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label>Estimated Proceeds</label>
-                                    <input type="text" class="form-control" id="sell-proceeds" value="$102.44" readonly>
-                                </div>
-                                <button class="btn" id="sell-btn">Sell ELSA Tokens</button>
-                            </div>
-                        </div>
+                    <div class="seller-badge" id="seller-badge">
+                        <i class="fas fa-check-circle"></i> Verified Seller
                     </div>
                 </div>
             </div>
-
-            <!-- Profile Page -->
-            <div class="page" id="profile-page">
-                <div class="page-header">
-                    <h2>User Profile</h2>
-                    <button class="btn" id="guide-btn">
-                        <i class="fas fa-book"></i> User Guide
+            
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="balance-display">$0.00</div>
+                    <div class="stat-label">Current Balance</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-earnings">$0.00</div>
+                    <div class="stat-label">Total Earnings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="books-sold">0</div>
+                    <div class="stat-label">Books Sold</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="books-purchased">0</div>
+                    <div class="stat-label">Books Purchased</div>
+                </div>
+            </div>
+            
+            <div class="wallet-actions">
+                <h3 class="page-title">
+                    <i class="fas fa-wallet"></i> MiniPay Wallet
+                </h3>
+                
+                <!-- Deposit Section -->
+                <div class="deposit-instructions">
+                    <h4><i class="fas fa-upload"></i> Deposit Funds via MiniPay</h4>
+                    <div class="highlight-box">
+                        <p><strong>Send to this MiniPay number:</strong></p>
+                        <h3 style="color: var(--primary); margin: 0.5rem 0;">08038684515</h3>
+                        <button class="btn-copy" onclick="copyMiniPayNumber()" style="display: inline-flex; align-items: center;">
+                            <i class="far fa-copy"></i> Copy Number
+                        </button>
+                    </div>
+                    <ol>
+                        <li>Open your <strong>MiniPay app</strong></li>
+                        <li>Select <strong>"Send Money"</strong></li>
+                        <li>Enter <strong>08038684515</strong> as recipient</li>
+                        <li>Enter the amount you wish to deposit (minimum $2)</li>
+                        <li>Complete the transaction</li>
+                        <li>Your balance will update automatically after confirmation (usually within 2 minutes)</li>
+                    </ol>
+                    <button class="btn" onclick="checkBalance()" style="margin-top: 1rem;">
+                        <i class="fas fa-sync-alt"></i> Refresh Balance
                     </button>
                 </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Account Information</div>
-                    </div>
-                    <div class="card-body">
-                        <div class="user-avatar">
-                            <span id="user-initials">JD</span>
-                            <div class="badge-icon unverified">
-                                <i class="fas fa-user"></i>
-                            </div>
-                        </div>
-
-                        <div class="user-info-grid">
-                            <div class="info-card">
-                                <h3><i class="fas fa-id-card"></i> User ID</h3>
-                                <div class="info-value" id="user-id">8401935726</div>
-                                <div class="info-small">Created: <span id="join-date">2023-07-15</span></div>
-                            </div>
-                            <div class="info-card">
-                                <h3><i class="fas fa-layer-group"></i> Tier Status</h3>
-                                <div class="info-value" id="tier-status">Unverified</div>
-                                <div class="info-small">Referrals: <span id="referral-count">0</span>/8</div>
-                            </div>
-                            <div class="info-card">
-                                <h3><i class="fas fa-share-alt"></i> Referral Code</h3>
-                                <div class="info-value" id="referral-code">ELS-8D4F2G</div>
-                                <div class="info-small">Share to earn rewards</div>
-                            </div>
-                            <div class="info-card">
-                                <h3><i class="fas fa-user-friends"></i> Referred Users</h3>
-                                <div class="info-value" id="referred-count">0</div>
-                                <div class="info-small">Pending: <span id="pending-referrals">0</span></div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <div class="card-title">Tier Upgrades</div>
-                            </div>
-                            <div class="card-body">
-                                <div class="tier-container">
-                                    <div class="tier-card">
-                                        <div class="tier-icon">
-                                            <i class="fas fa-dove"></i>
-                                        </div>
-                                        <h3>Bird Tier</h3>
-                                        <div class="tier-requirements">
-                                            <p><i class="fas fa-users"></i> 8 Referrals</p>
-                                            <p><i class="fas fa-dollar-sign"></i> $1 Verification Fee</p>
-                                        </div>
-                                        <div class="tier-status status-inactive">Not Qualified</div>
-                                        <button class="btn" style="margin-top: 15px;">Upgrade to Bird</button>
-                                    </div>
-                                    
-                                    <div class="tier-card">
-                                        <div class="tier-icon">
-                                            <i class="fas fa-user-tie"></i>
-                                        </div>
-                                        <h3>Boss Tier</h3>
-                                        <div class="tier-requirements">
-                                            <p><i class="fas fa-users"></i> 20 Referrals</p>
-                                            <p><i class="fas fa-dollar-sign"></i> $5 Verification Fee</p>
-                                        </div>
-                                        <div class="tier-status status-inactive">Not Qualified</div>
-                                        <button class="btn" style="margin-top: 15px; opacity: 0.5;" disabled>Upgrade to Boss</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Wallet Page -->
-            <div class="page" id="wallet-page">
-                <div class="page-header">
-                    <h2>Wallet Management</h2>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Deposit Funds</div>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>Amount to Deposit (Min: $2, Max: $10,000)</label>
-                            <input type="number" class="form-control" id="deposit-amount" min="2" max="10000" value="100">
-                        </div>
-                        <button class="btn" id="deposit-btn">Deposit via Paystack</button>
-                        <div class="info-small" style="margin-top: 15px;">
-                            Note: Deposits must be confirmed by admin before appearing in your balance
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">Withdraw Funds</div>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>Amount to Withdraw (Min: $4, Max: $9,000)</label>
-                            <input type="number" class="form-control" id="withdraw-amount" min="4" max="9000" value="100">
-                        </div>
-                        <div class="form-group">
-                            <label>Bank Account</label>
-                            <select class="form-control">
-                                <option>Access Bank - ****1234</option>
-                                <option>Opay - ****5678</option>
-                                <option>Kuda - ****9012</option>
-                            </select>
-                        </div>
-                        <button class="btn" id="withdraw-btn">Request Withdrawal</button>
-                        <div class="info-small" style="margin-top: 15px;">
-                            Withdrawals will be processed within 2 hours
-                        </div>
-                    </div>
-                </div>
                 
-                <div class="endorsement">
-                    <p>Endorsed by Reverend (CHUKWU EBUBECHI)</p>
+                <!-- Withdraw Section -->
+                <div class="instruction-steps">
+                    <h4><i class="fas fa-download"></i> Withdraw Funds</h4>
+                    <p>Withdrawals require a minimum of $2 and must be sent to a MiniPay account.</p>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button class="btn" style="flex: 1;" onclick="withdrawFunds()">
+                            <i class="fas fa-download"></i> Withdraw Now
+                        </button>
+                    </div>
                 </div>
             </div>
-
-            <!-- Settings Page -->
-            <div class="page" id="settings-page">
-                <div class="page-header">
-                    <h2>App Settings</h2>
-                </div>
-
-                <div class="settings-grid">
-                    <div class="setting-card">
-                        <h3><i class="fas fa-palette"></i> Theme Customization</h3>
-                        <div class="color-picker">
-                            <div class="color-option theme-1 active"></div>
-                            <div class="color-option theme-2"></div>
-                            <div class="color-option theme-3"></div>
-                            <div class="color-option theme-4"></div>
-                        </div>
-                    </div>
-
-                    <div class="setting-card">
-                        <h3><i class="fas fa-user-cog"></i> Account Settings</h3>
-                        <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" class="form-control" id="user-name" value="John Doe">
-                        </div>
-                        <div class="form-group">
-                            <label>Email Address</label>
-                            <input type="email" class="form-control" id="user-email" value="user@example.com">
-                        </div>
-                        <button class="btn">Update Profile</button>
-                    </div>
-
-                    <div class="setting-card">
-                        <h3><i class="fas fa-sliders-h"></i> Preferences</h3>
-                        <div class="form-group">
-                            <label>Language</label>
-                            <select class="form-control">
-                                <option>English</option>
-                                <option>French</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Currency</label>
-                            <select class="form-control">
-                                <option>USD ($)</option>
-                                <option>EUR (€)</option>
-                                <option>GBP (£)</option>
-                            </select>
-                        </div>
-                        <button class="btn">Save Preferences</button>
+            
+            <!-- Transaction History -->
+            <div class="transaction-history">
+                <h3 class="page-title" style="margin-top: 2rem;">
+                    <i class="fas fa-history"></i> Transaction History
+                </h3>
+                <div id="transaction-list">
+                    <!-- Transactions will appear here dynamically -->
+                    <div class="transaction-item empty-state">
+                        <div>No transactions yet</div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Bottom Navigation -->
-        <div class="bottom-nav">
-            <a href="#" class="nav-item active" data-page="home">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
-            </a>
-            <a href="#" class="nav-item" data-page="profile">
-                <i class="fas fa-user"></i>
-                <span>Profile</span>
-            </a>
-            <a href="#" class="nav-item" data-page="wallet">
-                <i class="fas fa-wallet"></i>
-                <span>Wallet</span>
-            </a>
-            <a href="#" class="nav-item" data-page="settings">
-                <i class="fas fa-cog"></i>
-                <span>Settings</span>
-            </a>
-        </div>
+        
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>© 2023 DIGIMART - Your Digital Book Marketplace</p>
+            <p>All rights reserved. Prices in USD and EUR based on your location.</p>
+        </footer>
     </div>
 
     <script>
-        // Global variables
+        // Configuration
+        const CONFIG = {
+            MINIPAY_NUMBER: "08038684515",
+            API_BASE_URL: "https://api.digimart.com/v1",
+            MIN_DEPOSIT: 2.00,
+            MIN_WITHDRAWAL: 2.00,
+            VERIFICATION_FEE: 6.00
+        };
+        
+        // App State
         let currentUser = null;
-        let userBalance = 0.00;
-        let elsaPrice = 2048.72;
-        let priceChange = 2.44;
-        let chart = null;
-        let chartData = [];
-        let priceUpdateInterval = null;
-        let referrals = 0;
-        let tier = "unverified";
+        let authToken = null;
+        let books = [];
+        let transactions = [];
         
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', function() {
-            // After splash screen, show auth
-            setTimeout(() => {
-                document.querySelector('.auth-container').classList.add('active');
-            }, 3000);
-            
-            // Initialize chart
-            initChart();
-            
-            // Setup navigation
-            setupNavigation();
-            
-            // Setup auth tabs
-            setupAuthTabs();
-            
-            // Setup trading functionality
-            setupTrading();
-            
-            // Setup password strength
-            setupPasswordStrength();
-            
-            // Setup logout button
-            document.getElementById('logout-btn')?.addEventListener('click', logout);
-            
-            // Setup login button
-            document.getElementById('login-btn')?.addEventListener('click', login);
-            
-            // Setup register button
-            document.getElementById('register-btn')?.addEventListener('click', register);
-            
-            // Setup deposit button
-            document.getElementById('deposit-btn')?.addEventListener('click', depositFunds);
-            
-            // Setup withdraw button
-            document.getElementById('withdraw-btn')?.addEventListener('click', withdrawFunds);
-            
-            // Setup user guide button
-            document.getElementById('guide-btn')?.addEventListener('click', showUserGuide);
-            
-            // Start price updates
-            startPriceUpdates();
-        });
-
-        // Initialize the price chart
-        function initChart() {
-            const ctx = document.getElementById('elsa-chart').getContext('2d');
-            
-            // Generate initial data
-            generateChartData();
-            
-            // Create chart
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    datasets: [{
-                        label: 'ELSA Price',
-                        data: chartData,
-                        borderColor: '#d4af37',
-                        backgroundColor: 'rgba(212, 175, 55, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'minute',
-                                tooltipFormat: 'HH:mm'
-                            },
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.05)'
-                            }
-                        },
-                        y: {
-                            beginAtZero: false,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.05)'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + value.toFixed(2);
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: 'rgba(26, 26, 26, 0.9)',
-                            titleColor: '#d4af37',
-                            bodyColor: '#ffffff',
-                            borderColor: 'rgba(212, 175, 55, 0.5)',
-                            borderWidth: 1,
-                            callbacks: {
-                                label: function(context) {
-                                    return `ELSA: $${context.parsed.y.toFixed(2)}`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
+        // DOM Elements
+        const elements = {
+            splashScreen: document.getElementById('splash-screen'),
+            authContainer: document.getElementById('auth-container'),
+            appContainer: document.getElementById('app-container'),
+            loginForm: document.getElementById('login-form'),
+            registerForm: document.getElementById('register-form'),
+            loginBtn: document.getElementById('login-btn'),
+            registerBtn: document.getElementById('register-btn'),
+            booksGrid: document.getElementById('books-grid'),
+            transactionList: document.getElementById('transaction-list'),
+            balanceDisplay: document.getElementById('balance-display'),
+            totalEarnings: document.getElementById('total-earnings'),
+            booksSold: document.getElementById('books-sold'),
+            booksPurchased: document.getElementById('books-purchased'),
+            profileName: document.getElementById('profile-name'),
+            profileEmail: document.getElementById('profile-email'),
+            profileAvatar: document.getElementById('profile-avatar'),
+            userAvatar: document.getElementById('user-avatar'),
+            balanceAmount: document.getElementById('balance-amount')
+        };
         
-        // Generate initial chart data
-        function generateChartData() {
-            chartData = [];
-            const now = Date.now();
-            let currentValue = elsaPrice;
-            
-            for (let i = -60; i <= 0; i++) {
-                const fluctuation = (Math.random() - 0.5) * 20;
-                currentValue += fluctuation;
-                if (currentValue < 1900) currentValue = 1900 + Math.random() * 100;
-                if (currentValue > 2100) currentValue = 2100 - Math.random() * 100;
-                
-                chartData.push({
-                    x: now + i * 60 * 1000,
-                    y: currentValue
-                });
-            }
-        }
-        
-        // Start updating prices
-        function startPriceUpdates() {
-            priceUpdateInterval = setInterval(() => {
-                // Update price with fluctuation
-                const fluctuation = (Math.random() - 0.5) * 10;
-                elsaPrice += fluctuation;
-                
-                // Keep price within reasonable range
-                if (elsaPrice < 1900) elsaPrice = 1900 + Math.random() * 100;
-                if (elsaPrice > 2100) elsaPrice = 2100 - Math.random() * 100;
-                
-                // Update price change
-                priceChange = (Math.random() - 0.5) * 3;
-                
-                // Update UI
-                document.getElementById('current-price').textContent = elsaPrice.toFixed(2);
-                const changeElement = document.getElementById('price-change');
-                changeElement.textContent = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}% `;
-                changeElement.className = `price-change ${priceChange >= 0 ? 'positive' : 'negative'}`;
-                changeElement.innerHTML = `${priceChange >= 0 ? '+' : ''}${priceChange.toFixed(2)}% <i class="fas fa-arrow-${priceChange >= 0 ? 'up' : 'down'}"></i>`;
-                
-                // Update chart
-                const now = Date.now();
-                chartData.push({
-                    x: now,
-                    y: elsaPrice
-                });
-                
-                // Remove oldest data point if we have more than 60 points
-                if (chartData.length > 60) {
-                    chartData.shift();
+        // Initialize the app
+        function initApp() {
+            // Check for existing session
+            const session = localStorage.getItem('digimartSession');
+            if (session) {
+                try {
+                    const { user, token } = JSON.parse(session);
+                    currentUser = user;
+                    authToken = token;
+                    loadAppData();
+                } catch (e) {
+                    console.error("Session parse error:", e);
+                    localStorage.removeItem('digimartSession');
+                    showAuth();
                 }
-                
-                // Update the chart
-                chart.update();
-                
-                // Update token calculations
-                updateTokenCalculations();
-            }, 2000);
-        }
-        
-        // Update token calculations based on current price
-        function updateTokenCalculations() {
-            const buyAmount = parseFloat(document.getElementById('buy-amount').value) || 0;
-            const tokens = buyAmount / elsaPrice;
-            document.getElementById('buy-tokens').value = `${tokens.toFixed(4)} ELSA`;
-            
-            const sellAmount = parseFloat(document.getElementById('sell-amount').value) || 0;
-            document.getElementById('sell-proceeds').value = `$${(sellAmount).toFixed(2)}`;
-        }
-
-        // Setup page navigation
-        function setupNavigation() {
-            const navLinks = document.querySelectorAll('.nav-item');
-            const pages = document.querySelectorAll('.page');
-            
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Remove active class from all links
-                    navLinks.forEach(l => l.classList.remove('active'));
-                    
-                    // Add active class to clicked link
-                    this.classList.add('active');
-                    
-                    // Hide all pages
-                    pages.forEach(page => page.classList.remove('active'));
-                    
-                    // Show the target page
-                    const targetPage = this.getAttribute('data-page');
-                    if (targetPage) {
-                        document.getElementById(`${targetPage}-page`).classList.add('active');
-                    }
-                });
-            });
-        }
-
-        // Setup auth tabs
-        function setupAuthTabs() {
-            const tabs = document.querySelectorAll('.auth-tab');
-            const forms = document.querySelectorAll('.auth-form');
-            
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    
-                    // Update tabs
-                    tabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Update forms
-                    forms.forEach(form => form.style.display = 'none');
-                    document.getElementById(`${tabId}-form`).style.display = 'block';
-                });
-            });
-        }
-
-        // Setup trading functionality
-        function setupTrading() {
-            // Buy amount controls
-            document.getElementById('buy-increase')?.addEventListener('click', () => {
-                const input = document.getElementById('buy-amount');
-                let value = parseFloat(input.value) || 0;
-                value = Math.min(value + 100, 10000);
-                input.value = value;
-                updateTokenCalculations();
-            });
-            
-            document.getElementById('buy-decrease')?.addEventListener('click', () => {
-                const input = document.getElementById('buy-amount');
-                let value = parseFloat(input.value) || 0;
-                value = Math.max(value - 100, 2);
-                input.value = value;
-                updateTokenCalculations();
-            });
-            
-            // Sell amount controls
-            document.getElementById('sell-increase')?.addEventListener('click', () => {
-                const input = document.getElementById('sell-amount');
-                let value = parseFloat(input.value) || 0;
-                value = Math.min(value + 100, 9000);
-                input.value = value;
-                updateTokenCalculations();
-            });
-            
-            document.getElementById('sell-decrease')?.addEventListener('click', () => {
-                const input = document.getElementById('sell-amount');
-                let value = parseFloat(input.value) || 0;
-                value = Math.max(value - 100, 4);
-                input.value = value;
-                updateTokenCalculations();
-            });
-            
-            // Amount options
-            document.querySelectorAll('.amount-option').forEach(option => {
-                option.addEventListener('click', function() {
-                    const amount = this.getAttribute('data-amount');
-                    const parent = this.closest('.trading-card');
-                    
-                    // Remove active class from siblings
-                    this.parentElement.querySelectorAll('.amount-option').forEach(el => {
-                        el.classList.remove('active');
-                    });
-                    
-                    // Add active to clicked
-                    this.classList.add('active');
-                    
-                    // Update input
-                    if (parent.querySelector('h3 i').classList.contains('fa-arrow-circle-down')) {
-                        document.getElementById('buy-amount').value = amount;
-                        updateTokenCalculations();
-                    } else {
-                        document.getElementById('sell-amount').value = amount;
-                        updateTokenCalculations();
-                    }
-                });
-            });
-            
-            // Buy button
-            document.getElementById('buy-btn')?.addEventListener('click', function() {
-                const amount = parseFloat(document.getElementById('buy-amount').value);
-                if (amount < 2 || amount > 10000) {
-                    showNotification('Invalid amount! Min: $2, Max: $10,000', 'error');
-                    return;
-                }
-                
-                if (tier === "unverified") {
-                    showNotification('You need to upgrade to Bird tier to trade', 'error');
-                    return;
-                }
-                
-                if (amount > userBalance) {
-                    showNotification('Insufficient balance!', 'error');
-                    return;
-                }
-                
-                userBalance -= amount;
-                document.getElementById('user-balance').textContent = `$${userBalance.toFixed(2)}`;
-                showNotification(`Successfully purchased $${amount} worth of ELSA tokens!`);
-            });
-            
-            // Sell button
-            document.getElementById('sell-btn')?.addEventListener('click', function() {
-                const amount = parseFloat(document.getElementById('sell-amount').value);
-                if (amount < 4 || amount > 9000) {
-                    showNotification('Invalid amount! Min: $4, Max: $9,000', 'error');
-                    return;
-                }
-                
-                if (tier === "unverified") {
-                    showNotification('You need to upgrade to Bird tier to trade', 'error');
-                    return;
-                }
-                
-                userBalance += amount;
-                document.getElementById('user-balance').textContent = `$${userBalance.toFixed(2)}`;
-                showNotification(`Successfully sold $${amount} worth of ELSA tokens!`);
-            });
-            
-            // Input changes
-            document.getElementById('buy-amount')?.addEventListener('input', updateTokenCalculations);
-            document.getElementById('sell-amount')?.addEventListener('input', updateTokenCalculations);
-        }
-
-        // Setup password strength
-        function setupPasswordStrength() {
-            const passwordInput = document.getElementById('reg-password');
-            const meter = document.getElementById('password-meter');
-            
-            passwordInput?.addEventListener('input', function() {
-                const password = this.value;
-                let strength = 0;
-                
-                if (password.length >= 12) strength += 25;
-                if (/[A-Z]/.test(password)) strength += 25;
-                if (/[0-9]/.test(password)) strength += 25;
-                if (/[^A-Za-z0-9]/.test(password)) strength += 25;
-                
-                meter.style.width = strength + '%';
-                
-                if (strength < 50) {
-                    meter.style.background = '#dc3545';
-                } else if (strength < 75) {
-                    meter.style.background = '#ffc107';
-                } else {
-                    meter.style.background = '#28a745';
-                }
-            });
-        }
-
-        // Show notification
-        function showNotification(message, type = 'success') {
-            const notification = document.querySelector('.notification');
-            const icon = notification.querySelector('i');
-            const title = notification.querySelector('h4');
-            const content = notification.querySelector('p');
-            
-            // Update content
-            content.textContent = message;
-            
-            // Update style based on type
-            if (type === 'error') {
-                title.textContent = 'Error!';
-                icon.className = 'fas fa-exclamation-circle';
-                notification.style.borderLeftColor = '#dc3545';
             } else {
-                title.textContent = 'Success!';
-                icon.className = 'fas fa-check-circle';
-                notification.style.borderLeftColor = '#d4af37';
+                showAuth();
             }
             
-            // Show notification
-            notification.classList.add('show');
-            
-            // Hide after 3 seconds
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
+            // Set up event listeners
+            setupEventListeners();
         }
-
-        // Login function
-        function login() {
+        
+        function showAuth() {
+            elements.splashScreen.style.display = 'none';
+            elements.authContainer.style.display = 'block';
+            elements.appContainer.style.display = 'none';
+        }
+        
+        function showApp() {
+            elements.splashScreen.style.display = 'none';
+            elements.authContainer.style.display = 'none';
+            elements.appContainer.style.display = 'block';
+            updateUI();
+        }
+        
+        function setupEventListeners() {
+            // Auth tab switching
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(`${tab.dataset.tab}-form`).classList.add('active');
+                });
+            });
+            
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                    document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+                    item.classList.add('active');
+                    document.getElementById(`${item.dataset.page}-page`).classList.add('active');
+                });
+            });
+            
+            // Login
+            elements.loginBtn.addEventListener('click', handleLogin);
+            
+            // Register
+            elements.registerBtn.addEventListener('click', handleRegister);
+            
+            // File upload
+            document.getElementById('book-file').addEventListener('change', function(e) {
+                const fileName = e.target.files[0]?.name || 'No file selected';
+                document.getElementById('file-name').textContent = fileName;
+            });
+            
+            // Publish book
+            document.getElementById('publish-btn').addEventListener('click', publishBook);
+        }
+        
+        async function handleLogin() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             
             if (!email || !password) {
-                showNotification('Please enter both email and password', 'error');
+                showNotification("Please enter both email and password");
                 return;
             }
             
-            if (email === "eluxxes@gmail.com") {
-                // Admin account
-                userBalance = 50000.00;
-                tier = "platinum";
-                referrals = 1248;
-            } else {
-                // Regular user
-                userBalance = 0.00;
-                tier = "unverified";
-                referrals = 0;
-            }
-            
-            showNotification('Successfully logged in!');
-            setTimeout(() => {
-                document.querySelector('.auth-container').classList.remove('active');
-                document.querySelector('.app-container').style.display = 'flex';
-                currentUser = {
-                    email: email,
-                    tier: tier,
-                    name: "John Doe"
-                };
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
                 
-                // Update UI
-                updateUserProfile();
-            }, 1500);
-        }
-
-        // Register function
-        function register() {
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            const confirm = document.getElementById('reg-confirm').value;
-            
-            if (!name || !email || !password || !confirm) {
-                showNotification('Please fill all fields', 'error');
-                return;
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Save session
+                    currentUser = data.user;
+                    authToken = data.token;
+                    localStorage.setItem('digimartSession', JSON.stringify({ user: currentUser, token: authToken }));
+                    
+                    // Load app data
+                    loadAppData();
+                    showApp();
+                } else {
+                    showNotification(data.message || "Login failed");
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+                showNotification("Network error. Please try again.");
             }
+        }
+        
+        async function handleRegister() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirm = document.getElementById('register-confirm').value;
+            const phone = document.getElementById('minipay-phone').value;
+            const country = document.getElementById('register-country').value;
             
-            if (password.length < 12) {
-                showNotification('Password must be at least 12 characters', 'error');
+            // Basic validation
+            if (!name || !email || !password || !confirm || !phone || !country) {
+                showNotification("Please fill all fields");
                 return;
             }
             
             if (password !== confirm) {
-                showNotification('Passwords do not match', 'error');
+                showNotification("Passwords don't match");
                 return;
             }
             
-            // Set user as unverified with $0 balance
-            userBalance = 0.00;
-            tier = "unverified";
-            referrals = 0;
-            
-            showNotification('Account created successfully!');
-            setTimeout(() => {
-                document.querySelector('.auth-tab[data-tab="login"]').click();
-                currentUser = {
-                    email: email,
-                    tier: tier,
-                    name: name
-                };
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        email,
+                        password,
+                        minipayNumber: phone,
+                        country
+                    })
+                });
                 
-                // Set name in settings
-                document.getElementById('user-name').value = name;
-                document.getElementById('user-email').value = email;
-                document.getElementById('user-initials').textContent = name.split(' ').map(n => n[0]).join('');
-            }, 1500);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showNotification("Registration successful! Please login.");
+                    document.querySelector('.auth-tab[data-tab="login"]').click();
+                } else {
+                    showNotification(data.message || "Registration failed");
+                }
+            } catch (error) {
+                console.error("Registration error:", error);
+                showNotification("Network error. Please try again.");
+            }
         }
-
-        // Update user profile display
+        
+        async function loadAppData() {
+            try {
+                // Load user data
+                const userResponse = await fetch(`${CONFIG.API_BASE_URL}/users/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (userResponse.ok) {
+                    currentUser = await userResponse.json();
+                    updateUserProfile();
+                }
+                
+                // Load books
+                const booksResponse = await fetch(`${CONFIG.API_BASE_URL}/books`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (booksResponse.ok) {
+                    books = await booksResponse.json();
+                    renderBooks();
+                }
+                
+                // Load transactions
+                const transactionsResponse = await fetch(`${CONFIG.API_BASE_URL}/transactions`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (transactionsResponse.ok) {
+                    transactions = await transactionsResponse.json();
+                    renderTransactions();
+                }
+                
+                showApp();
+            } catch (error) {
+                console.error("Data loading error:", error);
+                showNotification("Error loading data. Please refresh.");
+            }
+        }
+        
         function updateUserProfile() {
-            document.getElementById('user-balance').textContent = `$${userBalance.toFixed(2)}`;
-            document.getElementById('tier-status').textContent = tier.charAt(0).toUpperCase() + tier.slice(1);
-            document.getElementById('referral-count').textContent = referrals;
-            document.getElementById('tier-badge').textContent = tier.toUpperCase();
-            document.getElementById('tier-badge').className = `tier-badge badge-${tier}`;
+            if (!currentUser) return;
             
-            // Update badge icon
-            const badgeIcon = document.querySelector('.badge-icon');
-            badgeIcon.className = `badge-icon ${tier}`;
-            badgeIcon.innerHTML = tier === "platinum" ? '<i class="fas fa-crown"></i>' : 
-                                tier === "bird" ? '<i class="fas fa-dove"></i>' : 
-                                tier === "boss" ? '<i class="fas fa-user-tie"></i>' : 
-                                tier === "lord" ? '<i class="fas fa-crown"></i>' : 
-                                '<i class="fas fa-user"></i>';
+            // Update profile info
+            elements.profileName.textContent = currentUser.name;
+            elements.profileEmail.textContent = currentUser.email;
+            elements.minipayNumber.textContent = currentUser.minipayNumber || CONFIG.MINIPAY_NUMBER;
+            
+            // Update avatar initials
+            const initials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
+            elements.profileAvatar.textContent = initials;
+            elements.userAvatar.textContent = initials;
+            
+            // Update balance
+            elements.balanceDisplay.textContent = `$${currentUser.balance.toFixed(2)}`;
+            elements.balanceAmount.textContent = `$${currentUser.balance.toFixed(2)}`;
+            
+            // Update stats
+            elements.totalEarnings.textContent = `$${currentUser.totalEarnings?.toFixed(2) || '0.00'}`;
+            elements.booksSold.textContent = currentUser.booksSold || '0';
+            elements.booksPurchased.textContent = currentUser.booksPurchased || '0';
+            
+            // Update seller badge
+            const sellerBadge = document.getElementById('seller-badge');
+            if (currentUser.isVerifiedSeller) {
+                sellerBadge.innerHTML = '<i class="fas fa-check-circle"></i> Verified Seller';
+                sellerBadge.style.display = 'inline-block';
+            } else {
+                sellerBadge.innerHTML = `<i class="fas fa-lock"></i> <a href="#" onclick="verifySeller()">Verify as Seller ($${CONFIG.VERIFICATION_FEE})</a>`;
+                sellerBadge.style.display = 'inline-block';
+            }
         }
-
-        // Deposit funds via Paystack
-        function depositFunds() {
-            const amount = parseFloat(document.getElementById('deposit-amount').value);
-            
-            if (amount < 2 || amount > 10000) {
-                showNotification('Invalid amount! Min: $2, Max: $10,000', 'error');
+        
+        function renderBooks() {
+            if (!books.length) {
+                elements.booksGrid.innerHTML = '<div class="empty-state">No books available</div>';
                 return;
             }
             
-            // Redirect to Paystack
-            showNotification(`Redirecting to Paystack for $${amount} deposit...`);
+            elements.booksGrid.innerHTML = books.map(book => `
+                <div class="book-card" data-id="${book.id}">
+                    <div class="book-image">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="book-info">
+                        <h3 class="book-title">${book.title}</h3>
+                        <div class="book-meta">
+                            <span>${book.pages} pages</span>
+                            <span>${book.purchases} purchases</span>
+                        </div>
+                        <div class="book-price">$${book.price.toFixed(2)}</div>
+                        <div class="book-actions">
+                            <button class="btn btn-sm" onclick="previewBook('${book.id}')">Preview</button>
+                            <button class="btn btn-sm btn-outline" onclick="buyBook('${book.id}')">Buy Now</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderTransactions() {
+            if (!transactions.length) {
+                elements.transactionList.innerHTML = `
+                    <div class="transaction-item empty-state">
+                        <div>No transactions yet</div>
+                    </div>
+                `;
+                return;
+            }
             
-            // Simulate Paystack redirect
+            elements.transactionList.innerHTML = transactions.map(tx => `
+                <div class="transaction-item">
+                    <div>
+                        <div>${tx.description}</div>
+                        <div style="font-size: 0.9rem; color: var(--gray);">
+                            ${new Date(tx.date).toLocaleString()}
+                        </div>
+                    </div>
+                    <div class="transaction-amount ${tx.amount > 0 ? 'positive' : 'negative'}">
+                        ${tx.amount > 0 ? '+' : ''}$${Math.abs(tx.amount).toFixed(2)}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        async function verifySeller() {
+            if (!confirm(`Verify as seller for $${CONFIG.VERIFICATION_FEE}? This will be deducted from your balance.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/users/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: CONFIG.VERIFICATION_FEE
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentUser = data.user;
+                    updateUserProfile();
+                    showNotification("You are now a verified seller!");
+                } else {
+                    showNotification(data.message || "Verification failed");
+                }
+            } catch (error) {
+                console.error("Verification error:", error);
+                showNotification("Error during verification");
+            }
+        }
+        
+        async function buyBook(bookId) {
+            if (!confirm("Confirm purchase of this book?")) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/books/purchase`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ bookId })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentUser = data.user;
+                    books = data.books;
+                    transactions = data.transactions;
+                    updateUserProfile();
+                    renderBooks();
+                    renderTransactions();
+                    showNotification("Purchase successful! Book added to your library.");
+                } else {
+                    showNotification(data.message || "Purchase failed");
+                }
+            } catch (error) {
+                console.error("Purchase error:", error);
+                showNotification("Error during purchase");
+            }
+        }
+        
+        async function publishBook() {
+            const title = document.getElementById('book-title').value;
+            const description = document.getElementById('book-description').value;
+            const category = document.getElementById('book-category').value;
+            const price = parseFloat(document.getElementById('book-price').value);
+            const file = document.getElementById('book-file').files[0];
+            
+            // Validation
+            if (!title || !description || !category || !price || !file) {
+                showNotification("Please fill all fields and upload a file");
+                return;
+            }
+            
+            if (price < 1) {
+                showNotification("Minimum price is $1");
+                return;
+            }
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('description', description);
+            formData.append('category', category);
+            formData.append('price', price);
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/books`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}'
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    books = data.books;
+                    renderBooks();
+                    showNotification("Book published successfully!");
+                    // Reset form
+                    document.getElementById('upload-page').querySelectorAll('input, textarea, select').forEach(el => {
+                        if (el.type !== 'button' && el.type !== 'submit') {
+                            el.value = '';
+                        }
+                    });
+                    document.getElementById('file-name').textContent = '';
+                } else {
+                    showNotification(data.message || "Publishing failed");
+                }
+            } catch (error) {
+                console.error("Publish error:", error);
+                showNotification("Error publishing book");
+            }
+        }
+        
+        async function checkBalance() {
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/users/balance`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser.balance = data.balance;
+                    updateUserProfile();
+                    showNotification("Balance updated");
+                } else {
+                    showNotification("Error checking balance");
+                }
+            } catch (error) {
+                console.error("Balance check error:", error);
+                showNotification("Network error checking balance");
+            }
+        }
+        
+        async function withdrawFunds() {
+            if (currentUser.balance < CONFIG.MIN_WITHDRAWAL) {
+                showNotification(`You need at least $${CONFIG.MIN_WITHDRAWAL} to withdraw`);
+                return;
+            }
+            
+            const amount = parseFloat(prompt(`Enter amount to withdraw (minimum $${CONFIG.MIN_WITHDRAWAL}):`, CONFIG.MIN_WITHDRAWAL.toString()));
+            
+            if (isNaN(amount) return;
+            
+            if (amount < CONFIG.MIN_WITHDRAWAL) {
+                showNotification(`Minimum withdrawal is $${CONFIG.MIN_WITHDRAWAL}`);
+                return;
+            }
+            
+            if (amount > currentUser.balance) {
+                showNotification("Insufficient balance");
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/transactions/withdraw`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ amount })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentUser = data.user;
+                    transactions = data.transactions;
+                    updateUserProfile();
+                    renderTransactions();
+                    showNotification(`$${amount.toFixed(2)} withdrawn to your MiniPay`);
+                } else {
+                    showNotification(data.message || "Withdrawal failed");
+                }
+            } catch (error) {
+                console.error("Withdrawal error:", error);
+                showNotification("Error processing withdrawal");
+            }
+        }
+        
+        function copyMiniPayNumber() {
+            navigator.clipboard.writeText(CONFIG.MINIPAY_NUMBER)
+                .then(() => {
+                    showNotification("MiniPay number copied: " + CONFIG.MINIPAY_NUMBER);
+                })
+                .catch(err => {
+                    prompt("Copy this MiniPay number:", CONFIG.MINIPAY_NUMBER);
+                });
+        }
+        
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.backgroundColor = 'var(--primary)';
+            notification.style.color = 'white';
+            notification.style.padding = '1rem 2rem';
+            notification.style.borderRadius = '8px';
+            notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            notification.style.zIndex = '1000';
+            notification.style.animation = 'fadeIn 0.3s ease';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
             setTimeout(() => {
-                showNotification(`Deposit of $${amount} submitted for admin approval`);
-            }, 2000);
+                notification.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
         }
-
-        // Withdraw funds
-        function withdrawFunds() {
-            const amount = parseFloat(document.getElementById('withdraw-amount').value);
-            
-            if (amount < 4 || amount > 9000) {
-                showNotification('Invalid amount! Min: $4, Max: $9,000', 'error');
-                return;
-            }
-            
-            if (amount > userBalance) {
-                showNotification('Insufficient balance!', 'error');
-                return;
-            }
-            
-            showNotification(`Withdrawal request for $${amount} submitted. Funds will arrive within 2 hours.`);
-        }
-
-        // Show user guide
-        function showUserGuide() {
-            showNotification("User Guide: Complete registration, deposit funds, refer 8 people to upgrade to Bird tier, then start trading!");
-        }
-
-        // Logout function
-        function logout() {
-            showNotification('You have been logged out');
-            setTimeout(() => {
-                document.querySelector('.app-container').style.display = 'none';
-                document.querySelector('.auth-container').classList.add('active');
-                currentUser = null;
-            }, 1500);
-        }
+        
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
